@@ -1,7 +1,7 @@
 from datetime import timedelta as td
 from datetime import datetime as dt
 from scipy import interpolate
-import pyexiv2 as exiv
+#import pyexiv2 as exiv
 import numpy as np
 import sqlite3
 import csv
@@ -37,8 +37,10 @@ def batch_read_gps_logs(directory):
     pass
     
 def depth_from_pressure(mbars):
-    """Return a depth (in meters) from a pressure in millibars."""
-    return (mbars - 1013.25)/100.52
+    """Return a depth (in meters) from a pressure in millibars. Calculated using
+    1 atm = 1013.25 millibar and assuming 1 atm for every 9.9908 meters of sea
+    water."""
+    return (mbars - 1013.25)/102.02488795116682
 
 def read_depth_temp_log(filepath):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 
