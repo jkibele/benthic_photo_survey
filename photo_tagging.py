@@ -33,7 +33,42 @@ def read_gps_log(filepath):
     
     For reading NMEA, I can use pynmea. My gps logger records: '$GPGSA','$GPRMC',
      '$GPVTG','$GPGGA','$ADVER','$GPGSV'. pynmea will handle all except for $ADVER.
+     
+     eg2. $GPRMC,225446,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
+
+
+                225446       Time of fix 22:54:46 UTC
+                A            Navigation receiver warning A = OK, V = warning
+                4916.45,N    Latitude 49 deg. 16.45 min North
+                12311.12,W   Longitude 123 deg. 11.12 min West
+                000.5        Speed over ground, Knots
+                054.7        Course Made Good, True
+                191194       Date of fix  19 November 1994
+                020.3,E      Magnetic variation 20.3 deg East
+                *68          mandatory checksum
+
+
+     eg3. $GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70
+                   1    2    3    4    5     6    7    8      9     10  11 12
+
+
+           1   220516     Time Stamp
+           2   A          validity - A-ok, V-invalid
+           3   5133.82    current Latitude
+           4   N          North/South
+           5   00042.24   current Longitude
+           6   W          East/West
+           7   173.8      Speed in knots
+           8   231.8      True course
+           9   130694     Date Stamp
+           10  004.2      Variation
+           11  W          East/West
+           12  *70        checksum
     """
+    conn,cur = connection_and_cursor(db_path)
+    # Make sure the table is there
+    cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
+                longitude real, lon_hemi text, UNIQUE (utctime) ON CONFLICT REPLACE)")
     with open(filepath, 'r') as data_file:
         streamer = NMEAStream(data_file)
         next_data = streamer.get_objects()
@@ -43,7 +78,15 @@ def read_gps_log(filepath):
                 if nd.__class__.__name__=='GPRMC':
                     data.append(nd)
             next_data = streamer.get_objects()
-    return data
+    
+    for d in data:
+        datetime_str = str(d.datestamp) + ' ' + str(d.timestamp)
+        dt_obj = dt.strptime(datetime_str,'%d%m%y %H%M%S.%f')
+        t = ( d.data_validity, dt_obj, d.lat, d.lat_dir, d.lon, d.lon_dir )
+        cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?)", t)
+    
+    conn.commit()
+    cur.close()
     
 def batch_read_gps_logs(directory):
     """Iteratively use read_gps_log on all files in a directory. Restrict to a 
