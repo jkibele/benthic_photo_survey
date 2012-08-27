@@ -1,10 +1,15 @@
+from pynmea.streamer import NMEAStream
 from datetime import timedelta as td
 from datetime import datetime as dt
 from scipy import interpolate
 #import pyexiv2 as exiv
 import numpy as np
 import sqlite3
+import time
+import pytz
 import csv
+
+LOCAL_TIME_ZONE = 'Pacific/Auckland' # Find your local timezone name here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 db_path = 'data/db/raw_log.db'
 dt_testlog = 'test_data/sensus/sensus_test.csv'
@@ -29,18 +34,40 @@ def read_gps_log(filepath):
     For reading NMEA, I can use pynmea. My gps logger records: '$GPGSA','$GPRMC',
      '$GPVTG','$GPGGA','$ADVER','$GPGSV'. pynmea will handle all except for $ADVER.
     """
-    pass
+    with open(filepath, 'r') as data_file:
+        streamer = NMEAStream(data_file)
+        next_data = streamer.get_objects()
+        data = []
+        while next_data:
+            for nd in next_data:
+                if nd.__class__.__name__=='GPRMC':
+                    data.append(nd)
+            next_data = streamer.get_objects()
+    return data
     
 def batch_read_gps_logs(directory):
     """Iteratively use read_gps_log on all files in a directory. Restrict to a 
     range of dates?"""
     pass
+
+def make_aware_of_local_tz(unaware):
+    """Make an unaware time object aware of the local time zone. I'd like to 
+    introspect the system and get the TZ but I can't figure out how to do that
+    reliably so you'll have to se the LOCAL_TIME_ZONE parameter. Lame."""
+    local_zone = pytz.timezone(LOCAL_TIME_ZONE)
+    return local_zone.localize(unaware)
+
+def utc_from_local(aware_local):
+    """Given a local datetime, return the UTC datetime equivalent."""
+    if not aware_local.tzinfo: # make sure it really is aware
+        aware_local = make_aware_of_local_tz(aware_local)
+    return aware_local.astimezone(pytz.UTC)
     
 def depth_from_pressure(mbars):
     """Return a depth (in meters) from a pressure in millibars. Calculated using
     1 atm = 1013.25 millibar and assuming 1 atm for every 9.9908 meters of sea
     water."""
-    return (mbars - 1013.25)/102.02488795116682
+    return (mbars - 1013.25) / 101.418304564 
 
 def read_depth_temp_log(filepath):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 
@@ -51,7 +78,7 @@ def read_depth_temp_log(filepath):
     # Connect to the db
     conn,cur = connection_and_cursor(db_path)
     # Make sure the table is there
-    cur.execute("create table if not exists DepthTempLog ( device text, file integer, datetime datetime, kelvin real, celsius real, mbar integer, depthm real, UNIQUE (device, file, datetime) ON CONFLICT REPLACE)")
+    cur.execute("create table if not exists DepthTempLog ( device text, file integer, utctime datetime, kelvin real, celsius real, mbar integer, depthm real, UNIQUE (device, file, utctime) ON CONFLICT REPLACE)")
     # Read the csv file
     reader = csv.reader(open(filepath,'rb'),delimiter=',')
     
@@ -60,17 +87,20 @@ def read_depth_temp_log(filepath):
         file_id = int(row[2])
         # put the date and time in a datetime object so it can be manipulated
         start_time = dt(int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7]),int(row[8]))
-        # I'm not sure if the start time from the logger will be in local time or UTC
-        # I suspect it is in local time so I will want to convert to UTC so I can store
-        # everything in UTC and avoid screwups related to DST and whatnot
+        # The time comes in as local time. I don't want conflicts with gps utc
+        # time so I will store everything as utc time. This is annoying in sqlite
+        # it would be better to use Postgresql but I want to keep this small 
+        # and reduce the difficulty of installation.
         time_offset = td(seconds=float(row[9]))
-        record_time = start_time + time_offset
-        # time_string = record_time.strftime('%Y-%m-%d %H:%M:%S')
+        record_time = make_aware_of_local_tz( start_time + time_offset )
+        # If I store this as timezone aware, then I have trouble parsing the 
+        # times I pull out of the db. So I will store unaware by taking out tzinfo.
+        utc_time = utc_from_local(record_time).replace(tzinfo=None)
         mbar = int(row[10])
         kelvin = float(row[11])
         celsius = kelvin - 273.15
         depthm = depth_from_pressure(mbar)
-        t = (device,file_id,record_time,kelvin,celsius,mbar,depthm)
+        t = (device,file_id,utc_time,kelvin,celsius,mbar,depthm)
         
         # stick it in the table
         cur.execute("insert into DepthTempLog values (?,?,?,?,?,?,?)", t)
@@ -95,9 +125,9 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     just return False."""
     # Connect to the db
     conn,cur = connection_and_cursor(db_path)
-    # make a tuple with the time handed in as seconds so we can pass it to the query
+    # make a tuple with the time handed in so we can pass it to the query
     t = ( dt_obj, ) 
-    rows = cur.execute("select datetime, depthm from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',datetime) ) LIMIT 2", t).fetchall()
+    rows = cur.execute("select utctime, depthm from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 2", t).fetchall()
     t1 = dt.strptime(rows[0][0],'%Y-%m-%d %H:%M:%S')
     t1_secs = float( t1.strftime('%s') )
     t2 = dt.strptime(rows[1][0],'%Y-%m-%d %H:%M:%S')
@@ -133,7 +163,7 @@ def get_temp_for_time(dt_obj, reject_threshold=30):
     expect temperature to change that quickly relative to the sampling interval."""
     conn,cur = connection_and_cursor(db_path)
     t = ( dt_obj,dt_obj )
-    result = cur.execute("select abs(strftime('%s',?) - strftime('%s',datetime) ), celsius from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',datetime) ) LIMIT 1", t).fetchone()
+    result = cur.execute("select abs(strftime('%s',?) - strftime('%s',utctime) ), celsius from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 1", t).fetchone()
     time_diff = result[0]
     celsius = result[1]
     if time_diff > reject_threshold:
