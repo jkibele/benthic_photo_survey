@@ -5,8 +5,9 @@ import csv
 def depth_from_pressure(mbars):
     """Return a depth (in meters) from a pressure in millibars. Calculated using
     1 atm = 1013.25 millibar and assuming 1 atm for every 9.9908 meters of sea
-    water."""
-    return (mbars - 1013.25) / 101.418304564 
+    water. I'm also assuming that we're diving at sea level and that the ambient
+    presure is 1atm. """
+    return (mbars - 1013.25) / 101.41830484045322 
 
 def read_depth_temp_log(filepath):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 

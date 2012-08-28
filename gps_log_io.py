@@ -2,6 +2,36 @@ from pynmea.streamer import NMEAStream
 from itertools import groupby
 from common import *
 
+def parse_coordinate(coord):
+    """Take a coordinate of the form 12345.6789 and return in a format
+    like 123 degree-symbol 45.6789'."""
+    l = str(coord).split('.')
+    deg = l[0][:-2]
+    whole_min = l[0][-2:]
+    dec_min = l[1]
+    ret_str = u'%s\u00B0 %s.%s\'' % (deg,whole_min,dec_min)
+    return ret_str
+
+def get_position_for_time(dt_obj,reject_threshold=30):
+    """Given a datetime object, find the position for the nearest position
+    fix. I may want to interpolated between positions at some point but I'll
+    leave that for later."""
+    conn,cur = connection_and_cursor(db_path)
+    t = ( dt_obj,dt_obj )
+    result = cur.execute("select abs(strftime('%s',?) - strftime('%s',utctime) ), \
+                        latitude, lat_hemi, longitude, lon_hemi from GPSLog order by \
+                        abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 1", t).fetchone()
+    time_diff = result[0]
+    lat = result[1]
+    lat_hemi = result[2]
+    lon = result[3]
+    lon_hemi = result[4]
+    result_str = "%s %s, %s %s" % ( parse_coordinate(lat), lat_hemi.upper(), parse_coordinate(lon), lon_hemi.upper() )
+    if time_diff > reject_threshold:
+        return False
+    else:
+        return result_str
+
 def extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',)):
     """Use the pynmea library to read data out of an nmea log file."""
     with open(filepath, 'r') as data_file:
