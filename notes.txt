@@ -1,0 +1,3 @@
+Camera setup:
+
+Make sure the cameras date and time are correctly set to local time before taking photos. On the Panasonic Lumix DMC-TS4, you have to take it out of iA mode (put it in P mode for example), go to the settings menu, and turn on Auto Clock Set. This should sync the camera's clock with the gps time. If you're using a different camera, you just have to make sure the camera's clock is set to the correct local time within a few seconds.
