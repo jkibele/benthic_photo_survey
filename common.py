@@ -15,11 +15,12 @@ def make_aware_of_local_tz(unaware):
     """Make an unaware time object aware of the local time zone. I'd like to 
     introspect the system and get the TZ but I can't figure out how to do that
     reliably so you'll have to se the LOCAL_TIME_ZONE parameter. Lame."""
-    local_zone = pytz.timezone(LOCAL_TIME_ZONE)
+    local_zone = pytz.timezone(LOCAL_TIME_ZONE) # LOCAL_TIME_ZONE from configuration.py
     return local_zone.localize(unaware)
 
-def utc_from_local(aware_local):
-    """Given a local datetime, return the UTC datetime equivalent."""
-    if not aware_local.tzinfo: # make sure it really is aware
-        aware_local = make_aware_of_local_tz(aware_local)
-    return aware_local.astimezone(pytz.UTC)
+def utc_from_local(localtime):
+    """Given a local datetime, return the UTC datetime equivalent. If the time
+    given is not aware, assume it is suppose to be local and make it aware."""
+    if not localtime.tzinfo: # make sure it really is aware
+        localtime = make_aware_of_local_tz(localtime)
+    return localtime.astimezone(pytz.UTC)

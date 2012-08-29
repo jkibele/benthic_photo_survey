@@ -1,18 +1,51 @@
 from pynmea.streamer import NMEAStream
+from fractions import Fraction
 from itertools import groupby
 from common import *
 
-def parse_coordinate(coord):
+def parse_coordinate_pretty(coord):
     """Take a coordinate of the form 12345.6789 and return in a format
     like 123 degree-symbol 45.6789'."""
-    l = str(coord).split('.')
-    deg = l[0][:-2]
-    whole_min = l[0][-2:]
-    dec_min = l[1]
-    ret_str = u'%s\u00B0 %s.%s\'' % (deg,whole_min,dec_min)
+    deg = coord_deg(coord)
+    minutes = coord_min(coord)
+    ret_str = u'%s\u00B0 %f\'' % (deg,minutes)
     return ret_str
+    
+def coord_to_dict(coord, hemi):
+    """Take a coordinate in the format given in NMEA log files and put it into
+    a dictionary.
+    
+    >>>coord_to_dict(12345.67891234,'E')
+    {'deg': 123, 'hemi': 'E', 'min': 45.6789123}
+    """
+    c_dict = {  'deg': coord_deg(coord),
+                'min': coord_min(coord),
+                'fract': coord_fractions(coord), 
+                'hemi': hemi }
+    return c_dict
+    
+def coord_deg(coord):
+    """Pull the degrees from NMEA style coordinate"""
+    l = str(coord).split('.')
+    return int( l[0][:-2] )
+    
+def coord_min(coord):
+    """Pull the decimal minutes from NMEA style coordinate"""
+    l = str(coord).split('.')
+    return float( l[0][-2:] + '.' + l[1] )
+    
+def coord_fractions(coord):
+    deg = Fraction.from_decimal( coord_deg(coord) )
+    minutes = Fraction.from_float( coord_min(coord) )
+    sec = Fraction.from_decimal( 0 )
+    return (deg,minutes,sec)
 
-def get_position_for_time(dt_obj,reject_threshold=30):
+def parse_coordinates_to_dict(lat,lat_hemi,lon,lon_hemi):
+    lat_dict = coord_to_dict(lat,lat_hemi)
+    lon_dict = coord_to_dict(lon,lon_hemi)
+    return { 'lat': lat_dict, 'lon': lon_dict }
+
+def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     """Given a datetime object, find the position for the nearest position
     fix. I may want to interpolated between positions at some point but I'll
     leave that for later."""
@@ -26,11 +59,15 @@ def get_position_for_time(dt_obj,reject_threshold=30):
     lat_hemi = result[2]
     lon = result[3]
     lon_hemi = result[4]
-    result_str = "%s %s, %s %s" % ( parse_coordinate(lat), lat_hemi.upper(), parse_coordinate(lon), lon_hemi.upper() )
+    result_str = "%s %s, %s %s" % ( parse_coordinate_pretty(lat), lat_hemi.upper(), parse_coordinate_pretty(lon), lon_hemi.upper() )
+    result_dict = parse_coordinates_to_dict( lat,lat_hemi,lon,lon_hemi )
     if time_diff > reject_threshold:
         return False
     else:
-        return result_str
+        if return_pretty:
+            return result_str
+        else:
+            return result_dict
 
 def extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',)):
     """Use the pynmea library to read data out of an nmea log file."""
