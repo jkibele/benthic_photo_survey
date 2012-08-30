@@ -1,4 +1,4 @@
-import pyexiv2 as exiv
+import pyexiv2 as exiv # see not about pyexiv2 in notes.txt
 from depth_temp_log_io import *
 from configuration import *
 from gps_log_io import *
@@ -82,6 +82,7 @@ def add_position_to_photo(img,reject_threshold=30):
                     'LatitudeRef': pdict['lat']['hemi'],
                     'Longitude': pdict['lon']['fract'],
                     'LongitudeRef': pdict['lon']['hemi'] }
+    return add_dict, pdict
     for k,v in add_dict.iteritems():
         key = exgps + k
         print "%s: %s" % (str(key),str(v))

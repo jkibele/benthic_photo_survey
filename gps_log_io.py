@@ -3,13 +3,99 @@ from fractions import Fraction
 from itertools import groupby
 from common import *
 
-def parse_coordinate_pretty(coord):
-    """Take a coordinate of the form 12345.6789 and return in a format
-    like 123 degree-symbol 45.6789'."""
-    deg = coord_deg(coord)
-    minutes = coord_min(coord)
-    ret_str = u'%s\u00B0 %f\'' % (deg,minutes)
-    return ret_str
+class coord(object):
+    def __init__(self,degrees,minutes):
+        # Apparently all my type checking is bad form for python. Maybe 
+        # I will take it out at some point
+        if degrees == None:
+            self.degrees = None
+        elif int(degrees) <> degrees:
+            raise ValueError( "The value of %s changes when cast to an integer so it can not be used for degrees" % str(degrees) )
+        elif abs(degrees) > 180:
+            raise ValueError( "Degrees can not exceed 180." )
+        else:
+            self.degrees = int(degrees)
+        
+        if minutes == None:
+            self.minutes = None
+        elif not 0 <= float(minutes) < 60:
+            raise ValueError( "Minutes must be between 0 and 60." )
+        else:
+            self.minutes = float(minutes)
+            
+    def __setattr__(self,name,value):
+        if name=='degrees':
+            if int(value) <> value:
+                raise ValueError( "The value of %s changes when cast to an integer so it can not be used for degrees" % str(degrees) )
+            elif abs(value) > 180:
+                raise ValueError( "Degrees can not exceed 180." )
+            else:
+                super(coord,self).__setattr__(name,value)
+        elif name=='minutes':
+            if not 0 <= float(value) < 60:
+                raise ValueError( "Minutes must be between 0 and 60." )
+            else:
+                super(coord,self).__setattr__(name,value)
+                
+    def __repr__(self):
+        return "%i %g" % (self.degrees,self.minutes)
+        
+    @staticmethod
+    def from_nmea_string(nstr,hemi=None):
+        pos = ['N','E']
+        neg = ['S','W']
+        l = str(nstr).split('.')
+        deg = int( l[0][:-2] )
+        minute = float( l[0][-2:] + '.' + l[1] )
+        if hemi:
+            if hemi.upper() in neg:
+                deg = -abs(deg)
+            elif hemi.upper() in pos:
+                deg = abs(deg)
+            else:
+                raise ValueError( "Hemisphere should be N, S, E, or W. Why are you giving me %s?" % (hemi,) )
+        return coord(deg,minute)
+        
+    def __unicode__(self):
+        return u'%i\u00B0 %g\'' % (self.degrees,self.minutes)
+        
+    def __str__(self):
+        return unicode(self).encode('utf-8')
+        
+class latitude(coord):
+    def __init__(self,degrees,minutes):
+        if degrees <> None and abs(degrees) > 90:
+            raise ValueError( "Latitude degrees can not exceed 90" )
+        coord.__init__(self,degrees,minutes)
+        
+    def __setattr__(self,name,value):
+        if name=='degrees' and abs(value) > 90:
+            raise ValueError( "Degrees of latitude can not exceed 90." )
+        else:
+            super(coord,self).__setattr__(name,value)
+            
+    @staticmethod
+    def from_nmea_string(nstr,hemi=None):
+        c = coord.from_nmea_string(nstr,hemi)
+        return latitude(c.degrees,c.minutes)
+        
+    @property
+    def hemisphere(self):
+        if self.degrees < 0:
+            return 'S'
+        else:
+            return 'N'
+        
+class longitude(coord):
+    def __init__(self,degrees,minutes):
+        coord.__init__(self,degrees,minutes)
+        
+    @property
+    def hemisphere(self):
+        if self.degrees < 0:
+            return 'W'
+        else:
+            return 'E'
     
 def coord_to_dict(coord, hemi):
     """Take a coordinate in the format given in NMEA log files and put it into
