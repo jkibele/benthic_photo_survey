@@ -5,6 +5,103 @@ from gps_log_io import *
 from common import *
 import os
 
+class image_file(object):
+    """
+    An object to make accessing image files and metadata easier.
+    """
+    def __init__(self,img_path):
+        if os.path.exists(img_path):
+            self.file_path = img_path
+            md = exiv.ImageMetadata(img_path)
+            md.read()
+            self.md = md
+        else:
+            raise ValueError( "The file %s does not exist." % (img_path,) )
+            
+    def __repr__(self):
+        return "Image file: %s" % (self.file_path,)
+        
+    @property
+    def datetime(self):
+        """
+        Try to get a datetime object for the image's creation from the 
+        Exif.Photo.DateTimeOriginal value via pyexiv2.
+        """
+        try:
+            return self.md['Exif.Photo.DateTimeOriginal'].value
+        except KeyError:
+            return None
+            
+    @property
+    def utc_datetime(self):
+        if self.datetime:
+            return utc_from_local(self.datetime)
+        else:
+            return None
+    
+    @property
+    def exif_lat_tag(self):
+        try:
+            return self.md['Exif.GPSInfo.GPSLatitude']
+        except KeyError:
+            return None
+        
+    @property
+    def exif_latref_tag(self):
+        try:
+            return self.md['Exif.GPSInfo.GPSLatitudeRef']
+        except KeyError:
+            return None
+        
+    @property
+    def exif_lon_tag(self):
+        try:
+            return self.md['Exif.GPSInfo.GPSLongitude']
+        except KeyError:
+            return None
+        
+    @property
+    def exif_lonref_tag(self):
+        try:
+            return self.md['Exif.GPSInfo.GPSLongitudeRef']
+        except KeyError:
+            return None
+            
+    @property
+    def position(self):
+        """
+        Look at the exif data and return a position object as defined in
+        gps_log_io. Return None if there's no GPSInfo in the exif.
+        """
+        lat = latitude.from_exif_coord(self.exif_lat_tag.value,self.exif_latref_tag.value)
+        lon = longitude.from_exif_coord(self.exif_lon_tag.value,self.exif_lonref_tag.value)
+        return position(lat,lon)
+            
+    def set_exif_position(self,pos):
+        """
+        Set the relevant exif tags to match the position object handed in.
+        The position object is defined over in gps_log_io.py
+        """
+        pre = 'Exif.GPSInfo.GPS'
+        add_dict = {pre+'Latitude': pos.lat.exif_coord,
+                    pre+'LatitudeRef': pos.lat.hemisphere,
+                    pre+'Longitude': pos.lon.exif_coord,
+                    pre+'LongitudeRef': pos.lon.hemisphere }
+        for k,v in add_dict.iteritems():
+            print "%s = %s" % (str(k),str(v))
+            self.md[k] = exiv.ExifTag(k,v)
+        self.md.write()
+        return True
+            
+    def geotag(self):
+        """
+        Get a position that matches the time of creation for the image out
+        of the database and set the exif data accordingly. We assume that 
+        the photo timestamp is local and the gps position is utc.
+        """
+        pos = get_position_for_time(self.utc_datetime)
+        return self.set_exif_position(pos)
+
 def check_time_tags(img):
     md = get_photo_metadata(img)
     timetags = [tag for tag in md.exif_keys if tag.find('Time')<>-1]
@@ -59,45 +156,7 @@ def get_photo_datetime(md):
         ptime = False
     return ptime
 
-def add_position_to_photo(img,reject_threshold=30):
-    """Open up the image's exif data, find out when it was taken, then look in our
-    position database, find a position fix with a coresponding time stamp, put that
-    position into the proper format and write it to the image's exif data."""
-    md = get_photo_metadata(img)
-    ptime = get_photo_datetime(md)
-    if not ptime:
-        print "If there's no timestamp on the image we can't continue"
-        return False
-    # photo time is assumed to be local time but gps log is utc
-    utctime = utc_from_local(ptime)
-    
-    pdict = get_position_for_time(utctime,reject_threshold=reject_threshold)
-    
-    if not pdict:
-        print "Couldn't find a position close enough to the time handed in"
-        return False
-        
-    exgps = 'Exif.GPSInfo.GPS'
-    add_dict = {    'Latitude': pdict['lat']['fract'],
-                    'LatitudeRef': pdict['lat']['hemi'],
-                    'Longitude': pdict['lon']['fract'],
-                    'LongitudeRef': pdict['lon']['hemi'] }
-    return add_dict, pdict
-    for k,v in add_dict.iteritems():
-        key = exgps + k
-        print "%s: %s" % (str(key),str(v))
-        md[key] = exiv.ExifTag(key,v)
-    md.write()
-    # This isn't working to assign values because these keys don't exist
-    #md[exgps + 'Latitude'].value = pdict['lat']['fract']
-    #md[exgps + 'LatitudeRef'].value = pdict['lat']['hemi']    
-    #md[exgps + 'Longitude'].value = pdict['lon']['fract']
-    #md[exgps + 'LongitudeRef'].value = pdict['lon']['hemi']
-    
-    #md.write()
-    return True
 
-    
     
     
     

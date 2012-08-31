@@ -1,6 +1,7 @@
 from pynmea.streamer import NMEAStream
 from fractions import Fraction
 from itertools import groupby
+from math import modf
 from common import *
 
 class coord(object):
@@ -40,27 +41,77 @@ class coord(object):
     def __repr__(self):
         return "%i %g" % (self.degrees,self.minutes)
         
-    @staticmethod
-    def from_nmea_string(nstr,hemi=None):
-        pos = ['N','E']
-        neg = ['S','W']
-        l = str(nstr).split('.')
-        deg = int( l[0][:-2] )
-        minute = float( l[0][-2:] + '.' + l[1] )
-        if hemi:
-            if hemi.upper() in neg:
-                deg = -abs(deg)
-            elif hemi.upper() in pos:
-                deg = abs(deg)
-            else:
-                raise ValueError( "Hemisphere should be N, S, E, or W. Why are you giving me %s?" % (hemi,) )
-        return coord(deg,minute)
-        
     def __unicode__(self):
         return u'%i\u00B0 %g\'' % (self.degrees,self.minutes)
         
     def __str__(self):
         return unicode(self).encode('utf-8')
+        
+    @property
+    def dms(self):
+        """
+        Return coordinates in a tuple of degrees,minutes,seconds.
+        """
+        seconds = 60 * modf( self.minutes )[0]
+        return (self.degrees,int(self.minutes),seconds)
+    
+    @property
+    def exif_coord(self):
+        """
+        Return the coordinate in the format that can be used to assign to an
+        exif tag using the pyexiv2 library.
+        """
+        from pyexiv2.utils import Rational
+        (d,m,s) = self.dms
+        return ( Rational(abs(d),1),Rational(m,1),Rational(s,1) )
+        
+    def __adjust_sign(self,hemi):
+        pos = ['N','E']
+        neg = ['S','W']
+        if hemi:
+            if hemi.upper() in neg:
+                self.degrees = -abs(self.degrees)
+            elif hemi.upper() in pos:
+                self.degrees = abs(self.degrees)
+            else:
+                raise ValueError( "Hemisphere should be N, S, E, or W. Why are you giving me %s?" % (hemi,) )
+        
+    @staticmethod
+    def from_dms( d,m,s,hemi=None ):
+        """
+        Take degrees minutes and seconds and return a coord object in degrees
+        and float minutes.
+        """
+        minutes = float(m) + s / 60
+        c = coord( d, minutes )
+        c.__adjust_sign(hemi)
+        return c
+        
+    @staticmethod
+    def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
+        """
+        Take a tuple of Fractions (that's how they're given from pyexiv2)
+        and translate into a coord.
+        """
+        d = int( float(fracdeg) )
+        c = coord.from_dms( d, float(fracmin), float(fracsec) )
+        c.__adjust_sign(hemi)
+        return c
+        
+    @staticmethod
+    def from_nmea_string(nstr,hemi=None):
+        """
+        Take a coordinate in the format given in NMEA log files and return a
+        coord object. Hemi is optional. If supplied, we will determine the 
+        sign of the degrees value based on the value of hemi regardless of
+        original sign handed in.
+        """
+        l = str(nstr).split('.')
+        deg = int( l[0][:-2] )
+        minute = float( l[0][-2:] + '.' + l[1] )
+        c = coord(deg,minute)
+        c.__adjust_sign(hemi)
+        return c
         
 class latitude(coord):
     def __init__(self,degrees,minutes):
@@ -90,46 +141,31 @@ class longitude(coord):
     def __init__(self,degrees,minutes):
         coord.__init__(self,degrees,minutes)
         
+    @staticmethod
+    def from_nmea_string(nstr,hemi=None):
+        c = coord.from_nmea_string(nstr,hemi)
+        return longitude(c.degrees,c.minutes)
+        
     @property
     def hemisphere(self):
         if self.degrees < 0:
             return 'W'
         else:
             return 'E'
-    
-def coord_to_dict(coord, hemi):
-    """Take a coordinate in the format given in NMEA log files and put it into
-    a dictionary.
-    
-    >>>coord_to_dict(12345.67891234,'E')
-    {'deg': 123, 'hemi': 'E', 'min': 45.6789123}
-    """
-    c_dict = {  'deg': coord_deg(coord),
-                'min': coord_min(coord),
-                'fract': coord_fractions(coord), 
-                'hemi': hemi }
-    return c_dict
-    
-def coord_deg(coord):
-    """Pull the degrees from NMEA style coordinate"""
-    l = str(coord).split('.')
-    return int( l[0][:-2] )
-    
-def coord_min(coord):
-    """Pull the decimal minutes from NMEA style coordinate"""
-    l = str(coord).split('.')
-    return float( l[0][-2:] + '.' + l[1] )
-    
-def coord_fractions(coord):
-    deg = Fraction.from_decimal( coord_deg(coord) )
-    minutes = Fraction.from_float( coord_min(coord) )
-    sec = Fraction.from_decimal( 0 )
-    return (deg,minutes,sec)
-
-def parse_coordinates_to_dict(lat,lat_hemi,lon,lon_hemi):
-    lat_dict = coord_to_dict(lat,lat_hemi)
-    lon_dict = coord_to_dict(lon,lon_hemi)
-    return { 'lat': lat_dict, 'lon': lon_dict }
+            
+class position(object):
+    def __init__(self,lat,lon):
+        self.lat = lat
+        self.lon = lon
+        
+    def __repr__(self):
+        return "%s, %s" % (repr(self.lat),repr(self.lon))
+        
+    def __unicode__(self):
+        return u'%s, %s' % (self.lat,self.lon)
+        
+    def __str__(self):
+        return "%s, %s" % (self.lat,self.lon)
 
 def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     """Given a datetime object, find the position for the nearest position
@@ -141,19 +177,16 @@ def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
                         latitude, lat_hemi, longitude, lon_hemi from GPSLog order by \
                         abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 1", t).fetchone()
     time_diff = result[0]
-    lat = result[1]
-    lat_hemi = result[2]
-    lon = result[3]
-    lon_hemi = result[4]
-    result_str = "%s %s, %s %s" % ( parse_coordinate_pretty(lat), lat_hemi.upper(), parse_coordinate_pretty(lon), lon_hemi.upper() )
-    result_dict = parse_coordinates_to_dict( lat,lat_hemi,lon,lon_hemi )
+    lat = latitude.from_nmea_string( result[1], result[2] )
+    lon = longitude.from_nmea_string( result[3], result[4] )
+    
     if time_diff > reject_threshold:
         return False
     else:
         if return_pretty:
-            return result_str
+            return unicode( lat ) + u', ' + unicode( lon )
         else:
-            return result_dict
+            return position(lat,lon)
 
 def extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',)):
     """Use the pynmea library to read data out of an nmea log file."""
