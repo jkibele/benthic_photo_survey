@@ -3,6 +3,10 @@ from fractions import Fraction
 from itertools import groupby
 from math import modf
 from common import *
+try:
+    from osgeo import ogr
+except ImportError:
+    import ogr
 
 class coord(object):
     def __init__(self,degrees,minutes):
@@ -166,6 +170,32 @@ class position(object):
         
     def __str__(self):
         return "%s, %s" % (self.lat,self.lon)
+
+class gpx_file(object):
+    def __init__(self,file_path):
+        self.file_path = file_path
+
+    def __repr__(self):
+        return "GPX file: %s" % (file_path,)
+        
+    @property
+    def ogr_ds(self):
+        gpx_driver = ogr.GetDriverByName('GPX')
+        return gpx_driver.Open(self.file_path)
+        
+    @property
+    def layer_names(self):
+        ds = self.ogr_ds
+        return [ds.GetLayerByIndex(x).GetName() for x in range(ds.GetLayerCount())]
+    
+    @property    
+    def track_points(self):
+        ds = self.ogr_ds
+        lyr = ds.GetLayerByName('track_points')
+        result = []
+        for feat in lyr:
+            result.append([feat.time,feat.geometry().GetPoint()])
+        return result
 
 def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     """Given a datetime object, find the position for the nearest position
