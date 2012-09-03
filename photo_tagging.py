@@ -68,6 +68,13 @@ class image_file(object):
             return None
             
     @property
+    def exif_depth_tag(self):
+        try:
+            return self.md['Exif.GPSInfo.GPSAltitude']
+        except KeyError:
+            return None
+            
+    @property
     def position(self):
         """
         Look at the exif data and return a position object as defined in
@@ -87,6 +94,18 @@ class image_file(object):
                     pre+'LatitudeRef': pos.lat.hemisphere,
                     pre+'Longitude': pos.lon.exif_coord,
                     pre+'LongitudeRef': pos.lon.hemisphere }
+        for k,v in add_dict.iteritems():
+            print "%s = %s" % (str(k),str(v))
+            self.md[k] = exiv.ExifTag(k,v)
+        self.md.write()
+        return True
+        
+    def set_exif_depth_temp(self,depth,temp):
+        pre = 'Exif.GPSInfo.GPS'
+        add_dict = {pre+'Altitude': depth,
+                    pre+'AltitudeRef': 1,
+                    dt_str = "{'depth':depth,'temp':temp}"
+                    'Exif.Photo.UserComment': dt_str }
         for k,v in add_dict.iteritems():
             print "%s = %s" % (str(k),str(v))
             self.md[k] = exiv.ExifTag(k,v)

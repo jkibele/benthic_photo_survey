@@ -64,6 +64,13 @@ class coord(object):
         """
         seconds = 60 * modf( self.minutes )[0]
         return (self.degrees,int(self.minutes),seconds)
+        
+    @property
+    def nmea_string(self):
+        """
+        Return coordinates in a nmea style string.
+        """
+        return str(abs(self.degrees)) + str(self.minutes)
     
     @property
     def exif_coord(self):
@@ -276,10 +283,30 @@ class gpx_file(object):
             pos = position(lat,lon)
             result.append([dt_parser.parse( feat.time ),pos])
         return result
+        
+    def read_to_db(self, dbp=db_path):
+        conn,cur = connection_and_cursor(dbp)
+        # Make sure the table is there
+        create_gpslog_table(cur)
+        for tp in self.track_points:
+            utctime = tp[0]
+            pos = tp[1]
+            latitude = pos.lat.nmea_string
+            lat_hemi = pos.lat.hemisphere
+            longitude = pos.lon.nmea_string
+            lon_hemi = pos.lon.hemisphere
+            t = ( None, utctime, latitude, lat_hemi, longitude, lon_hemi, None )
+            cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?,?)", t)
+        conn.commit()
+        cur.close()
+
+def create_gpslog_table(cur):
+    cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
+                longitude real, lon_hemi text, num_sats integer, UNIQUE (utctime) ON CONFLICT REPLACE)")
 
 def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     """Given a datetime object, find the position for the nearest position
-    fix. I may want to interpolated between positions at some point but I'll
+    fix. I may want to interpolate between positions at some point but I'll
     leave that for later."""
     conn,cur = connection_and_cursor(db_path)
     t = ( dt_obj,dt_obj )
@@ -331,8 +358,7 @@ def read_gps_log(filepath):
     """
     conn,cur = connection_and_cursor(db_path)
     # Make sure the table is there
-    cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
-                longitude real, lon_hemi text, num_sats integer, UNIQUE (utctime) ON CONFLICT REPLACE)")
+    create_gpslog_table(cur)
     
     data = extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',))
     

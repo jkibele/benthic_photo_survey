@@ -4,6 +4,6 @@ Make sure the cameras date and time are correctly set to local time before takin
 
 
 Notes on specific libraries used:
-pyexiv2 appears to be a complete pain in the butt to install on mac so I may try and convert to pexif at some point (http://http://code.google.com/p/pexif/) for now, I'm going to keep using pyexiv2. pexif may not currently support very many cameras (including Panasonic) so it might not work out without some additional development.
+pyexiv2 appears to be a complete pain in the butt to install on mac so I may try and convert to pexif at some point (http://http://code.google.com/p/pexif/) for now, I'm going to keep using pyexiv2. pexif may not currently support very many cameras (including Panasonic) so it won't do it. There are some instructions for installing pyexiv2 on mac here: https://gist.github.com/819680
 
 GDAL: Caused me a lot of trouble on Ubuntu because I had stupidly built from source at some point without expat support necessary for reading GPX files with OGR. I had to manually delete the executable files and the libraries. Once I'd gotten that sorted, I used the Ubuntu software center with this repository: https://launchpad.net/~ubuntugis/+archive/ubuntugis-unstable  It has almost all of the GIS software that I had struggled to install.
