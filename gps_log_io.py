@@ -1,17 +1,23 @@
 from pynmea.streamer import NMEAStream
+from dateutil import parser as dt_parser
 from fractions import Fraction
 from itertools import groupby
 from math import modf
 from common import *
 try:
-    from osgeo import ogr
-except ImportError:
     import ogr
+except ImportError:
+    from osgeo import ogr
 
 class coord(object):
+    """
+    Store a latitude or a longitude and provide some methods for converting to
+    various formats. Coord will be reclassed by latitude and longitude classes
+    that will provide methods specific to those types of coordinates.
+    """
     def __init__(self,degrees,minutes):
         # Apparently all my type checking is bad form for python. Maybe 
-        # I will take it out at some point
+        # I will take it out at some point but probably not
         if degrees == None:
             self.degrees = None
         elif int(degrees) <> degrees:
@@ -70,6 +76,11 @@ class coord(object):
         return ( Rational(abs(d),1),Rational(m,1),Rational(s,1) )
         
     def __adjust_sign(self,hemi):
+        """
+        If given 'N' or 'E' for the hemisphere, set the sign of the degrees to positive.
+        If given 'S' or 'W' for the hemisphere, set the sign of the degrees to negative.
+        If hemi is None, do nothing.
+        """
         pos = ['N','E']
         neg = ['S','W']
         if hemi:
@@ -88,6 +99,18 @@ class coord(object):
         """
         minutes = float(m) + s / 60
         c = coord( d, minutes )
+        c.__adjust_sign(hemi)
+        return c
+        
+    @staticmethod
+    def from_dd( dec_deg, hemi=None ):
+        """
+        Take decimal degrees and return a coord object with integer degrees and
+        float minutes.
+        """
+        m,d = modf(dec_deg)
+        m = abs(m) * 60
+        c = coord(d,m)
         c.__adjust_sign(hemi)
         return c
         
@@ -130,6 +153,33 @@ class latitude(coord):
             super(coord,self).__setattr__(name,value)
             
     @staticmethod
+    def from_dms( d,m,s,hemi=None ):
+        """
+        Take degrees minutes and seconds and return a coord object in degrees
+        and float minutes.
+        """
+        c = coord.from_dms( d,m,s,hemi )
+        return latitude(c.degrees,c.minutes)
+        
+    @staticmethod
+    def from_dd( dec_deg, hemi=None ):
+        """
+        Take decimal degrees and return a coord object with integer degrees and
+        float minutes.
+        """
+        c = coord.from_dd( dec_deg, hemi )
+        return latitude(c.degrees,c.minutes)
+        
+    @staticmethod
+    def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
+        """
+        Take a tuple of Fractions (that's how they're given from pyexiv2)
+        and translate into a coord.
+        """
+        c = coord.from_exif_coord( (fracdeg,fracmin,fracsec), hemi )
+        return latitude(c.degrees,c.minutes)
+    
+    @staticmethod
     def from_nmea_string(nstr,hemi=None):
         c = coord.from_nmea_string(nstr,hemi)
         return latitude(c.degrees,c.minutes)
@@ -145,6 +195,33 @@ class longitude(coord):
     def __init__(self,degrees,minutes):
         coord.__init__(self,degrees,minutes)
         
+    @staticmethod
+    def from_dms( d,m,s,hemi=None ):
+        """
+        Take degrees minutes and seconds and return a coord object in degrees
+        and float minutes.
+        """
+        c = coord.from_dms( d,m,s,hemi )
+        return longitude(c.degrees,c.minutes)
+        
+    @staticmethod
+    def from_dd( dec_deg, hemi=None ):
+        """
+        Take decimal degrees and return a coord object with integer degrees and
+        float minutes.
+        """
+        c = coord.from_dd( dec_deg, hemi )
+        return longitude(c.degrees,c.minutes)
+        
+    @staticmethod
+    def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
+        """
+        Take a tuple of Fractions (that's how they're given from pyexiv2)
+        and translate into a coord.
+        """
+        c = coord.from_exif_coord( (fracdeg,fracmin,fracsec), hemi )
+        return longitude(c.degrees,c.minutes)
+    
     @staticmethod
     def from_nmea_string(nstr,hemi=None):
         c = coord.from_nmea_string(nstr,hemi)
@@ -194,7 +271,10 @@ class gpx_file(object):
         lyr = ds.GetLayerByName('track_points')
         result = []
         for feat in lyr:
-            result.append([feat.time,feat.geometry().GetPoint()])
+            lon = longitude.from_dd( feat.geometry().GetX() )
+            lat = latitude.from_dd( feat.geometry().GetY() )
+            pos = position(lat,lon)
+            result.append([dt_parser.parse( feat.time ),pos])
         return result
 
 def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
