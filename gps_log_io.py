@@ -8,6 +8,18 @@ try:
     import ogr
 except ImportError:
     from osgeo import ogr
+    
+def fraction_to_rational(fra):
+    """
+    Take a fraction and return a stupid Rational to make stupid damned 
+    pyexiv2 happy. If it's not a fraction, just hand it back and hope
+    for the best.
+    """
+    from pyexiv2.utils import Rational
+    if fra.__class__.__name__=='Fraction':
+        return Rational(fra.limit_denominator().numerator,fra.limit_denominator().denominator)
+    else:
+        return fra    
 
 class coord(object):
     """
@@ -127,8 +139,11 @@ class coord(object):
         Take a tuple of Fractions (that's how they're given from pyexiv2)
         and translate into a coord.
         """
-        d = int( float(fracdeg) )
-        c = coord.from_dms( d, float(fracmin), float(fracsec) )
+        fracdeg = fraction_to_rational(fracdeg)
+        fracmin = fraction_to_rational(fracmin)
+        fracsec = fraction_to_rational(fracsec)
+        d = int( fracdeg.to_float() )
+        c = coord.from_dms( d, fracmin.to_float(), fracsec.to_float() )
         c.__adjust_sign(hemi)
         return c
         
@@ -260,7 +275,7 @@ class gpx_file(object):
         self.file_path = file_path
 
     def __repr__(self):
-        return "GPX file: %s" % (file_path,)
+        return "GPX file: %s" % (self.file_path,)
         
     @property
     def ogr_ds(self):
@@ -295,7 +310,7 @@ class gpx_file(object):
             lat_hemi = pos.lat.hemisphere
             longitude = pos.lon.nmea_string
             lon_hemi = pos.lon.hemisphere
-            t = ( None, utctime, latitude, lat_hemi, longitude, lon_hemi, None )
+            t = ( None, utctime.replace(tzinfo=None), latitude, lat_hemi, longitude, lon_hemi, None )
             cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?,?)", t)
         conn.commit()
         cur.close()
@@ -308,6 +323,8 @@ def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     """Given a datetime object, find the position for the nearest position
     fix. I may want to interpolate between positions at some point but I'll
     leave that for later."""
+    if not dt_obj:
+        return None
     conn,cur = connection_and_cursor(db_path)
     t = ( dt_obj,dt_obj )
     result = cur.execute("select abs(strftime('%s',?) - strftime('%s',utctime) ), \
@@ -318,7 +335,7 @@ def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     lon = longitude.from_nmea_string( result[3], result[4] )
     
     if time_diff > reject_threshold:
-        return False
+        return None
     else:
         if return_pretty:
             return unicode( lat ) + u', ' + unicode( lon )

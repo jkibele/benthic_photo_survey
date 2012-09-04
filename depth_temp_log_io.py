@@ -89,8 +89,9 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     if verbose:
         print "Min: %i Given: %.3f Max: %i" % (times.min(),dt_obj_secs,times.max())
     if ( abs(times.min() - dt_obj_secs) > reject_threshold ):
-        print "Target time: %s, %s seconds, Closest time: %s, %s seconds, 2nd Closest: %s,%s seconds" % ( dt_obj.strftime('%Y-%m-%d %H:%M:%S'),dt_obj.strftime('%s'),t1.strftime('%Y-%m-%d %H:%M:%S'),t1.strftime('%s'),t2.strftime('%Y-%m-%d %H:%M:%S'),t2.strftime('%s') )
-        return False
+        if verbose:
+            print "Target time: %s, %s seconds, Closest time: %s, %s seconds, 2nd Closest: %s,%s seconds" % ( dt_obj.strftime('%Y-%m-%d %H:%M:%S'),dt_obj.strftime('%s'),t1.strftime('%Y-%m-%d %H:%M:%S'),t1.strftime('%s'),t2.strftime('%Y-%m-%d %H:%M:%S'),t2.strftime('%s') )
+        return None
     elif times.min() < dt_obj_secs < times.max(): # if dt_obj is between the two closest times, interpolate the depth
         return interpolate_depth( dt_obj_secs, t1_secs, t2_secs, d1m, d2m )
     else: # just return the closest depth if our given time is not between the two closest logged times
@@ -107,6 +108,21 @@ def get_temp_for_time(dt_obj, reject_threshold=30):
     time_diff = result[0]
     celsius = result[1]
     if time_diff > reject_threshold:
-        return False
+        return None
     else:
         return celsius
+
+def adjust_all_times(time_delta):
+    """
+    This will shift all the times of all the records. You probably don't wan to do
+    this but I did want to once. I actually did it directly in the db so I have 
+    never tested this method but I figured I might want it some day.
+    """
+    conn,cur = connection_and_cursor(db_path)
+    t = (time_delta.total_seconds(),)
+    cur.execute("update DepthTempLog set utctime=datetime(utctime,'+?')", t)
+    conn.commit()
+    cur.close()
+
+
+
