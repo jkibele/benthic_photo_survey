@@ -9,19 +9,19 @@ def depth_from_pressure(mbars):
     presure is 1atm. """
     return (mbars - 1013.25) / 101.41830484045322 
 
-def read_depth_temp_log(filepath):
+def read_depth_temp_log(filepath,path_to_db=db_path):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 
     and easy searching. Records must have a unique combination of device identifier,
     file number, and datetime stamp. If a conflict is found, the old record will be
     overwritten by the new one. This should insure that duplicates will not be 
     created if a csv file is loaded in multiple times."""
     # Connect to the db
-    conn,cur = connection_and_cursor(db_path)
+    conn,cur = connection_and_cursor(path_to_db)
     # Make sure the table is there
     cur.execute("create table if not exists DepthTempLog ( device text, file integer, utctime datetime, kelvin real, celsius real, mbar integer, depthm real, UNIQUE (device, file, utctime) ON CONFLICT REPLACE)")
     # Read the csv file
     reader = csv.reader(open(filepath,'rb'),delimiter=',')
-    
+    rec_count = 0
     for row in reader:
         device = row[1]
         file_id = int(row[2])
@@ -44,8 +44,10 @@ def read_depth_temp_log(filepath):
         
         # stick it in the table
         cur.execute("insert into DepthTempLog values (?,?,?,?,?,?,?)", t)
+        rec_count += 1
     conn.commit()
     cur.close()
+    print "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
 
 def interpolate_depth(t_secs,t1_secs,t2_secs,d1m,d2m):
     """Given depth d1m at time t1_secs and depth d2m at time t2_secs, interpolate
@@ -124,5 +126,16 @@ def adjust_all_times(time_delta):
     conn.commit()
     cur.close()
 
-
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Import a depth/temperature csv file into the database.')
+    parser.add_argument('input_path', type=str, help='The directory of csv files or the individual file that you want to import.')
+    parser.add_argument('output_db', nargs='?', type=str, help='The database you would like to read the log into. If left blank, the db specified in configuration.py will be used.', default=db_path)
+    args = parser.parse_args()
+    
+    if os.path.isdir(args.input_path): # this means a directory has been handed in
+        for fname in os.listdir(args.input_path):
+            read_depth_temp_log(os.path.join(args.input_path,fname),args.output_db)
+    else:
+        read_depth_temp_log(args.input_path,args.output_db)
+    
 

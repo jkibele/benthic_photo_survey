@@ -2,7 +2,7 @@ from datetime import timedelta as td
 from datetime import datetime as dt
 from configuration import *
 import numpy as np
-import sqlite3, argparse, pytz
+import sqlite3, argparse, pytz, os
 
 def connection_and_cursor(path_to_db):
     """Connect to the db and pass back the connection and cursor"""

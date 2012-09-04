@@ -4,7 +4,6 @@ from depth_temp_log_io import *
 from configuration import *
 from gps_log_io import *
 from common import *
-import os
 
 class image_file(object):
     """

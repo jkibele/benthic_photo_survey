@@ -290,19 +290,26 @@ class gpx_file(object):
     @property    
     def track_points(self):
         ds = self.ogr_ds
-        lyr = ds.GetLayerByName('track_points')
-        result = []
-        for feat in lyr:
-            lon = longitude.from_dd( feat.geometry().GetX() )
-            lat = latitude.from_dd( feat.geometry().GetY() )
-            pos = position(lat,lon)
-            result.append([dt_parser.parse( feat.time ),pos])
-        return result
+        try:
+            lyr = ds.GetLayerByName('track_points')
+            result = []
+            for feat in lyr:
+                lon = longitude.from_dd( feat.geometry().GetX() )
+                lat = latitude.from_dd( feat.geometry().GetY() )
+                pos = position(lat,lon)
+                result.append([dt_parser.parse( feat.time ),pos])
+            return result
+        except AttributeError:
+            return None
         
     def read_to_db(self, dbp=db_path):
+        if not self.track_points:
+            print "The file %s has no track points." % (self.file_path,)
+            return None
         conn,cur = connection_and_cursor(dbp)
         # Make sure the table is there
         create_gpslog_table(cur)
+        rec_count = 0
         for tp in self.track_points:
             utctime = tp[0]
             pos = tp[1]
@@ -312,8 +319,10 @@ class gpx_file(object):
             lon_hemi = pos.lon.hemisphere
             t = ( None, utctime.replace(tzinfo=None), latitude, lat_hemi, longitude, lon_hemi, None )
             cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?,?)", t)
+            rec_count += 1
         conn.commit()
         cur.close()
+        print "Read %i records from %s to %s." % (rec_count,os.path.basename(self.file_path),os.path.basename(dbp))
 
 def create_gpslog_table(cur):
     cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
@@ -368,19 +377,19 @@ def group_nmea_sentences_by_timestamp(obj_list):
     #    print "timestamp: %s group contains: %s" % (str(g[0].timestamp), ', '.join([z.__class__.__name__ for z in g]))
     return groups
 
-def read_gps_log(filepath):
+def read_gps_log(filepath,path_to_db=db_path):
     """Read in a single nmea gps log into the sqlite database. Currently requiring
     the GPRMC sentence and optionally reading the number of satellites from the
     GPGGA sentence when it is available.
     """
-    conn,cur = connection_and_cursor(db_path)
+    conn,cur = connection_and_cursor(path_to_db)
     # Make sure the table is there
     create_gpslog_table(cur)
     
     data = extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',))
     
     grouped = group_nmea_sentences_by_timestamp(data)
-    
+    rec_count = 0
     for timegroup in grouped:
         # GPGGA does not have a datestamp so I don't want to use lone GPGGA sentences
         # If I have both sentences, I'll get the number of satellites.
@@ -400,11 +409,37 @@ def read_gps_log(filepath):
             
             t = ( validity, utctime, latitude, lat_hemi, longitude, lon_hemi, num_sats )
             cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?,?)", t)
+            rec_count += 1
     
     conn.commit()
     cur.close()
+    print "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
     
 def batch_read_gps_logs(directory):
     """Iteratively use read_gps_log on all files in a directory. Restrict to a 
     range of dates?"""
     pass
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Import a GPS log file into the database. The GPS log can either be an NMEA text log file with a \'.log\' extension or a GPX file with a \'.gpx\' extension.")
+    parser.add_argument('input_path', type=str, help='The directory of log files or the individual file that you want to import.')
+    parser.add_argument('output_db', nargs='?', type=str, help='The database you would like to read the log into. If left blank, the %s will be used as specified in configuration.py.' % (db_path,), default=db_path)
+    args = parser.parse_args()
+
+    if os.path.isdir(args.input_path): # this means a directory has been handed in
+        for fname in os.listdir(args.input_path):
+            if fname.lower().endswith('.log'):
+                read_gps_log(os.path.join(args.input_path,fname),args.output_db)
+            elif fname.lower().endswith('.gpx'):
+                gpx_file(os.path.join(args.input_path,fname)).read_to_db(args.output_db)
+    else:
+        if args.input_path.lower().endswith('.log'):
+            read_gps_log(args.input_path,args.output_db)
+        elif args.input_path.lower().endswith('.gpx'):
+            gf = gpx_file(args.input_path)
+            gf.read_to_db(args.output_db)
+
+
+
+
+
