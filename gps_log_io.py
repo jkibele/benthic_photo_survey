@@ -292,15 +292,19 @@ class gpx_file(object):
         ds = self.ogr_ds
         try:
             lyr = ds.GetLayerByName('track_points')
-            result = []
-            for feat in lyr:
-                lon = longitude.from_dd( feat.geometry().GetX() )
-                lat = latitude.from_dd( feat.geometry().GetY() )
-                pos = position(lat,lon)
-                result.append([dt_parser.parse( feat.time ),pos])
-            return result
         except AttributeError:
             return None
+            
+        result = []
+        for feat in lyr:
+            lon = longitude.from_dd( feat.geometry().GetX() )
+            lat = latitude.from_dd( feat.geometry().GetY() )
+            pos = position(lat,lon)
+            try:
+                result.append([dt_parser.parse( feat.time ),pos])
+            except AttributeError:
+                pass # If we get here it's because there is a track point with no timestamp so we don't want it
+        return result
         
     def read_to_db(self, dbp=db_path):
         if not self.track_points:
