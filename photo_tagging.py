@@ -4,6 +4,9 @@ from depth_temp_log_io import *
 from configuration import *
 from gps_log_io import *
 from common import *
+# That namespace url doesn't really exist. The custom tags seem to work
+# without it. Perhaps I should figure out if I really need it or not.
+exiv.xmp.register_namespace('http://svarchiteuthis.com/benthicphoto/', 'BenthicPhoto')
 
 class image_file(object):
     """
@@ -21,16 +24,31 @@ class image_file(object):
     def __repr__(self):
         return "Image file: %s" % (self.file_path,)
         
+    def __get_exiv_tag(self,tag_string):
+        """
+        Try to get a pyexiv2 tag. If the tag doesn't exist, return None.
+        """
+        try:
+            return self.md[tag_string]
+        except KeyError:
+            return None
+    
+    def __get_exiv_tag_value(self,tag_string):
+        """
+        Try to get a pyexiv2 tag value. If the tag doesn't exist, return None.
+        """
+        try:
+            return self.md[tag_string].value
+        except KeyError:
+            return None
+        
     @property
     def datetime(self):
         """
         Try to get a datetime object for the image's creation from the 
         Exif.Photo.DateTimeOriginal value via pyexiv2.
         """
-        try:
-            return self.md['Exif.Photo.DateTimeOriginal'].value
-        except KeyError:
-            return None
+        return self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal')
             
     @property
     def utc_datetime(self):
@@ -41,45 +59,33 @@ class image_file(object):
     
     @property
     def exif_lat_tag(self):
-        try:
-            return self.md['Exif.GPSInfo.GPSLatitude']
-        except KeyError:
-            return None
+        return self.__get_exiv_tag('Exif.GPSInfo.GPSLatitude')
         
     @property
     def exif_latref_tag(self):
-        try:
-            return self.md['Exif.GPSInfo.GPSLatitudeRef']
-        except KeyError:
-            return None
+        return self.__get_exiv_tag('Exif.GPSInfo.GPSLatitudeRef')
         
     @property
     def exif_lon_tag(self):
-        try:
-            return self.md['Exif.GPSInfo.GPSLongitude']
-        except KeyError:
-            return None
+        return self.__get_exiv_tag('Exif.GPSInfo.GPSLongitude')
         
     @property
     def exif_lonref_tag(self):
-        try:
-            return self.md['Exif.GPSInfo.GPSLongitudeRef']
-        except KeyError:
-            return None
+        return self.__get_exiv_tag('Exif.GPSInfo.GPSLongitudeRef')
             
     @property
     def exif_depth_tag(self):
-        try:
-            return self.md['Exif.GPSInfo.GPSAltitude']
-        except KeyError:
-            return None
+        return self.__get_exiv_tag('Exif.GPSInfo.GPSAltitude')
             
     @property
-    def exif_depth_temp_dict(self):
+    def __exif_depth_temp_dict(self):
         """
         This is a bit of a hack. I couldn't find a good place to store temperature
         data in the exif so I went with storing a python dictionary as a string
-        in Exif.Photo.UserComment.
+        in Exif.Photo.UserComment. I think I'm going to stop using this and store
+        this stuff in custom xmp tags instead. UserComment is accessible to many
+        photo management apps so it seems likely to get corrupted. I made it a 
+        private method but maybe I should have just deleted it.
         """
         try:
             dstr = self.md['Exif.Photo.UserComment'].value
@@ -88,15 +94,25 @@ class image_file(object):
             return None
             
     @property
-    def exif_temperature(self):
+    def __exif_temperature(self):
         """
         This just exposes the temperature value from the hack mentioned in the
-        doc string for exif_depth_temp_dict.
+        doc string for exif_depth_temp_dict. I'm going to stop writing to this
+        tag so don't be surprised if this returns nothing. Actually, I think I
+        may just make it a private method because I don't want to delete it.
         """
         if self.exif_depth_temp_dict:
             return self.exif_depth_temp_dict['temp']
         else:
             return None
+            
+    @property
+    def xmp_temperature(self):
+        return self.__get_exiv_tag_value('Xmp.BenthicPhoto.temperature')
+            
+    @property
+    def xmp_temp_units(self):
+        return self.__get_exiv_tag_value('Xmp.BenthicPhoto.temp_units')
             
     @property
     def position(self):
@@ -114,7 +130,11 @@ class image_file(object):
     def __set_datetime__(self,dt_obj):
         """
         Set the date original in the exif. I don't think you want to do this
-        but I did want to once.
+        but I did want to once. If you lose the origination time for your 
+        image you can not sync it to your gps track or your depth log so 
+        leave this alone unless you're sure you know what you're doing. 
+        If you screw up your data don't come crying to me. I tried to warn
+        you.
         """
         key = 'Exif.Photo.DateTimeOriginal'
         self.md[key] = exiv.ExifTag(key,dt_obj)
@@ -157,6 +177,18 @@ class image_file(object):
         self.md.write()
         return True
         
+    def __set_xmp_depth_temp(self,depth,temp):
+        if not depth:
+            return None
+        if not temp:
+            temp = 0.0 # temperature isn't important at this point so if it's not there we'll just call it zero
+        pre = 'Xmp.BenthicPhoto.'
+        self.md[pre+'depth'] = str(depth)
+        self.md[pre+'depth_units'] = 'meters'
+        self.md[pre+'temperature'] = str(temp)
+        self.md[pre+'temp_units'] = 'celsius'
+        self.md.write()
+        
     @property
     def logger_depth(self):
         """
@@ -180,7 +212,13 @@ class image_file(object):
             return None
         
     def depth_temp_tag(self):
+        """
+        Get the depth and temp readings out of the db that match the photo's origination
+        time (considering that the photo's time stamp is in the local timezone and the
+        logs are in UTC) and write those values to the image's exif data.
+        """
         self.__set_exif_depth_temp(self.logger_depth,self.logger_temp)
+        self.__set_xmp_depth_temp(self.logger_depth,self.logger_temp)
         if self.exif_depth_tag:
             return self.exif_depth_tag.value
         else:
@@ -198,6 +236,9 @@ class image_file(object):
         return self.position
         
     def remove_geotagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
         geokeys = ['Latitude','LatitudeRef','Longitude','LongitudeRef']
         pre = 'Exif.GPSInfo.GPS'
         for key in [pre+gk for gk in geokeys]:
@@ -235,6 +276,7 @@ if __name__ == '__main__':
 
 
 #### Pretty much just testing garbage below here #######
+#### Why don't I delete it? Good question.       #######
 
 def check_time_tags(img):
     md = get_photo_metadata(img)
