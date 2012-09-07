@@ -76,6 +76,10 @@ class image_file(object):
     @property
     def exif_depth_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSAltitude')
+        
+    @property
+    def exif_depth(self):
+        return self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude')
             
     @property
     def __exif_depth_temp_dict(self):
@@ -113,6 +117,10 @@ class image_file(object):
     @property
     def xmp_temp_units(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.temp_units')
+        
+    @property
+    def xmp_substrate(self):
+        return self.__get_exiv_tag_value('Xmp.BenthicPhoto.substrate')
             
     @property
     def position(self):
@@ -187,6 +195,11 @@ class image_file(object):
         self.md[pre+'depth_units'] = 'meters'
         self.md[pre+'temperature'] = str(temp)
         self.md[pre+'temp_units'] = 'celsius'
+        self.md.write()
+        
+    def set_xmp_substrate(self, subst_str):
+        pre = 'Xmp.BenthicPhoto.'
+        self.md[pre+'substrate'] = subst_str
         self.md.write()
         
     @property
