@@ -148,10 +148,10 @@ class MyFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.folderPath = dlg.GetPath()
             #print self.folderPath
-            picPaths = glob.glob(self.folderPath + os.path.sep + "*.JPG")
-            picPaths = picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg") 
+            self.myPanel.picPaths = glob.glob(self.folderPath + os.path.sep + "*.JPG")
+            self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg") 
             #print picPaths
-        Publisher().sendMessage("update images", picPaths)
+            Publisher().sendMessage("update images", self.myPanel.picPaths)
         event.Skip()
 
     #----------------------------------------------------------------------
@@ -174,20 +174,21 @@ class MyFrame(wx.Frame):
         self.the_image.SetBitmap(wx.BitmapFromImage(img))
         # photo info
         self.filename.SetLabel(image_name)
+        direc = '...' + direc[-30:]
         self.directory.SetLabel(direc)
-        num_str = "%i of %i" % (self.myPanel.currentPicture + 1,self.myPanel.totalPictures)
+        num_str = "%i of %i" % (self.myPanel.currentPicture + 1, self.myPanel.totalPictures)
         self.img_num.SetLabel(num_str)
         # exif data
         self.loadExif()
         
         self.Refresh()
-        Publisher().sendMessage("load grid", image)
-        Publisher().sendMessage("load list", image)
         Publisher().sendMessage("resize", "")
         
     #----------------------------------------------------------------------
     def loadExif(self):
-        self.position.SetLabel( self.imf.position.__str__().replace(',','\n') )
+        latstr, lonstr = unicode(self.imf.position).split(',')
+        pstr = latstr + ' \n' + lonstr
+        self.position.SetLabel( pstr )
         if self.imf.exif_depth:
             dstr = str(self.imf.exif_depth) + " m"
         else:
@@ -198,7 +199,7 @@ class MyFrame(wx.Frame):
         else:
             tstr = 'None'
         self.temperature.SetLabel( tstr )
-        self.substrate.SetLabel( self.imf.xmp_substrate )
+        self.substrate.SetLabel( str(self.imf.xmp_substrate) )
         
         self.substrate.Refresh()
         
@@ -239,7 +240,10 @@ class MyFrame(wx.Frame):
         """
         self.myPanel.picPaths = msg.data
         self.myPanel.totalPictures = len(self.myPanel.picPaths)
-        self.loadImage(self.myPanel.picPaths[0])
+        try:
+            self.loadImage(self.myPanel.picPaths[0])
+        except:
+            pass
         
     #----------------------------------------------------------------------
     def onNext(self, event):
