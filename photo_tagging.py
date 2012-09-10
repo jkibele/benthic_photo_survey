@@ -79,7 +79,10 @@ class image_file(object):
         
     @property
     def exif_depth(self):
-        return self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude')
+        if self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude'):
+            return float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude') )
+        else:
+            return None
             
     @property
     def __exif_depth_temp_dict(self):
