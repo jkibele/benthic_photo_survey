@@ -47,7 +47,7 @@ def read_depth_temp_log(filepath,path_to_db=db_path):
         rec_count += 1
     conn.commit()
     cur.close()
-    print "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
+    return "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
 
 def interpolate_depth(t_secs,t1_secs,t2_secs,d1m,d2m):
     """Given depth d1m at time t1_secs and depth d2m at time t2_secs, interpolate

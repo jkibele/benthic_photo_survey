@@ -162,6 +162,9 @@ class image_file(object):
                     pre+'LatitudeRef': pos.lat.hemisphere,
                     pre+'Longitude': pos.lon.exif_coord,
                     pre+'LongitudeRef': pos.lon.hemisphere }
+        if verbose:
+            print "Geotagging for %s:" % os.path.basename( self.file_path )
+            print "Coord %s rendered as %s, %s" % ( str(self.position), str( self.position.lat.exif_coord ), str( self.position.lon.exif_coord ) )
         for k,v in add_dict.iteritems():
             if verbose:
                 print "%s = %s" % (str(k),str(v))
@@ -240,16 +243,33 @@ class image_file(object):
         else:
             return None
         
-    def geotag(self):
+    def geotag(self,verbose=True):
         """
         Get a position that matches the time of creation for the image out
         of the database and set the exif data accordingly. We assume that 
         the photo timestamp is local and the gps position is utc.
         """
-        pos = get_position_for_time(self.utc_datetime)
+        pos = get_position_for_time(self.utc_datetime,verbose=verbose)
+        if verbose and pos:
+            print "-------------------GeoTagg--------------------------------"
+            print "%s is going to get set to %s as %s, %s" % ( os.path.basename( self.file_path ), unicode( pos ), str(pos.lat.exif_coord), str(pos.lon.exif_coord) )
+            print "%s, %s in dms" % ( str(pos.lat.dms), str(pos.lon.dms) )
         if pos:
-            self.__set_exif_position(pos)
+            self.__set_exif_position(pos,verbose)
         return self.position
+        
+    def __compare_position__(self):
+        """
+        This is just for testing. Check to see if the value stored in the db
+        matches what we display after conversion. I want to make sure I'm not
+        throwing away precision in coordinate conversions.
+        """
+        pos = get_position_for_time(self.utc_datetime,verbose=True)
+        print "  db says: %s, %s \nexif says: %s, %s" % ( pos.lat.nmea_string, pos.lon.nmea_string, self.position.lat.nmea_string, self.position.lon.nmea_string )
+        if pos.lat.nmea_string == self.position.lat.nmea_string:
+            print "Latitudes match"
+        if pos.lon.nmea_string == self.position.lon.nmea_string:
+            print "Longitudes match"
         
     def remove_geotagging(self):
         """
@@ -261,6 +281,46 @@ class image_file(object):
             if self.md.__contains__(key):
                 self.md.__delitem__(key)
                 self.md.write()
+                
+    def remove_depthtagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        geokeys = ['Altitude','AltitudeRef']
+        pre = 'Exif.GPSInfo.GPS'
+        for key in [pre+gk for gk in geokeys]:
+            if self.md.__contains__(key):
+                self.md.__delitem__(key)
+                self.md.write()
+                
+    def remove_temptagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        geokeys = ['depth','depth_units','temperature','temp_units']
+        pre = 'Xmp.BenthicPhoto.'
+        for key in [pre+gk for gk in geokeys]:
+            if self.md.__contains__(key):
+                self.md.__delitem__(key)
+                self.md.write()
+                
+    def remove_substratetagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        key = 'Xmp.BenthicPhoto.substrate'
+        if self.md.__contains__(key):
+            self.md.__delitem__(key)
+            self.md.write()
+                
+    def remove_all_tagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        self.remove_geotagging()
+        self.remove_depthtagging()
+        self.remove_temptagging()
+        self.remove_substratetagging()
 
 def exif_tag_jpegs(photo_dir):
     for fname in os.listdir(photo_dir):

@@ -2,7 +2,9 @@ import glob
 import os
 import wx
 from wx.lib.pubsub import Publisher
+from depth_temp_log_io import *
 from photo_tagging import *
+from gps_log_io import *
 
 class bpsPanel(wx.Panel):
     def __init__(self, parent):
@@ -31,20 +33,21 @@ class MyFrame(wx.Frame):
         # Menu Bar
         self.bps_menubar = wx.MenuBar()
         self.file_menu = wx.Menu()
-        self.load_photos = wx.MenuItem(self.file_menu, wx.NewId(), "Load Photos", "", wx.ITEM_NORMAL)
+        self.load_photos = wx.MenuItem(self.file_menu, wx.NewId(), "Load &Photos", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.load_photos)
-        self.load_gps = wx.MenuItem(self.file_menu, wx.NewId(), "Load GPS Log", "", wx.ITEM_NORMAL)
+        self.load_gps = wx.MenuItem(self.file_menu, wx.NewId(), "Load &GPS Log", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.load_gps)
-        self.load_depth = wx.MenuItem(self.file_menu, wx.NewId(), "Load Depth Log", "", wx.ITEM_NORMAL)
+        self.load_depth = wx.MenuItem(self.file_menu, wx.NewId(), "Load &Depth Log", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.load_depth)
         self.file_menu.AppendSeparator()
-        self.quit_menu = wx.MenuItem(self.file_menu, wx.ID_EXIT, "Quit", "", wx.ITEM_NORMAL)
+        self.quit_menu = wx.MenuItem(self.file_menu, wx.ID_EXIT, "&Quit", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.quit_menu)
-        self.bps_menubar.Append(self.file_menu, "File")
+        self.bps_menubar.Append(self.file_menu, "&File")
         self.SetMenuBar(self.bps_menubar)
         # Menu Bar end
         self.btn_geotag = wx.Button(self.myPanel, -1, "Geotag")
         self.btn_depth_tag = wx.Button(self.myPanel, -1, "Depth Temp Tag")
+        self.btn_tag_all = wx.Button(self.myPanel, -1, "Tag \'em All")
         #self.the_image = wx.StaticBitmap(self.myPanel, -1, wx.Bitmap("/home/jkibele/Pictures/us_in_little_boat.jpg", wx.BITMAP_TYPE_ANY))
         img = wx.EmptyImage(self.myPanel.photoMaxSize,self.myPanel.photoMaxSize)
         self.the_image = wx.StaticBitmap(self.myPanel, wx.ID_ANY, wx.BitmapFromImage(img))
@@ -56,6 +59,10 @@ class MyFrame(wx.Frame):
         self.filename_label = wx.StaticText(self.myPanel, -1, "Filename:")
         self.filename = wx.StaticText(self.myPanel, -1, " ")
         self.img_num = wx.StaticText(self.myPanel, -1, "0 of 0 in directory")
+        self.date_label = wx.StaticText(self.myPanel, -1, "Date:")
+        self.date = wx.StaticText(self.myPanel, -1, " ")
+        self.time_label = wx.StaticText(self.myPanel, -1, "Time:")
+        self.time = wx.StaticText(self.myPanel, -1, " ")
         self.pos_label = wx.StaticText(self.myPanel, -1, "Position:")
         self.position = wx.StaticText(self.myPanel, -1, " \n ")
         self.depth_label = wx.StaticText(self.myPanel, -1, "Depth:")
@@ -76,6 +83,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.appQuit, self.quit_menu)
         self.Bind(wx.EVT_BUTTON, self.geotag, self.btn_geotag)
         self.Bind(wx.EVT_BUTTON, self.depth_tag, self.btn_depth_tag)
+        self.Bind(wx.EVT_BUTTON, self.tag_all, self.btn_tag_all)
         self.Bind(wx.EVT_BUTTON, self.onPrevious, self.btn_prev)
         self.Bind(wx.EVT_BUTTON, self.onNext, self.btn_next)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.setSubstrate, self.substSelector)
@@ -95,13 +103,14 @@ class MyFrame(wx.Frame):
         rightColumn = wx.FlexGridSizer(3, 1, 0, 0)
         select_substrate = wx.StaticBoxSizer(self.select_substrate_staticbox, wx.VERTICAL)
         exif_data = wx.StaticBoxSizer(self.exif_data_staticbox, wx.HORIZONTAL)
-        exif_grid = wx.FlexGridSizer(4, 2, 0, 0)
+        exif_grid = wx.FlexGridSizer(6, 2, 0, 0)
         photo_info = wx.StaticBoxSizer(self.photo_info_staticbox, wx.VERTICAL)
         self.left_column = wx.BoxSizer(wx.VERTICAL)
         button_holder = wx.BoxSizer(wx.HORIZONTAL)
         upper_button_holder = wx.GridSizer(1, 3, 0, 0)
         upper_button_holder.Add(self.btn_geotag, 0, wx.ALL, 5)
         upper_button_holder.Add(self.btn_depth_tag, 0, wx.ALL, 5)
+        upper_button_holder.Add(self.btn_tag_all, 0, wx.ALL, 5)
         self.left_column.Add(upper_button_holder, 1, wx.ALL, 5)
         self.left_column.Add(self.the_image, 0, wx.ALL|wx.CENTER, 5)
         button_holder.Add(self.btn_prev, 0, wx.ALL, 10)
@@ -115,6 +124,10 @@ class MyFrame(wx.Frame):
         photo_info.Add(self.filename, 0, wx.ALIGN_RIGHT, 0)
         photo_info.Add(self.img_num, 0, wx.TOP, 5)
         rightColumn.Add(photo_info, 1, wx.ALL|wx.EXPAND, 5)
+        exif_grid.Add(self.date_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.date, 0, 0, 0)
+        exif_grid.Add(self.time_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.time, 0, 0, 0)
         exif_grid.Add(self.pos_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.position, 0, 0, 0)
         exif_grid.Add(self.depth_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
@@ -152,7 +165,9 @@ class MyFrame(wx.Frame):
             self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg") 
             #print picPaths
             Publisher().sendMessage("update images", self.myPanel.picPaths)
+            dlg.Destroy()
         event.Skip()
+        return True
 
     #----------------------------------------------------------------------
     def loadImage(self, image):
@@ -186,8 +201,19 @@ class MyFrame(wx.Frame):
         
     #----------------------------------------------------------------------
     def loadExif(self):
-        latstr, lonstr = unicode(self.imf.position).split(',')
-        pstr = latstr + ' \n' + lonstr
+        if self.imf.datetime:
+            pdate = self.imf.datetime.strftime('%d/%m/%Y')
+            ptime = self.imf.datetime.strftime('%H:%M:%S')
+        else:
+            pdate = 'None'
+            ptime = 'None'
+        self.time.SetLabel( ptime )
+        self.date.SetLabel( pdate )
+        if self.imf.position:
+            latstr, lonstr = unicode(self.imf.position).split(',')
+            pstr = latstr + ' \n' + lonstr
+        else:
+            pstr = 'None\n'
         self.position.SetLabel( pstr )
         if self.imf.exif_depth:
             dstr = str(self.imf.exif_depth) + " m"
@@ -264,26 +290,98 @@ class MyFrame(wx.Frame):
         """"""
         self.ubberSizer.Fit(self)
 
+    #----------------------------------------------------------------------
     def loadGPS(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Event handler `loadGPS' not implemented!"
+        dlg = wx.FileDialog(self, "Choose a GPS file",
+                           style=wx.FD_DEFAULT_STYLE)
+        result_str =''
+        if dlg.ShowModal() == wx.ID_OK:
+            fp = dlg.GetPath()
+            if fp.lower().endswith('.gpx'):
+                gf = gpx_file(fp)
+                result_str = gf.read_to_db()
+            elif fp.lower().endswith('.log'):
+                result_str = read_gps_log(fp)
+            else:
+                wx.MessageBox('Import Failed. The GPS log needs to have a .gpx or .log extension', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+                return False
+            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
+            dlg.Destroy()
         event.Skip()
+        self.Refresh()
+        return True
 
+    #----------------------------------------------------------------------
     def loadDepth(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Event handler `loadDepth' not implemented!"
+        dlg = wx.FileDialog(self, "Choose a depth logger file",
+                           style=wx.FD_DEFAULT_STYLE)
+        result_str =''
+        if dlg.ShowModal() == wx.ID_OK:
+            fp = dlg.GetPath()
+            if fp.lower().endswith('.csv'):
+                result_str = read_depth_temp_log(fp)
+            else:
+                wx.MessageBox('Import Failed. The Depth / Temp log needs to have a .csv extension', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+                return False
+            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
+            dlg.Destroy()
         event.Skip()
-
+        self.Refresh()
+        return True
+    
+    #----------------------------------------------------------------------
     def appQuit(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Event handler `appQuit' not implemented!"
+        self.Close()
         event.Skip()
 
+    #----------------------------------------------------------------------
     def geotag(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Event handler `geotag' not implemented!"
-        event.Skip()
+        r = self.imf.geotag()
+        if not r:
+            wx.MessageBox('I could not geotag this image. Either I could not find a position with a close enough time code or perhaps something more insidious and evil happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+            return False
+        else:
+            event.Skip()
+            self.Refresh()
+            return True
 
+    #----------------------------------------------------------------------
     def depth_tag(self, event): # wxGlade: MyFrame.<event_handler>
-        print "Event handler `depth_tag' not implemented!"
-        event.Skip()
+        r = self.imf.depth_temp_tag()
+        if not r:
+            wx.MessageBox('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+            return False
+        else:
+            event.Skip()
+            self.Refresh()
+            return True
+            
+    #----------------------------------------------------------------------
+    def tag_all(self, event):
+        rd_cnt = 0
+        rg_cnt = 0
+        #rdict = {}
+        if len( self.myPanel.picPaths ) > 0:
+            for pp in self.myPanel.picPaths:
+                imf = image_file(pp)
+                if imf.depth_temp_tag():
+                    rd_cnt += 1
+                if imf.geotag():
+                    rg_cnt += 1
+                #rdict.update( {os.path.basename(pp): str(imf.position)} )
+            if rd_cnt==rg_cnt==self.myPanel.totalPictures:
+                title_str = 'Great Success!'
+            else:
+                title_str = 'Moderate Success'
+            info_str = "Out of %i total photos, I geotagged %i and tagged %i with depth and temperature. You\'re welcome." % (self.myPanel.totalPictures,rg_cnt,rd_cnt)
+            wx.MessageBox(info_str,title_str, wx.OK | wx.ICON_INFORMATION)
+            self.Refresh()
+        else:
+            wx.MessageBox('I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+            return False
+        
 
+    #----------------------------------------------------------------------
     def setSubstrate(self, event): # wxGlade: MyFrame.<event_handler>
         index = event.GetSelection()
         chosen_substrate = self.substSelector.GetString(index)

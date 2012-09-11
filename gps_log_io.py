@@ -92,7 +92,7 @@ class coord(object):
         """
         from pyexiv2.utils import Rational
         (d,m,s) = self.dms
-        return ( Rational(abs(d),1),Rational(m,1),Rational(s,1) )
+        return ( Rational(abs(d),1),Rational(m,1),Rational(s * 1e7,1e7) )
         
     def __adjust_sign(self,hemi):
         """
@@ -326,13 +326,13 @@ class gpx_file(object):
             rec_count += 1
         conn.commit()
         cur.close()
-        print "Read %i records from %s to %s." % (rec_count,os.path.basename(self.file_path),os.path.basename(dbp))
+        return "Read %i records from %s to %s." % (rec_count,os.path.basename(self.file_path),os.path.basename(dbp))
 
 def create_gpslog_table(cur):
     cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
                 longitude real, lon_hemi text, num_sats integer, UNIQUE (utctime) ON CONFLICT REPLACE)")
 
-def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
+def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False,verbose=False):
     """Given a datetime object, find the position for the nearest position
     fix. I may want to interpolate between positions at some point but I'll
     leave that for later."""
@@ -341,12 +341,13 @@ def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False):
     conn,cur = connection_and_cursor(db_path)
     t = ( dt_obj,dt_obj )
     result = cur.execute("select abs(strftime('%s',?) - strftime('%s',utctime) ), \
-                        latitude, lat_hemi, longitude, lon_hemi from GPSLog order by \
+                        latitude, lat_hemi, longitude, lon_hemi, rowid from GPSLog order by \
                         abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 1", t).fetchone()
     time_diff = result[0]
     lat = latitude.from_nmea_string( result[1], result[2] )
     lon = longitude.from_nmea_string( result[3], result[4] )
-    
+    if verbose:
+        print "Position from rowid: %i ---> %s, %s.  Time difference = %i" % (result[5], str(lat), str(lon), time_diff)
     if time_diff > reject_threshold:
         return None
     else:
@@ -417,7 +418,7 @@ def read_gps_log(filepath,path_to_db=db_path):
     
     conn.commit()
     cur.close()
-    print "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
+    return "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
     
 def batch_read_gps_logs(directory):
     """Iteratively use read_gps_log on all files in a directory. Restrict to a 
