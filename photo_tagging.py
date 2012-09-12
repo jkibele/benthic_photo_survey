@@ -162,9 +162,6 @@ class image_file(object):
                     pre+'LatitudeRef': pos.lat.hemisphere,
                     pre+'Longitude': pos.lon.exif_coord,
                     pre+'LongitudeRef': pos.lon.hemisphere }
-        if verbose:
-            print "Geotagging for %s:" % os.path.basename( self.file_path )
-            print "Coord %s rendered as %s, %s" % ( str(self.position), str( self.position.lat.exif_coord ), str( self.position.lon.exif_coord ) )
         for k,v in add_dict.iteritems():
             if verbose:
                 print "%s = %s" % (str(k),str(v))

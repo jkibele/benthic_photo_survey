@@ -63,8 +63,10 @@ class MyFrame(wx.Frame):
         self.date = wx.StaticText(self.myPanel, -1, " ")
         self.time_label = wx.StaticText(self.myPanel, -1, "Time:")
         self.time = wx.StaticText(self.myPanel, -1, " ")
-        self.pos_label = wx.StaticText(self.myPanel, -1, "Position:")
-        self.position = wx.StaticText(self.myPanel, -1, " \n ")
+        self.lat_label = wx.StaticText(self.myPanel, -1, "Latitude:")
+        self.latitude = wx.StaticText(self.myPanel, -1, " ")
+        self.lon_label = wx.StaticText(self.myPanel, -1, "Longitude:")
+        self.longitude = wx.StaticText(self.myPanel, -1, " ")
         self.depth_label = wx.StaticText(self.myPanel, -1, "Depth:")
         self.depth = wx.StaticText(self.myPanel, -1, " ")
         self.temp_label = wx.StaticText(self.myPanel, -1, "Temperature:")
@@ -103,7 +105,7 @@ class MyFrame(wx.Frame):
         rightColumn = wx.FlexGridSizer(3, 1, 0, 0)
         select_substrate = wx.StaticBoxSizer(self.select_substrate_staticbox, wx.VERTICAL)
         exif_data = wx.StaticBoxSizer(self.exif_data_staticbox, wx.HORIZONTAL)
-        exif_grid = wx.FlexGridSizer(6, 2, 0, 0)
+        exif_grid = wx.FlexGridSizer(7, 2, 0, 0)
         photo_info = wx.StaticBoxSizer(self.photo_info_staticbox, wx.VERTICAL)
         self.left_column = wx.BoxSizer(wx.VERTICAL)
         button_holder = wx.BoxSizer(wx.HORIZONTAL)
@@ -128,8 +130,10 @@ class MyFrame(wx.Frame):
         exif_grid.Add(self.date, 0, 0, 0)
         exif_grid.Add(self.time_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.time, 0, 0, 0)
-        exif_grid.Add(self.pos_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.position, 0, 0, 0)
+        exif_grid.Add(self.lat_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.latitude, 0, 0, 0)
+        exif_grid.Add(self.lon_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.longitude, 0, 0, 0)
         exif_grid.Add(self.depth_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.depth, 0, 0, 0)
         exif_grid.Add(self.temp_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
@@ -166,7 +170,6 @@ class MyFrame(wx.Frame):
             #print picPaths
             Publisher().sendMessage("update images", self.myPanel.picPaths)
             dlg.Destroy()
-        event.Skip()
         return True
 
     #----------------------------------------------------------------------
@@ -211,10 +214,10 @@ class MyFrame(wx.Frame):
         self.date.SetLabel( pdate )
         if self.imf.position:
             latstr, lonstr = unicode(self.imf.position).split(',')
-            pstr = latstr + ' \n' + lonstr
         else:
-            pstr = 'None\n'
-        self.position.SetLabel( pstr )
+            latstr, lonstr = 'None','None'
+        self.latitude.SetLabel( latstr )
+        self.longitude.SetLabel( lonstr )
         if self.imf.exif_depth:
             dstr = str(self.imf.exif_depth) + " m"
         else:
@@ -325,7 +328,6 @@ class MyFrame(wx.Frame):
                 return False
             wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
             dlg.Destroy()
-        event.Skip()
         self.Refresh()
         return True
     
@@ -341,8 +343,7 @@ class MyFrame(wx.Frame):
             wx.MessageBox('I could not geotag this image. Either I could not find a position with a close enough time code or perhaps something more insidious and evil happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
             return False
         else:
-            event.Skip()
-            self.Refresh()
+            self.loadExif()
             return True
 
     #----------------------------------------------------------------------
@@ -352,8 +353,7 @@ class MyFrame(wx.Frame):
             wx.MessageBox('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
             return False
         else:
-            event.Skip()
-            self.Refresh()
+            self.loadExif()
             return True
             
     #----------------------------------------------------------------------
@@ -368,14 +368,13 @@ class MyFrame(wx.Frame):
                     rd_cnt += 1
                 if imf.geotag():
                     rg_cnt += 1
-                #rdict.update( {os.path.basename(pp): str(imf.position)} )
             if rd_cnt==rg_cnt==self.myPanel.totalPictures:
                 title_str = 'Great Success!'
             else:
                 title_str = 'Moderate Success'
             info_str = "Out of %i total photos, I geotagged %i and tagged %i with depth and temperature. You\'re welcome." % (self.myPanel.totalPictures,rg_cnt,rd_cnt)
             wx.MessageBox(info_str,title_str, wx.OK | wx.ICON_INFORMATION)
-            self.Refresh()
+            self.loadExif()
         else:
             wx.MessageBox('I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
             return False
