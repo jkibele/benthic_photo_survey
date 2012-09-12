@@ -4,3 +4,6 @@ db_path = 'data/db/raw_log.db'
 dt_testlog = 'test_data/sensus/sensus_test.csv'
 gps_testlog = 'test_data/gps/GPS_20120722_194204.log'
 test_image = 'test_data/images/P6251541.jpg'
+
+#--------------bps_export------------------------------
+CONF_EPSG = 4326

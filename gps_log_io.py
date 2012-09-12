@@ -78,6 +78,14 @@ class coord(object):
         return (self.degrees,int(self.minutes),seconds)
         
     @property
+    def decimal_degrees(self):
+        """
+        Return the coordinate in decimal degrees.
+        """
+        from math import copysign as cps
+        return self.degrees + cps(self.minutes,self.degrees) / 60.0
+        
+    @property
     def nmea_string(self):
         """
         Return coordinates in a nmea style string.
@@ -116,7 +124,7 @@ class coord(object):
         Take degrees minutes and seconds and return a coord object in degrees
         and float minutes.
         """
-        minutes = float(m) + s / 60
+        minutes = float(m) + s / 60.0
         c = coord( d, minutes )
         c.__adjust_sign(hemi)
         return c
@@ -269,6 +277,15 @@ class position(object):
         
     def __str__(self):
         return "%s, %s" % (self.lat,self.lon)
+        
+    @property
+    def ogr_point(self):
+        """
+        Return the coordinate as an ogr point geometry.
+        """
+        geom = ogr.Geometry(ogr.wkbPoint)
+        geom.SetPoint(0, self.lon.decimal_degrees, self.lat.decimal_degrees)
+        return geom
 
 class gpx_file(object):
     def __init__(self,file_path):
