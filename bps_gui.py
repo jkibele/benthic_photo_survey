@@ -24,7 +24,7 @@ class MyFrame(wx.Frame):
         wx.Frame.__init__(self, *args, **kwds)
         self.myPanel = bpsPanel(self)
         self.exif_data_staticbox = wx.StaticBox(self.myPanel, -1, "Exif Data")
-        self.select_substrate_staticbox = wx.StaticBox(self.myPanel, -1, "Select Substrate")
+        self.select_substrate_staticbox = wx.StaticBox(self.myPanel, -1, "Habitat and Substrate")
         self.photo_info_staticbox = wx.StaticBox(self.myPanel, -1, "Photo Info")
         
         Publisher().subscribe(self.updateImages, ("update images"))
@@ -67,14 +67,17 @@ class MyFrame(wx.Frame):
         self.latitude = wx.StaticText(self.myPanel, -1, " ")
         self.lon_label = wx.StaticText(self.myPanel, -1, "Longitude:")
         self.longitude = wx.StaticText(self.myPanel, -1, " ")
+        self.direction_label = wx.StaticText(self.myPanel, -1, "Direction:")
+        self.direction = wx.StaticText(self.myPanel, -1, " ")
         self.depth_label = wx.StaticText(self.myPanel, -1, "Depth:")
         self.depth = wx.StaticText(self.myPanel, -1, " ")
         self.temp_label = wx.StaticText(self.myPanel, -1, "Temperature:")
         self.temperature = wx.StaticText(self.myPanel, -1, " ")
         self.subst_label = wx.StaticText(self.myPanel, -1, "Substrate:")
         self.substrate = wx.StaticText(self.myPanel, -1, " ")
-        self.substSelector = wx.ListBox(self.myPanel, -1, choices=["Sand", "Turf", "Barrens", "Mixed Weed", "Kelp Forest", "Other"])
-        self.substSelectLabel = wx.StaticText(self.myPanel, -1, "Double click to set substrate value.")
+        self.habitatSelector = wx.ListBox(self.myPanel, -1, choices=CONF_HABITATS)
+        self.substSelector = wx.ListBox(self.myPanel, -1, choices=CONF_SUBSTRATES)
+        self.substSelectLabel = wx.StaticText(self.myPanel, -1, "Double click to set value.")
 
         self.__set_properties()
         self.__do_layout()
@@ -105,7 +108,7 @@ class MyFrame(wx.Frame):
         rightColumn = wx.FlexGridSizer(3, 1, 0, 0)
         select_substrate = wx.StaticBoxSizer(self.select_substrate_staticbox, wx.VERTICAL)
         exif_data = wx.StaticBoxSizer(self.exif_data_staticbox, wx.HORIZONTAL)
-        exif_grid = wx.FlexGridSizer(7, 2, 0, 0)
+        exif_grid = wx.FlexGridSizer(8, 2, 0, 0)
         photo_info = wx.StaticBoxSizer(self.photo_info_staticbox, wx.VERTICAL)
         self.left_column = wx.BoxSizer(wx.VERTICAL)
         button_holder = wx.BoxSizer(wx.HORIZONTAL)
@@ -134,6 +137,8 @@ class MyFrame(wx.Frame):
         exif_grid.Add(self.latitude, 0, 0, 0)
         exif_grid.Add(self.lon_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.longitude, 0, 0, 0)
+        exif_grid.Add(self.direction_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.direction, 0, 0, 0)
         exif_grid.Add(self.depth_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.depth, 0, 0, 0)
         exif_grid.Add(self.temp_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
@@ -142,7 +147,10 @@ class MyFrame(wx.Frame):
         exif_grid.Add(self.substrate, 0, 0, 0)
         exif_data.Add(exif_grid, 1, wx.ALL|wx.EXPAND, 5)
         rightColumn.Add(exif_data, 1, wx.ALL|wx.EXPAND, 5)
-        select_substrate.Add(self.substSelector, 0, wx.ALL|wx.EXPAND, 5)
+        selector_holder = wx.BoxSizer(wx.HORIZONTAL)
+        selector_holder.Add(self.habitatSelector, 0, wx.ALL|wx.EXPAND, 5)
+        selector_holder.Add(self.substSelector, 0, wx.ALL|wx.EXPAND, 5)
+        select_substrate.Add(selector_holder, 0, wx.ALL|wx.EXPAND, 5)
         select_substrate.Add(self.substSelectLabel, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
         rightColumn.Add(select_substrate, 1, wx.ALL|wx.EXPAND, 5)
         mainGrid.Add(rightColumn, 1, wx.TOP|wx.EXPAND, 20)
@@ -218,8 +226,9 @@ class MyFrame(wx.Frame):
             latstr, lonstr = 'None','None'
         self.latitude.SetLabel( latstr )
         self.longitude.SetLabel( lonstr )
+        self.direction.SetLabel( str(self.imf.exif_direction) )
         if self.imf.exif_depth:
-            dstr = str(self.imf.exif_depth) + " m"
+            dstr = "%.2f m" % self.imf.exif_depth
         else:
             dstr = 'None'
         self.depth.SetLabel( dstr )

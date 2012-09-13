@@ -41,6 +41,26 @@ class image_file(object):
             return self.md[tag_string].value
         except KeyError:
             return None
+            
+    def __get_exiv_tag_human_value(self,tag_string):
+        """
+        Try to get a pyexiv2 tag human value. If the tag doesn't exist, return None.
+        """
+        try:
+            return self.md[tag_string].human_value
+        except KeyError:
+            return None
+            
+    def exif_dict(self, exclude_panasonic_keys=True):
+        """
+        Return a dict with all exif keys and values.
+        """
+        exif_dict = {}
+        for key in self.md.exif_keys:
+            if not ( exclude_panasonic_keys and 'Panasonic' in key.split('.') ):
+                if self.__get_exiv_tag_human_value(key):
+                    exif_dict.update( { key : self.__get_exiv_tag_human_value(key)[:100] } )
+        return exif_dict
         
     @property
     def datetime(self):
@@ -56,6 +76,11 @@ class image_file(object):
             return utc_from_local(self.datetime)
         else:
             return None
+    
+    @property
+    def exif_direction(self):
+        if self.__get_exiv_tag_value('Exif.GPSInfo.GPSImgDirection'):
+            return float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSImgDirection') )
     
     @property
     def exif_lat_tag(self):
@@ -176,11 +201,12 @@ class image_file(object):
         if not temp:
             temp = 0.0 # temperature isn't important at this point so if it's not there we'll just call it zero
         pre = 'Exif.GPSInfo.GPS'
-        dt_str = "{'depth':%g,'temp':%g}" % (depth,temp)
+        #dt_str = "{'depth':%g,'temp':%g}" % (depth,temp)
         dfrac = Fraction.from_float(depth).limit_denominator()
         add_dict = {pre+'Altitude': Rational(dfrac.numerator,dfrac.denominator),
                     pre+'AltitudeRef': bytes(1),
-                    'Exif.Photo.UserComment': dt_str }
+                    }
+                    #'Exif.Photo.UserComment': dt_str }
         for k,v in add_dict.iteritems():
             if verbose:
                 print "%s = %s" % (str(k),str(v))

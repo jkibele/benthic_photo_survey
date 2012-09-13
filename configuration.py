@@ -7,3 +7,5 @@ test_image = 'test_data/images/P6251541.jpg'
 
 #--------------bps_export------------------------------
 CONF_EPSG = 4326
+CONF_HABITATS = ["Sand", "Turf", "Barrens", "Mixed Weed", "Kelp Forest", "Other"]
+CONF_SUBSTRATES = ["Bedrock","Boulder","Cobble","Pebble","Shell","Sand","Mud"]

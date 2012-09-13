@@ -15,6 +15,7 @@ class bps_shp_exporter(object):
                         'date_utc'  : ogr.OFTString,
                         'time_loc'  : ogr.OFTString,
                         'time_utc'  : ogr.OFTString,
+                        'direction' : ogr.OFTReal,
                         'depth'     : ogr.OFTReal,
                         'temp'      : ogr.OFTReal,
                         'subst'     : ogr.OFTString, }
@@ -56,6 +57,8 @@ class bps_shp_exporter(object):
             feat.SetField( 'date_utc', imf.utc_datetime.strftime('%d/%m/%Y') )
             feat.SetField( 'time_loc', imf.datetime.strftime('%H:%M:%S') )
             feat.SetField( 'time_utc', imf.utc_datetime.strftime('%H:%M:%S') )
+            if imf.exif_direction:
+                feat.SetField( 'direction', imf.exif_direction )
             if imf.exif_depth:
                 feat.SetField( 'depth', imf.exif_depth )
             if imf.xmp_temperature:
