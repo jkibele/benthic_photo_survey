@@ -53,9 +53,12 @@ class image_file(object):
             
     def exif_dict(self, exclude_panasonic_keys=True):
         """
-        Return a dict with all exif keys and values.
+        Return a dict with all exif and xmp keys and values.
         """
         exif_dict = {}
+        for key in self.md.xmp_keys:
+            if self.__get_exiv_tag_value(key):
+                exif_dict.update( { key : self.__get_exiv_tag_value(key) } )
         for key in self.md.exif_keys:
             if not ( exclude_panasonic_keys and 'Panasonic' in key.split('.') ):
                 if self.__get_exiv_tag_human_value(key):
@@ -104,10 +107,11 @@ class image_file(object):
         
     @property
     def exif_depth(self):
-        if self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude'):
-            return float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude') )
-        else:
-            return None
+        try:
+            ret_val = float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude') )
+        except TypeError:
+            ret_val = None
+        return ret_val
             
     @property
     def __exif_depth_temp_dict(self):
@@ -149,6 +153,10 @@ class image_file(object):
     @property
     def xmp_substrate(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.substrate')
+        
+    @property
+    def xmp_habitat(self):
+        return self.__get_exiv_tag_value('Xmp.BenthicPhoto.habitat')
             
     @property
     def position(self):
@@ -229,6 +237,11 @@ class image_file(object):
     def set_xmp_substrate(self, subst_str):
         pre = 'Xmp.BenthicPhoto.'
         self.md[pre+'substrate'] = subst_str
+        self.md.write()
+        
+    def set_xmp_habitat(self, subst_str):
+        pre = 'Xmp.BenthicPhoto.'
+        self.md[pre+'habitat'] = subst_str
         self.md.write()
         
     @property

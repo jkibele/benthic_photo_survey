@@ -5,6 +5,7 @@ from wx.lib.pubsub import Publisher
 from depth_temp_log_io import *
 from photo_tagging import *
 from gps_log_io import *
+from bps_export import *
 
 class bpsPanel(wx.Panel):
     def __init__(self, parent):
@@ -32,6 +33,7 @@ class MyFrame(wx.Frame):
         
         # Menu Bar
         self.bps_menubar = wx.MenuBar()
+        # ------File Menu
         self.file_menu = wx.Menu()
         self.load_photos = wx.MenuItem(self.file_menu, wx.NewId(), "Load &Photos", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.load_photos)
@@ -43,8 +45,15 @@ class MyFrame(wx.Frame):
         self.quit_menu = wx.MenuItem(self.file_menu, wx.ID_EXIT, "&Quit", "", wx.ITEM_NORMAL)
         self.file_menu.AppendItem(self.quit_menu)
         self.bps_menubar.Append(self.file_menu, "&File")
+        # ------Export Menu
+        self.export_menu = wx.Menu()
+        self.shp_export = wx.MenuItem(self.export_menu, wx.NewId(), "Export &Shapefile", "", wx.ITEM_NORMAL)
+        self.export_menu.AppendItem(self.shp_export)
+        self.bps_menubar.Append(self.export_menu, "&Export")
+        
         self.SetMenuBar(self.bps_menubar)
         # Menu Bar end
+        
         self.btn_geotag = wx.Button(self.myPanel, -1, "Geotag")
         self.btn_depth_tag = wx.Button(self.myPanel, -1, "Depth Temp Tag")
         self.btn_tag_all = wx.Button(self.myPanel, -1, "Tag \'em All")
@@ -73,6 +82,8 @@ class MyFrame(wx.Frame):
         self.depth = wx.StaticText(self.myPanel, -1, " ")
         self.temp_label = wx.StaticText(self.myPanel, -1, "Temperature:")
         self.temperature = wx.StaticText(self.myPanel, -1, " ")
+        self.habitat_label = wx.StaticText(self.myPanel, -1, "Habitat:")
+        self.habitat = wx.StaticText(self.myPanel, -1, " ")
         self.subst_label = wx.StaticText(self.myPanel, -1, "Substrate:")
         self.substrate = wx.StaticText(self.myPanel, -1, " ")
         self.habitatSelector = wx.ListBox(self.myPanel, -1, choices=CONF_HABITATS)
@@ -86,18 +97,24 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.loadGPS, self.load_gps)
         self.Bind(wx.EVT_MENU, self.loadDepth, self.load_depth)
         self.Bind(wx.EVT_MENU, self.appQuit, self.quit_menu)
+        self.Bind(wx.EVT_MENU, self.shpExport, self.shp_export)
         self.Bind(wx.EVT_BUTTON, self.geotag, self.btn_geotag)
         self.Bind(wx.EVT_BUTTON, self.depth_tag, self.btn_depth_tag)
         self.Bind(wx.EVT_BUTTON, self.tag_all, self.btn_tag_all)
         self.Bind(wx.EVT_BUTTON, self.onPrevious, self.btn_prev)
         self.Bind(wx.EVT_BUTTON, self.onNext, self.btn_next)
+        self.Bind(wx.EVT_CHAR_HOOK, self.onKeyDown)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.setHabitat, self.habitatSelector)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.setSubstrate, self.substSelector)
         # end wxGlade
 
     def __set_properties(self):
         # begin wxGlade: MyFrame.__set_properties
         self.SetTitle("Benthic Photo Survey")
-        self.substSelector.SetMinSize((120, 150))
+        
+        self.habitatSelector.SetMinSize((120, 160))
+        self.habitatSelector.SetSelection(0)
+        self.substSelector.SetMinSize((120, 160))
         self.substSelector.SetSelection(0)
         # end wxGlade
 
@@ -108,7 +125,7 @@ class MyFrame(wx.Frame):
         rightColumn = wx.FlexGridSizer(3, 1, 0, 0)
         select_substrate = wx.StaticBoxSizer(self.select_substrate_staticbox, wx.VERTICAL)
         exif_data = wx.StaticBoxSizer(self.exif_data_staticbox, wx.HORIZONTAL)
-        exif_grid = wx.FlexGridSizer(8, 2, 0, 0)
+        exif_grid = wx.FlexGridSizer(9, 2, 0, 0)
         photo_info = wx.StaticBoxSizer(self.photo_info_staticbox, wx.VERTICAL)
         self.left_column = wx.BoxSizer(wx.VERTICAL)
         button_holder = wx.BoxSizer(wx.HORIZONTAL)
@@ -143,6 +160,8 @@ class MyFrame(wx.Frame):
         exif_grid.Add(self.depth, 0, 0, 0)
         exif_grid.Add(self.temp_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.temperature, 0, 0, 0)
+        exif_grid.Add(self.habitat_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
+        exif_grid.Add(self.habitat, 0, 0, 0)
         exif_grid.Add(self.subst_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
         exif_grid.Add(self.substrate, 0, 0, 0)
         exif_data.Add(exif_grid, 1, wx.ALL|wx.EXPAND, 5)
@@ -160,6 +179,7 @@ class MyFrame(wx.Frame):
         self.SetSizer(self.ubberSizer)
         self.ubberSizer.Fit(self)
         self.Layout()
+        #print self.substSelector.Strings
         # end wxGlade
 
     #----------------------------------------------------------------------
@@ -167,15 +187,17 @@ class MyFrame(wx.Frame):
         """
         Opens a DirDialog to allow the user to open a folder with pictures
         """
-        dlg = wx.DirDialog(self, "Choose a directory",
+        dlg = wx.DirDialog(self, "Choose a directory", defaultPath=os.path.join(os.getcwd(),'data/images'),
                            style=wx.DD_DEFAULT_STYLE)
         
         if dlg.ShowModal() == wx.ID_OK:
             self.folderPath = dlg.GetPath()
             #print self.folderPath
             self.myPanel.picPaths = glob.glob(self.folderPath + os.path.sep + "*.JPG")
-            self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg") 
-            #print picPaths
+            self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg")
+            #print self.myPanel.picPaths
+            self.myPanel.picPaths.sort()
+            #print self.myPanel.picPaths
             Publisher().sendMessage("update images", self.myPanel.picPaths)
             dlg.Destroy()
         return True
@@ -237,9 +259,28 @@ class MyFrame(wx.Frame):
         else:
             tstr = 'None'
         self.temperature.SetLabel( tstr )
-        self.substrate.SetLabel( str(self.imf.xmp_substrate) )
+        hab = self.imf.xmp_habitat
+        self.habitat.SetLabel( str(hab) )
+        if hab: # Set the selection in the list box
+            index = self.habitatSelector.Strings.index( unicode( hab ) )
+            self.habitatSelector.SetSelection( index )
+            
+        subs = self.imf.xmp_substrate
+        self.substrate.SetLabel( str(subs) )
+        if subs:
+            index = self.substSelector.Strings.index( str( subs ) )
+            self.substSelector.SetSelection( index )
         
         self.substrate.Refresh()
+        
+    #---------------------------------------------------------------------
+    def onKeyDown(self, event):
+        keycode = event.GetKeyCode()
+        if keycode == wx.WXK_RIGHT:
+            self.nextPicture()
+        elif keycode == wx.WXK_LEFT:
+            self.previousPicture()
+        event.Skip()
         
     #----------------------------------------------------------------------
     def nextPicture(self):
@@ -277,6 +318,7 @@ class MyFrame(wx.Frame):
         Updates the picPaths list to contain the current folder's images
         """
         self.myPanel.picPaths = msg.data
+        self.myPanel.currentPicture = 0
         self.myPanel.totalPictures = len(self.myPanel.picPaths)
         try:
             self.loadImage(self.myPanel.picPaths[0])
@@ -304,7 +346,7 @@ class MyFrame(wx.Frame):
 
     #----------------------------------------------------------------------
     def loadGPS(self, event): # wxGlade: MyFrame.<event_handler>
-        dlg = wx.FileDialog(self, "Choose a GPS file",
+        dlg = wx.FileDialog(self, "Choose a GPS file", defaultDir=os.path.join(os.getcwd(),'data/gps'),
                            style=wx.FD_DEFAULT_STYLE)
         result_str =''
         if dlg.ShowModal() == wx.ID_OK:
@@ -325,7 +367,7 @@ class MyFrame(wx.Frame):
 
     #----------------------------------------------------------------------
     def loadDepth(self, event): # wxGlade: MyFrame.<event_handler>
-        dlg = wx.FileDialog(self, "Choose a depth logger file",
+        dlg = wx.FileDialog(self, "Choose a depth logger file",defaultDir=os.path.join(os.getcwd(),'data/sensus'),
                            style=wx.FD_DEFAULT_STYLE)
         result_str =''
         if dlg.ShowModal() == wx.ID_OK:
@@ -344,6 +386,20 @@ class MyFrame(wx.Frame):
     def appQuit(self, event): # wxGlade: MyFrame.<event_handler>
         self.Close()
         event.Skip()
+        
+    #----------------------------------------------------------------------
+    def shpExport(self, event):
+        dlg = wx.FileDialog(self, "Create a shapefile", wildcard='Shapefiles (*.shp)|*.shp', 
+                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT, defaultDir=os.path.join(os.getcwd(),'data/shapefiles') )
+        if dlg.ShowModal() == wx.ID_OK:
+            fp = dlg.GetPath()
+            bpse = bps_shp_exporter(fp)
+            returned_path = bpse.write_shapefile( self.folderPath )
+            result_str = "Shapefile written to: %s" % returned_path
+            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
+            dlg.Destroy()
+        self.Refresh()
+        return True
 
     #----------------------------------------------------------------------
     def geotag(self, event): # wxGlade: MyFrame.<event_handler>
@@ -388,7 +444,14 @@ class MyFrame(wx.Frame):
             wx.MessageBox('I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
             return False
         
-
+    #----------------------------------------------------------------------
+    def setHabitat(self, event):
+        index = event.GetSelection()
+        chosen_habitat = self.habitatSelector.GetString(index)
+        self.imf.set_xmp_habitat(chosen_habitat)
+        self.loadExif()
+        event.Skip()
+        
     #----------------------------------------------------------------------
     def setSubstrate(self, event): # wxGlade: MyFrame.<event_handler>
         index = event.GetSelection()

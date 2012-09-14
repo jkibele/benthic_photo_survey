@@ -2,25 +2,37 @@ from photo_tagging import *
 import osr
 
 class bps_shp_exporter(object):
-    def __init__(self, file_path, overwrite=True,lyr_name='bps_points',epsg=CONF_EPSG):
+    def __init__(self, file_path, overwrite=True,lyr_name='bps_points',epsg_in=CONF_INPUT_EPSG,epsg_out=CONF_OUTPUT_EPSG):
         self.overwrite = overwrite
         self.file_path = self.__validate_fp(file_path)
         #-----Set up the shapefile-------------------------
-        self.spatialRef = osr.SpatialReference()
-        self.spatialRef.ImportFromEPSG(epsg)
+        self.spatialRefIn = osr.SpatialReference()
+        self.spatialRefIn.ImportFromEPSG(epsg_in)
+        # if epsg_out is None, we want to output in the epsg_in spatial reference
+        if epsg_out:
+            self.spatialRefOut = osr.SpatialReference()
+            self.spatialRefOut.ImportFromEPSG(epsg_out)
+            self.sr_trans = osr.CoordinateTransformation(self.spatialRefIn,self.spatialRefOut)
+        else:
+            self.spatialRefOut = self.spatialRefIn
+            self.sr_trans = None
         self.driver = ogr.GetDriverByName('ESRI Shapefile')
         self.ds = self.driver.CreateDataSource(self.file_path)
-        self.lyr = self.ds.CreateLayer(lyr_name, self.spatialRef, ogr.wkbPoint)
+        self.lyr = self.ds.CreateLayer(lyr_name, self.spatialRefOut, ogr.wkbPoint)
         self.f_dict = { 'date_loc'  : ogr.OFTString,
                         'date_utc'  : ogr.OFTString,
                         'time_loc'  : ogr.OFTString,
                         'time_utc'  : ogr.OFTString,
+                        'img_path'  : ogr.OFTString,
                         'direction' : ogr.OFTReal,
                         'depth'     : ogr.OFTReal,
                         'temp'      : ogr.OFTReal,
+                        'habitat'   : ogr.OFTString,
                         'subst'     : ogr.OFTString, }
         for k,v in self.f_dict.iteritems():
             new_field = ogr.FieldDefn(k, v)
+            if k == 'img_path':
+                new_field.SetWidth(100)
             self.lyr.CreateField(new_field)
         
         self.lyrDefn = self.lyr.GetLayerDefn()
@@ -51,18 +63,25 @@ class bps_shp_exporter(object):
         """
         if imf.position:
             feat = ogr.Feature(self.lyrDefn)
-            feat.SetGeometry(imf.position.ogr_point)
+            geom = imf.position.ogr_point
+            geom.AssignSpatialReference(self.spatialRefIn)
+            if self.sr_trans:
+                geom.Transform(self.sr_trans)
+            feat.SetGeometry(geom)
             feat.SetFID(self.feat_index)
             feat.SetField( 'date_loc', imf.datetime.strftime('%d/%m/%Y') )
             feat.SetField( 'date_utc', imf.utc_datetime.strftime('%d/%m/%Y') )
             feat.SetField( 'time_loc', imf.datetime.strftime('%H:%M:%S') )
             feat.SetField( 'time_utc', imf.utc_datetime.strftime('%H:%M:%S') )
+            feat.SetField( 'img_path', str(imf.file_path) )
             if imf.exif_direction:
                 feat.SetField( 'direction', imf.exif_direction )
             if imf.exif_depth:
                 feat.SetField( 'depth', imf.exif_depth )
             if imf.xmp_temperature:
                 feat.SetField( 'temp', imf.xmp_temperature )
+            if imf.xmp_habitat:
+                feat.SetField( 'habitat', imf.xmp_habitat )
             if imf.xmp_substrate:
                 feat.SetField( 'subst', imf.xmp_substrate )
             self.lyr.CreateFeature(feat)
@@ -71,7 +90,7 @@ class bps_shp_exporter(object):
             
     def write_prj(self):
         # create the *.prj file
-        outSpatialRef = self.spatialRef
+        outSpatialRef = self.spatialRefOut
         outSpatialRef.MorphToESRI()
         prj_fname = self.file_path[:-3] + 'prj'
         f = open(prj_fname, 'w')
