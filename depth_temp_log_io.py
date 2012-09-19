@@ -9,7 +9,7 @@ def depth_from_pressure(mbars):
     presure is 1atm. """
     return (mbars - 1013.25) / 101.41830484045322 
 
-def read_depth_temp_log(filepath,path_to_db=db_path):
+def read_depth_temp_log(filepath,path_to_db=db_path,verbose=False):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 
     and easy searching. Records must have a unique combination of device identifier,
     file number, and datetime stamp. If a conflict is found, the old record will be
@@ -20,6 +20,8 @@ def read_depth_temp_log(filepath,path_to_db=db_path):
     # Make sure the table is there
     cur.execute("create table if not exists DepthTempLog ( device text, file integer, utctime datetime, kelvin real, celsius real, mbar integer, depthm real, UNIQUE (device, file, utctime) ON CONFLICT REPLACE)")
     # Read the csv file
+    if verbose:
+        print "About to read %s" % os.path.basename(filepath)
     reader = csv.reader(open(filepath,'rb'),delimiter=',')
     rec_count = 0
     for row in reader:
@@ -42,6 +44,8 @@ def read_depth_temp_log(filepath,path_to_db=db_path):
         depthm = depth_from_pressure(mbar)
         t = (device,file_id,utc_time,kelvin,celsius,mbar,depthm)
         
+        if verbose:
+            print "--- Just read row %i, putting it in db now." % rec_count
         # stick it in the table
         cur.execute("insert into DepthTempLog values (?,?,?,?,?,?,?)", t)
         rec_count += 1
