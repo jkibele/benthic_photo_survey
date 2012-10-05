@@ -418,6 +418,14 @@ def read_gps_crap_from_dir(dir):
         if fname.lower().endswith('.jpg'):
             read_gps_crap(os.path.join(dir,fname))
             
+def shift_time_for_photos(direc,time_delta):
+    for fname in os.listdir(direc):
+        if fname.lower().endswith('.jpg'):
+            imf = image_file( os.path.join( direc,fname ) )
+            orig_time = imf.datetime
+            imf.__set_datetime__( orig_time + time_delta )
+            print "Changed %s from %s to %s." % ( fname, orig_time.strftime('%H:%M'), imf.datetime.strftime('%H:%M') )
+            
 def photo_times_for_dir(dir):
     for fname in os.listdir(dir):
         if fname.lower().endswith('.jpg'):
