@@ -71,7 +71,7 @@ class image_file(object):
         Try to get a datetime object for the image's creation from the 
         Exif.Photo.DateTimeOriginal value via pyexiv2.
         """
-        return self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal')
+        return make_aware_of_local_tz( self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal') )
             
     @property
     def utc_datetime(self):

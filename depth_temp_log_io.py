@@ -71,6 +71,8 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     just return False."""
     # Connect to the db
     conn,cur = connection_and_cursor(db_path)
+    # For some reason TZ awareness screws up DST
+    dt_obj = dt_obj.replace(tzinfo=None)
     # make a tuple with the time handed in so we can pass it to the query
     t = ( dt_obj, ) 
     rows = cur.execute("select utctime, depthm from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 2", t).fetchall()
