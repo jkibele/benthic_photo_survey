@@ -8,5 +8,6 @@ pyexiv2 appears to be a complete pain in the butt to install on mac so I may try
 
 GDAL: Caused me a lot of trouble on Ubuntu because I had stupidly built from source at some point without expat support necessary for reading GPX files with OGR. I had to manually delete the executable files and the libraries. Once I'd gotten that sorted, I used the Ubuntu software center with this repository: https://launchpad.net/~ubuntugis/+archive/ubuntugis-unstable  It has almost all of the GIS software that I had struggled to install.
 
+
 Notes on precision:
 1 minute of Latitude is about 1.8 km and 0.001 minutes is about 1.8 meters. I'm now storing at the maximum precision of the Exif format (or at least at the max of what pyexiv2 can write) which is 1 e -7 of a second. That should be plenty. Just for reference, 1 second of latitude is about 30 meters.

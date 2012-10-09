@@ -12,6 +12,7 @@ class bpsPanel(wx.Panel):
         wx.Panel.__init__(self, parent)
         width, height = wx.DisplaySize()
         self.picPaths = []
+        self.image_dir = None
         self.currentPicture = 0
         self.totalPictures = 0
         self.photoMaxSize = height - 200
@@ -49,6 +50,8 @@ class MyFrame(wx.Frame):
         self.export_menu = wx.Menu()
         self.shp_export = wx.MenuItem(self.export_menu, wx.NewId(), "Export &Shapefile", "", wx.ITEM_NORMAL)
         self.export_menu.AppendItem(self.shp_export)
+        self.depth_graph = wx.MenuItem(self.export_menu, wx.NewId(), "Depth Profile &Graph", "", wx.ITEM_NORMAL)
+        self.export_menu.AppendItem(self.depth_graph)
         self.bps_menubar.Append(self.export_menu, "&Export")
         
         self.SetMenuBar(self.bps_menubar)
@@ -98,6 +101,7 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.loadDepth, self.load_depth)
         self.Bind(wx.EVT_MENU, self.appQuit, self.quit_menu)
         self.Bind(wx.EVT_MENU, self.shpExport, self.shp_export)
+        self.Bind(wx.EVT_MENU, self.depthGraph, self.depth_graph)
         self.Bind(wx.EVT_BUTTON, self.geotag, self.btn_geotag)
         self.Bind(wx.EVT_BUTTON, self.depth_tag, self.btn_depth_tag)
         self.Bind(wx.EVT_BUTTON, self.tag_all, self.btn_tag_all)
@@ -192,6 +196,7 @@ class MyFrame(wx.Frame):
         
         if dlg.ShowModal() == wx.ID_OK:
             self.folderPath = dlg.GetPath()
+            self.myPanel.image_dir = self.folderPath
             #print self.folderPath
             self.myPanel.picPaths = glob.glob(self.folderPath + os.path.sep + "*.JPG")
             self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg")
@@ -386,6 +391,12 @@ class MyFrame(wx.Frame):
     def appQuit(self, event): # wxGlade: MyFrame.<event_handler>
         self.Close()
         event.Skip()
+        
+    #----------------------------------------------------------------------
+    def depthGraph(self, event):
+        imd = image_directory(self.myPanel.image_dir)
+        imd.depth_plot()
+        return True
         
     #----------------------------------------------------------------------
     def shpExport(self, event):

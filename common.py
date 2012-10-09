@@ -1,6 +1,7 @@
 from datetime import timedelta as td
 from datetime import datetime as dt
 from configuration import *
+import matplotlib.pyplot as plt
 import numpy as np
 import sqlite3, argparse, pytz, os
 
@@ -23,3 +24,9 @@ def utc_from_local(localtime):
     if not localtime.tzinfo: # make sure it really is aware
         localtime = make_aware_of_local_tz(localtime)
     return localtime.astimezone(pytz.UTC)
+    
+def local_from_utc(utc_datetime):
+    """Given a utc datetime, return the local equivalent."""
+    if not utc_datetime.tzinfo: # make sure it is aware
+        utc_datetime = pytz.utc.localize(utc_datetime)
+    return utc_datetime.astimezone( pytz.timezone(LOCAL_TIME_ZONE) ) # LOCAL_TIME_ZONE from configuration.py

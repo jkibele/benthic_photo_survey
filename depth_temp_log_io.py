@@ -1,6 +1,70 @@
 from scipy import interpolate
+from dateutil import parser as dt_parser
 from common import *
 import csv
+
+class dive_record_set(object):
+    """
+    Provide an interface to retrieve a set of depth / temp records and do
+    stuff with them. If the given start and end datetime objects are naive,
+    we'll assume they're in the local time zone as defined in configuration.py
+    """
+    def __init__(self, start_dt, end_dt, path_to_db=db_path):
+        if start_dt.tzinfo == None:
+            start_dt = make_aware_of_local_tz(start_dt)
+        if end_dt.tzinfo == None:
+            end_dt = make_aware_of_local_tz(end_dt)        
+        self.start = start_dt
+        self.end = end_dt
+        self.db_path = path_to_db
+        
+    @property
+    def db_rows(self):
+        """
+        utctime field in db does not store time zone but should always be in
+        UTC so we'll make the start and end naive so we don't screw up the 
+        comparison.
+        """
+        stdt = self.start.astimezone(pytz.utc).replace(tzinfo=None)
+        endt = self.end.astimezone(pytz.utc).replace(tzinfo=None)
+        t = ( self.start.astimezone(pytz.utc), self.end.astimezone(pytz.utc), )
+        conn,cur = connection_and_cursor(self.db_path)
+        rows = cur.execute( "SELECT utctime, celsius, depthm FROM DepthTempLog WHERE utctime >= ? AND utctime <= ?", t ).fetchall()
+        cur.close()
+        return rows
+        
+    @property
+    def depth_time_list(self):
+        """
+        datetimes come out of the db in UTC. Convert to local tz before returning.
+        """
+        return [ ( float(r[2]), local_from_utc( dt_parser.parse(r[0]) ) ) for r in self.db_rows]
+        
+    @property
+    def depth_time_array(self):
+        return np.array(self.depth_time_list)
+        
+    def plot_depth_time(self):
+        y = -1 * self.depth_time_array[:,0] # depths * -1 to make negative values
+        x = self.depth_time_array[:,1] # datetimes
+        plt.plot_date(x,y,linestyle='-')
+        plt.show()
+        
+    @property
+    def temperature_time_list(self):
+        """
+        datetimes come out of the db in UTC. Convert to local tz before returning.
+        """
+        return [ ( float(r[1]), local_from_utc( dt_parser.parse(r[0]) ) ) for r in self.db_rows]
+        
+    @property
+    def temperature_time_array(self):
+        return np.array(self.temperature_time_list)
+        
+    @property
+    def time_delta(self):
+        return self.end - self.start
+        
 
 def depth_from_pressure(mbars):
     """Return a depth (in meters) from a pressure in millibars. Calculated using

@@ -8,6 +8,72 @@ from common import *
 # without it. Perhaps I should figure out if I really need it or not.
 exiv.xmp.register_namespace('http://svarchiteuthis.com/benthicphoto/', 'BenthicPhoto')
 
+class image_directory(object):
+    def __init__(self, dir_path):
+        if os.path.isdir(dir_path):
+            jpgs = [ os.path.join(dir_path,f) for f in os.listdir(dir_path) if f.lower().endswith('.jpg') ]
+        else:
+            raise ValueError("%s is not a directory." % dir_path)
+        self.images = [ image_file(img) for img in jpgs ]
+        self.images.sort(key=lambda i: i.datetime) # sort the images by datetime of the image
+        
+    @property
+    def local_datetimes(self):
+        return [ x.datetime for x in self.images ]
+    
+    @property
+    def utc_datetimes(self):
+        return [ x.utc_datetime for x in self.images ]
+        
+    @property
+    def exif_depths(self):
+        d_list = []
+        for img in self.images:
+            if img.exif_depth:
+                d_list.append(img.exif_depth * -1)
+            else:
+                d_list.append(0.0)
+        return np.array(d_list)
+        
+    def depth_plot(self):
+        """
+        Create a plot of the depth profile with photo times and depths marked.
+        """
+        drs = dive_record_set( min(self.local_datetimes), max(self.local_datetimes) )
+        y = -1 * drs.depth_time_array[:,0] # depths * -1 to make negative values
+        x = drs.depth_time_array[:,1] # datetimes
+            
+        fig = plt.figure() # imported from matplotlib
+        ax = fig.add_subplot(111)
+        ax.plot_date(x,y,marker='.',linestyle='-')
+        ax.plot(self.local_datetimes,self.exif_depths,'r*',markersize=10,picker=5)
+        
+        def onpick(event):
+            global ann
+            try:
+                ann.remove()
+            except NameError:
+                pass
+            ind = event.ind[0]
+            fname = os.path.basename( self.images[ind].file_path )
+            ann = ax.annotate(fname, xy=(self.local_datetimes[ind], self.exif_depths[ind]), xytext=(-20,-20), 
+                                textcoords='offset points', ha='center', va='top',
+                                bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3),
+                                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.5', 
+                                                color='red'))
+            plt.draw()
+            print "Photo: %s" % fname
+            
+        fig.canvas.mpl_connect('pick_event', onpick)
+        plt.show()
+        
+    def depth_temp_tag(self,verbose=False):
+        """
+        Depth tag all the photos in the directory.
+        """
+        for img in self.images:
+            img.depth_temp_tag(verbose)
+
 class image_file(object):
     """
     An object to make accessing image files and metadata easier.
@@ -110,7 +176,10 @@ class image_file(object):
         try:
             ret_val = float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude') )
         except TypeError:
-            ret_val = None
+            try:
+                ret_val = self.__get_exiv_tag_value('Exif.GPSInfo.GPSAltitude').to_float()
+            except AttributeError:
+                ret_val = None
         return ret_val
             
     @property
@@ -204,6 +273,10 @@ class image_file(object):
         
     def __set_exif_depth_temp(self,depth,temp,verbose=False):
         from pyexiv2.utils import Rational
+        if depth < 0: # This can happen because there's a bit of slop in the conversion from pressure to depth
+            if verbose:
+                print "Given depth was a negative value."
+            depth = 0
         if not depth:
             return None
         if not temp:
@@ -266,13 +339,13 @@ class image_file(object):
         else:
             return None
         
-    def depth_temp_tag(self):
+    def depth_temp_tag(self,verbose=False):
         """
         Get the depth and temp readings out of the db that match the photo's origination
         time (considering that the photo's time stamp is in the local timezone and the
         logs are in UTC) and write those values to the image's exif data.
         """
-        self.__set_exif_depth_temp(self.logger_depth,self.logger_temp)
+        self.__set_exif_depth_temp(self.logger_depth,self.logger_temp,verbose=verbose)
         self.__set_xmp_depth_temp(self.logger_depth,self.logger_temp)
         if self.exif_depth_tag:
             return self.exif_depth_tag.value
