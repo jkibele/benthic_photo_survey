@@ -45,8 +45,11 @@ class image_directory(object):
             
         fig = plt.figure() # imported from matplotlib
         ax = fig.add_subplot(111)
-        ax.plot_date(x,y,marker='.',linestyle='-')
+        ax.plot_date(x,y,marker='.',linestyle='-',tz=pytz.timezone(LOCAL_TIME_ZONE) ) # LOCAL_TIME_ZONE from configuration.py)
         ax.plot(self.local_datetimes,self.exif_depths,'r*',markersize=10,picker=5)
+        plt.xlabel('Date and Time')
+        plt.ylabel('Depth (meters)')
+        fig.suptitle('Photos with Depth and Time')
         
         def onpick(event):
             global ann
@@ -56,13 +59,14 @@ class image_directory(object):
                 pass
             ind = event.ind[0]
             fname = os.path.basename( self.images[ind].file_path )
-            ann = ax.annotate(fname, xy=(self.local_datetimes[ind], self.exif_depths[ind]), xytext=(-20,-20), 
+            ann_text = "Photo: %s\ndepth: %g\ndate: %s" % ( fname, self.exif_depths[ind], self.local_datetimes[ind].strftime('%Y/%m/%d %H:%M:%S') )
+            ann = ax.annotate(ann_text, xy=(self.local_datetimes[ind], self.exif_depths[ind]), xytext=(-20,-20), 
                                 textcoords='offset points', ha='center', va='top',
                                 bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3),
                                 arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.5', 
                                                 color='red'))
             plt.draw()
-            print "Photo: %s" % fname
+            print "Photo: %s, index: %i, depth: %g, date: %s" % ( fname, ind, self.exif_depths[ind], self.local_datetimes[ind].strftime('%Y/%m/%d %H:%M:%S') )
             
         fig.canvas.mpl_connect('pick_event', onpick)
         plt.show()
