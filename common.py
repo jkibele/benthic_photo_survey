@@ -1,9 +1,20 @@
 from datetime import timedelta as td
 from datetime import datetime as dt
 from configuration import *
+import matplotlib as mpl
+# I have to change the matplotlib backend to WXAgg so that the depth_plot
+# will play nice with the WXPython bps_gui. Leaving it as GTKAgg causes a
+# segmentation fault.
+mpl.rcParams['backend'] = 'WXAgg'
 import matplotlib.pyplot as plt
 import numpy as np
 import sqlite3, argparse, pytz, os
+
+
+def hex_to_rgb(value):
+    value = value.lstrip('#')
+    lv = len(value)
+    return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
 
 def connection_and_cursor(path_to_db):
     """Connect to the db and pass back the connection and cursor"""

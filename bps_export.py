@@ -28,6 +28,8 @@ class bps_shp_exporter(object):
                         'depth'     : ogr.OFTReal,
                         'temp'      : ogr.OFTReal,
                         'habitat'   : ogr.OFTString,
+                        'hab_color' : ogr.OFTString,
+                        'hab_num'   : ogr.OFTInteger,
                         'subst'     : ogr.OFTString, }
         for k,v in self.f_dict.iteritems():
             new_field = ogr.FieldDefn(k, v)
@@ -61,6 +63,8 @@ class bps_shp_exporter(object):
         Take an image_file object (defined in photo_tagging.py) and make a 
         shapefile feature out of it.
         """
+        hcd = CONF_HAB_COLOR_DICT
+        hnd = CONF_HAB_NUM_DICT
         if imf.position:
             feat = ogr.Feature(self.lyrDefn)
             geom = imf.position.ogr_point
@@ -82,6 +86,8 @@ class bps_shp_exporter(object):
                 feat.SetField( 'temp', imf.xmp_temperature )
             if imf.xmp_habitat:
                 feat.SetField( 'habitat', imf.xmp_habitat )
+                feat.SetField( 'hab_color', hcd[imf.xmp_habitat] )
+                feat.SetField( 'hab_num', hnd[imf.xmp_habitat] )
             if imf.xmp_substrate:
                 feat.SetField( 'subst', imf.xmp_substrate )
             self.lyr.CreateFeature(feat)

@@ -50,7 +50,7 @@ class image_directory(object):
         plt.xlabel('Date and Time')
         plt.ylabel('Depth (meters)')
         fig.suptitle('Photos with Depth and Time')
-        
+        #print "Before def onpick"
         def onpick(event):
             global ann
             try:
@@ -67,9 +67,10 @@ class image_directory(object):
                                                 color='red'))
             plt.draw()
             print "Photo: %s, index: %i, depth: %g, date: %s" % ( fname, ind, self.exif_depths[ind], self.local_datetimes[ind].strftime('%Y/%m/%d %H:%M:%S') )
-            
+        #print "Before mpl_connect"    
         fig.canvas.mpl_connect('pick_event', onpick)
         plt.show()
+        #print "after plt show"
         
     def depth_temp_tag(self,verbose=False):
         """
