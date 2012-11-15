@@ -15,5 +15,5 @@ CONF_OUTPUT_EPSG = 2193 # 2193 is the NZTM 2000 EPSG. This is what the exported
 CONF_HABITATS = ['Barrens', 'Kelp Forest', 'Mixed Weed', 'Red Foliose', 'Sand', 'Turf', 'Other']
 CONF_HAB_COLORS = ['#E5E5E5', '#8B6914', '#302713', '#A52A2A', '#FFC250', '#FFC0CB', '#0000FF']
 CONF_HAB_COLOR_DICT = dict( zip( CONF_HABITATS, CONF_HAB_COLORS ) )
-CONF_HAB_NUM_DICT = dict( zip( CONF_HABITATS, range(len(CONF_HABITATS)) ) )
+CONF_HAB_NUM_DICT = dict( zip( CONF_HABITATS, range(1,len(CONF_HABITATS)+1) ) )
 CONF_SUBSTRATES = ["Bedrock","Boulder","Cobble","Pebble","Shell","Sand","Mud"]
