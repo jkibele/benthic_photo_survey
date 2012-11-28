@@ -17,6 +17,15 @@ class image_directory(object):
         self.images = [ image_file(img) for img in jpgs ]
         self.images.sort(key=lambda i: i.datetime) # sort the images by datetime of the image
         
+    def __shift_datetimes__(self, time_delta_obj, verbose=True):
+        """
+        Shift the 'date original' values of all photos in the directory. See the
+        warnings in the image_file.__set_datetime__ method doc string. You should
+        be careful about using this method.
+        """
+        for img in self.images:
+            new_dt = img.__shift_datetime__( time_delta_obj, verbose=verbose )
+        
     @property
     def local_datetimes(self):
         return [ x.datetime for x in self.images ]
@@ -135,7 +144,11 @@ class image_file(object):
                 if self.__get_exiv_tag_human_value(key):
                     exif_dict.update( { key : self.__get_exiv_tag_human_value(key)[:100] } )
         return exif_dict
-        
+    
+    @property
+    def file_name(self):
+        return os.path.basename(self.file_path)
+    
     @property
     def datetime(self):
         """
@@ -260,6 +273,18 @@ class image_file(object):
         key = 'Exif.Photo.DateTimeOriginal'
         self.md[key] = exiv.ExifTag(key,dt_obj)
         self.md.write()
+        return self.datetime
+        
+    def __shift_datetime__(self,time_delta_obj,verbose=True):
+        """
+        Shift the 'date original' in the exif by the given time delta. See the
+        warnings in the doc string of __set_datetime__ method. You should be 
+        careful with this.
+        """
+        current_dt = self.datetime
+        self.__set_datetime__( current_dt + time_delta_obj )
+        if verbose:
+            print "datetime of %s changed from %s to %s." % ( self.file_name, current_dt.strftime('%X, %x'), self.datetime.strftime('%X, %x') )
         return self.datetime
             
     def __set_exif_position(self,pos,verbose=False):
