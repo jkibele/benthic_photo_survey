@@ -191,10 +191,13 @@ class MyFrame(wx.Frame):
         """
         Opens a DirDialog to allow the user to open a folder with pictures
         """
+        print os.path.join(os.getcwd(),'data/images')
+        #print wx.VERSION_STRING
         dlg = wx.DirDialog(self, "Choose a directory", defaultPath=os.path.join(os.getcwd(),'data/images'),
                            style=wx.DD_DEFAULT_STYLE)
         
         if dlg.ShowModal() == wx.ID_OK:
+            #print dlg.GetPath()
             self.folderPath = dlg.GetPath()
             self.myPanel.image_dir = self.folderPath
             #print self.folderPath
@@ -296,6 +299,7 @@ class MyFrame(wx.Frame):
             self.myPanel.currentPicture = 0
         else:
             self.myPanel.currentPicture += 1
+        print self.myPanel.picPaths
         self.loadImage(self.myPanel.picPaths[self.myPanel.currentPicture])
         
     #----------------------------------------------------------------------

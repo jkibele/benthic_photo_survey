@@ -10,5 +10,9 @@ GDAL: Caused me a lot of trouble on Ubuntu because I had stupidly built from sou
 
 Matplotlib: I started with 1.0.1 (which I found binaries for somewhere) but it turns out there's a bug in 1.0.1 that was preventing the proper handling of timezones in plot_date so I needed 1.1.1. It wasn't too hard to deal with. I ran 'sudo apt-get build-dep matplotlib' to take care of the dependencies. Then I downloaded the source for 1.1.1 and followed the install instructions for build from source (http://matplotlib.org/users/installing.html).
 
+Sensu Ultra Downloading: On ubuntu 12.10 I had a problem getting sensus manager to see the usb serial port. The trick was to change the permissions on the device like so: sudo chmod 666 /dev/ttyUSB0
+
+gpsbabel: The way to get stuff off the garmin is something like this: sudo gpsbabel -i garmin -f usb: -o gpx -F ~/test.gpx
+
 Notes on precision:
 1 minute of Latitude is about 1.8 km and 0.001 minutes is about 1.8 meters. I'm now storing at the maximum precision of the Exif format (or at least at the max of what pyexiv2 can write) which is 1 e -7 of a second. That should be plenty. Just for reference, 1 second of latitude is about 30 meters.
