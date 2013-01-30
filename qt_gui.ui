@@ -22,7 +22,20 @@
     <item row="0" column="0" rowspan="3">
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QGraphicsView" name="imageDisplay"/>
+       <widget class="QLabel" name="photoDisplay">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="qt_resources.qrc">:/photoDisplay/data/images/tawf_04102012/P1000404.JPG</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
@@ -445,11 +458,6 @@
      </widget>
     </item>
    </layout>
-   <zorder>layoutWidget</zorder>
-   <zorder>layoutWidget</zorder>
-   <zorder>photoInfoGroupBox</zorder>
-   <zorder>exifDataGroupBox</zorder>
-   <zorder>groupBox</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -466,7 +474,7 @@
     </property>
     <addaction name="actionLoad_GPS_Log"/>
     <addaction name="actionLoad_Depth_Log"/>
-    <addaction name="actionLoad_Image_Directory"/>
+    <addaction name="actionLoad_Photo_Directory"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -497,12 +505,12 @@
     <string>Alt+D</string>
    </property>
   </action>
-  <action name="actionLoad_Image_Directory">
+  <action name="actionLoad_Photo_Directory">
    <property name="text">
     <string>Load Photos</string>
    </property>
    <property name="shortcut">
-    <string>Alt+I</string>
+    <string>Alt+P</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -524,7 +532,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="qt_resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionQuit</sender>
@@ -542,5 +552,75 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>nextButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>nextPhoto()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>591</x>
+     <y>577</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>614</x>
+     <y>320</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>previousButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>previousPhoto()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>67</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>4</x>
+     <y>424</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>geotagButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>geoTag()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>223</x>
+     <y>581</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>129</x>
+     <y>571</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>depthTempTagButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>depthTempTag()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>377</x>
+     <y>578</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>570</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>nextPhoto()</slot>
+  <slot>previousPhoto()</slot>
+  <slot>geoTag()</slot>
+  <slot>depthTempTag()</slot>
+ </slots>
 </ui>
