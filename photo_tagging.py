@@ -14,8 +14,10 @@ class image_directory(object):
             jpgs = [ os.path.join(dir_path,f) for f in os.listdir(dir_path) if f.lower().endswith('.jpg') ]
         else:
             raise ValueError("%s is not a directory." % dir_path)
+        self.path = dir_path
         self.images = [ image_file(img) for img in jpgs ]
         self.images.sort(key=lambda i: i.datetime) # sort the images by datetime of the image
+        self.image_count = len( self.images )
         
     def __shift_datetimes__(self, time_delta_obj, verbose=True):
         """

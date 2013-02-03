@@ -1,5 +1,4 @@
 from pynmea.streamer import NMEAStream
-from dateutil import parser as dt_parser
 from fractions import Fraction
 from itertools import groupby
 from math import modf

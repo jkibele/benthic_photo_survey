@@ -12,7 +12,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Benthic Photo Survey</string>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -21,15 +21,45 @@
    <layout class="QGridLayout" name="gridLayout_2">
     <item row="0" column="0" rowspan="3">
      <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
       <item>
        <widget class="QLabel" name="photoDisplay">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>500</height>
+         </size>
+        </property>
+        <property name="autoFillBackground">
+         <bool>true</bool>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Panel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
-        <property name="pixmap">
-         <pixmap resource="qt_resources.qrc">:/photoDisplay/data/images/tawf_04102012/P1000404.JPG</pixmap>
-        </property>
         <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignHCenter|Qt::AlignTop</set>
+        </property>
+        <property name="wordWrap">
          <bool>true</bool>
         </property>
         <property name="textInteractionFlags">
@@ -43,6 +73,9 @@
          <widget class="QPushButton" name="previousButton">
           <property name="text">
            <string>Previous</string>
+          </property>
+          <property name="shortcut">
+           <string>Left</string>
           </property>
          </widget>
         </item>
@@ -104,6 +137,9 @@
           <property name="text">
            <string>Next</string>
           </property>
+          <property name="shortcut">
+           <string>Right</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -112,6 +148,18 @@
     </item>
     <item row="0" column="1">
      <widget class="QGroupBox" name="photoInfoGroupBox">
+      <property name="minimumSize">
+       <size>
+        <width>240</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>240</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="autoFillBackground">
        <bool>true</bool>
       </property>
@@ -120,7 +168,12 @@
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <widget class="QLabel" name="photoCount">
+        <widget class="QLabel" name="photoCountValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>0 of 0</string>
          </property>
@@ -137,7 +190,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="directoryText">
+        <widget class="QLabel" name="directoryValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="layoutDirection">
           <enum>Qt::LeftToRight</enum>
          </property>
@@ -157,7 +218,15 @@
         </widget>
        </item>
        <item>
-        <widget class="QLabel" name="filenameText">
+        <widget class="QLabel" name="filenameValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -171,6 +240,18 @@
     </item>
     <item row="1" column="1">
      <widget class="QGroupBox" name="exifDataGroupBox">
+      <property name="minimumSize">
+       <size>
+        <width>240</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>240</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="title">
        <string>Exif Data</string>
       </property>
@@ -188,25 +269,16 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="dateValue">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="timeLabel">
-         <property name="text">
-          <string>Time</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <widget class="QLabel" name="timeValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -222,59 +294,16 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLabel" name="latitudeValue">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="longitudeLabel">
-         <property name="text">
-          <string>Longitude</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLabel" name="longitudeValue">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="directionLabel">
-         <property name="text">
-          <string>Direction </string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="1">
         <widget class="QLabel" name="directionValue">
-         <property name="text">
-          <string/>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
          </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="depthLabel">
-         <property name="text">
-          <string>Depth</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="1">
-        <widget class="QLabel" name="depthValue">
          <property name="text">
           <string/>
          </property>
@@ -296,8 +325,106 @@
          </property>
         </widget>
        </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="depthLabel">
+         <property name="text">
+          <string>Depth</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLabel" name="latitudeValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="longitudeLabel">
+         <property name="text">
+          <string>Longitude</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLabel" name="longitudeValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="directionLabel">
+         <property name="text">
+          <string>Direction </string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLabel" name="depthValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QLabel" name="substrateValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
        <item row="6" column="1">
         <widget class="QLabel" name="temperatureValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -315,6 +442,14 @@
        </item>
        <item row="7" column="1">
         <widget class="QLabel" name="habitatValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -330,10 +465,28 @@
          </property>
         </widget>
        </item>
-       <item row="8" column="1">
-        <widget class="QLabel" name="substrateValue">
+       <item row="0" column="1">
+        <widget class="QLabel" name="dateValue">
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
          <property name="text">
           <string/>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="timeLabel">
+         <property name="text">
+          <string>Time</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -341,7 +494,19 @@
      </widget>
     </item>
     <item row="2" column="1">
-     <widget class="QGroupBox" name="groupBox">
+     <widget class="QGroupBox" name="habAndSubstBox">
+      <property name="minimumSize">
+       <size>
+        <width>240</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>240</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="title">
        <string>Habitat and Substrate</string>
       </property>
@@ -363,51 +528,6 @@
          <property name="toolTip">
           <string>Double Click to set habitat</string>
          </property>
-         <item>
-          <property name="text">
-           <string>Hab1</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab8</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab9</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab3</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab4 </string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab5</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab6</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>hab7</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item>
@@ -427,31 +547,6 @@
          <property name="toolTip">
           <string>Double Click to set Substrate</string>
          </property>
-         <item>
-          <property name="text">
-           <string>subst 1</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>subst 2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>subst 3</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>subst 4</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>subst 5</string>
-          </property>
-         </item>
         </widget>
        </item>
       </layout>
@@ -534,6 +629,7 @@
  </widget>
  <resources>
   <include location="qt_resources.qrc"/>
+  <include location="../../../.designer/backup/qt_resources.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -559,8 +655,8 @@
    <slot>nextPhoto()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>591</x>
-     <y>577</y>
+     <x>661</x>
+     <y>593</y>
     </hint>
     <hint type="destinationlabel">
      <x>614</x>
@@ -607,12 +703,44 @@
    <slot>depthTempTag()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>377</x>
-     <y>578</y>
+     <x>487</x>
+     <y>593</y>
     </hint>
     <hint type="destinationlabel">
      <x>289</x>
      <y>570</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>habitatListWidget</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setHabitat()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>738</x>
+     <y>512</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>706</x>
+     <y>598</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substrateListWidget</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setSubstrate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>865</x>
+     <y>563</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>889</x>
+     <y>599</y>
     </hint>
    </hints>
   </connection>
@@ -622,5 +750,8 @@
   <slot>previousPhoto()</slot>
   <slot>geoTag()</slot>
   <slot>depthTempTag()</slot>
+  <slot>setPhotoDisplay()</slot>
+  <slot>setHabitat()</slot>
+  <slot>setSubstrate()</slot>
  </slots>
 </ui>
