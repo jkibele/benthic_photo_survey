@@ -34,7 +34,7 @@ class bps_shp_exporter(object):
         for k,v in self.f_dict.iteritems():
             new_field = ogr.FieldDefn(k, v)
             if k == 'img_path':
-                new_field.SetWidth(100)
+                new_field.SetWidth(180)
             self.lyr.CreateField(new_field)
         
         self.lyrDefn = self.lyr.GetLayerDefn()

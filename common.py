@@ -7,8 +7,8 @@ import matplotlib as mpl
 # I have to change the matplotlib backend to WXAgg so that the depth_plot
 # will play nice with the WXPython bps_gui. Leaving it as GTKAgg causes a
 # segmentation fault.
-mpl.rcParams['backend'] = 'WXAgg'
-#import matplotlib.pyplot as plt
+#mpl.rcParams['backend'] = 'WXAgg'
+import matplotlib.pyplot as plt
 import numpy as np
 
 

@@ -30,7 +30,7 @@
          <bool>true</bool>
         </property>
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -38,8 +38,72 @@
         <property name="minimumSize">
          <size>
           <width>500</width>
-          <height>500</height>
+          <height>350</height>
          </size>
+        </property>
+        <property name="palette">
+         <palette>
+          <active>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>220</red>
+              <green>220</green>
+              <blue>220</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </active>
+          <inactive>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>255</red>
+              <green>255</green>
+              <blue>255</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>220</red>
+              <green>220</green>
+              <blue>220</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </inactive>
+          <disabled>
+           <colorrole role="Base">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>220</red>
+              <green>220</green>
+              <blue>220</blue>
+             </color>
+            </brush>
+           </colorrole>
+           <colorrole role="Window">
+            <brush brushstyle="SolidPattern">
+             <color alpha="255">
+              <red>220</red>
+              <green>220</green>
+              <blue>220</blue>
+             </color>
+            </brush>
+           </colorrole>
+          </disabled>
+         </palette>
         </property>
         <property name="autoFillBackground">
          <bool>true</bool>
@@ -565,7 +629,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionLoad_GPS_Log"/>
     <addaction name="actionLoad_Depth_Log"/>
@@ -575,37 +639,45 @@
    </widget>
    <widget class="QMenu" name="menuOutput">
     <property name="title">
-     <string>Output</string>
+     <string>&amp;Output</string>
     </property>
     <addaction name="actionExport_Shapefile"/>
     <addaction name="actionDepth_Plot"/>
    </widget>
+   <widget class="QMenu" name="menuActions">
+    <property name="title">
+     <string>&amp;Actions</string>
+    </property>
+    <addaction name="actionGeo_Tag_All_Photos"/>
+    <addaction name="actionDepth_Temp_Tag_All"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuActions"/>
    <addaction name="menuOutput"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionLoad_GPS_Log">
    <property name="text">
-    <string>Load GPS Log</string>
+    <string>Load &amp;GPS Log</string>
    </property>
    <property name="shortcut">
-    <string>Alt+G</string>
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionLoad_Depth_Log">
    <property name="text">
-    <string>Load Depth Log</string>
+    <string>Load &amp;Depth Log</string>
    </property>
    <property name="shortcut">
-    <string>Alt+D</string>
+    <string>Ctrl+D</string>
    </property>
   </action>
   <action name="actionLoad_Photo_Directory">
    <property name="text">
-    <string>Load Photos</string>
+    <string>Load &amp;Photos</string>
    </property>
    <property name="shortcut">
-    <string>Alt+P</string>
+    <string>Ctrl+P</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -618,19 +690,26 @@
   </action>
   <action name="actionExport_Shapefile">
    <property name="text">
-    <string>Export Shapefile</string>
+    <string>Export &amp;Shapefile</string>
    </property>
   </action>
   <action name="actionDepth_Plot">
    <property name="text">
-    <string>Depth Plot</string>
+    <string>Depth &amp;Plot</string>
+   </property>
+  </action>
+  <action name="actionGeo_Tag_All_Photos">
+   <property name="text">
+    <string>Geo Tag All Photos</string>
+   </property>
+  </action>
+  <action name="actionDepth_Temp_Tag_All">
+   <property name="text">
+    <string>Depth/Temp Tag All</string>
    </property>
   </action>
  </widget>
- <resources>
-  <include location="qt_resources.qrc"/>
-  <include location="../../../.designer/backup/qt_resources.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>actionQuit</sender>
@@ -744,6 +823,118 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionGeo_Tag_All_Photos</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>geoTagAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDepth_Temp_Tag_All</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>depthTempTagAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Depth_Log</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadDepthLog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_GPS_Log</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadGpsLog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDepth_Plot</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>depthPlot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionExport_Shapefile</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>exportShapefile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionLoad_Photo_Directory</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>loadPhotoDirectory()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>nextPhoto()</slot>
@@ -753,5 +944,12 @@
   <slot>setPhotoDisplay()</slot>
   <slot>setHabitat()</slot>
   <slot>setSubstrate()</slot>
+  <slot>geoTagAll()</slot>
+  <slot>depthTempTagAll()</slot>
+  <slot>loadPhotoDirectory()</slot>
+  <slot>loadGpsLog()</slot>
+  <slot>loadDepthLog()</slot>
+  <slot>depthPlot()</slot>
+  <slot>exportShapefile()</slot>
  </slots>
 </ui>

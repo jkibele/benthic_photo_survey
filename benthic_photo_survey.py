@@ -9,7 +9,6 @@ from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
     QMessageBox
 from ui_bps import Ui_MainWindow
 
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)                                         
@@ -20,7 +19,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.currentPhotoIndex = 0
         self.habitatListWidget.addItems( CONF_HABITATS )
         self.substrateListWidget.addItems( CONF_SUBSTRATES )
-        self.actionLoad_Photo_Directory.triggered.connect(self.loadPhotoDirectory)
         
     def resizeEvent( self, event ):
         super(MainWindow, self).resizeEvent( event )
@@ -43,7 +41,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loadPhotoDirectoryData()
         
     def loadPhotoDirectoryData(self):
-        """"""
         self.filenameValue.setText(self.imf.file_name)
         direc = '...' + self.imageDirectoryObj.path[-30:]
         self.directoryValue.setText(direc)
@@ -81,12 +78,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if hab: # Set the selection in the listbox
             hab_list_item = self.habitatListWidget.findItems( str(hab), QtCore.Qt.MatchFlags() )[0]
             self.habitatListWidget.setCurrentItem( hab_list_item )
+        else:
+            self.habitatListWidget.setCurrentItem( None )
             
         subs = self.imf.xmp_substrate
         self.substrateValue.setText( str(subs) )
         if subs:
             subst_list_item = self.substrateListWidget.findItems( str(subs), QtCore.Qt.MatchFlags() )[0]
             self.substrateListWidget.setCurrentItem( subst_list_item )
+        else:
+            self.substrateListWidget.setCurrentItem( None )
 
     def loadPhotoDirectory(self):
         photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory='data/images') )
@@ -142,6 +143,27 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             msg.setWindowTitle("What photo?")
             msg.exec_()
             return False
+            
+    def geoTagAll(self):
+        rg_cnt = 0
+        if self.imageDirectoryObj and self.imageDirectoryObj.image_count > 0:
+            for imf in self.imageDirectoryObj.images:
+                if imf.geotag():
+                    rg_cnt += 1
+            if rg_cnt==self.imageDirectoryObj.image_count:
+                title_str = 'Great Success!'
+            else:
+                title_str = 'Moderate Success'
+            info_str = "Out of %i total photos, I geotagged %i. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
+            
+            self.loadExifData()
+        else:
+            info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
+            title_str = 'Epic Failure'
+        mbox = QMessageBox()
+        mbox.setText( info_str )
+        mbox.setWindowTitle( title_str )
+        mbox.exec_()
     
     def depthTempTag(self):
         if self.imf:
@@ -161,8 +183,98 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             msg.setWindowTitle("What photo?")
             msg.exec_()
             return False
+            
+    def depthTempTagAll(self):
+        rg_cnt = 0
+        if self.imageDirectoryObj.image_count > 0:
+            for imf in self.imageDirectoryObj.images:
+                if imf.depth_temp_tag():
+                    rg_cnt += 1
+            if rg_cnt==self.imageDirectoryObj.image_count:
+                title_str = 'Great Success!'
+            else:
+                title_str = 'Moderate Success'
+            info_str = "Out of %i total photos, I tagged %i with depth and temperature. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
+            
+            self.loadExifData()
+        else:
+            info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
+            title_str = 'Epic Failure'
+        mbox = QMessageBox()
+        mbox.setText( info_str )
+        mbox.setWindowTitle( title_str )
+        mbox.exec_()
     
+    def depthPlot(self):
+        self.imageDirectoryObj.depth_plot()
     
+    def exportShapefile(self):
+        shp_filepath = str( QFileDialog.getSaveFileName(self, 'Save Shapefile',
+                                                        directory='data/shapefiles',
+                                                        filter='Shapefiles (*.shp)') )
+        if shp_filepath:
+            try:
+                bpse = bps_shp_exporter(shp_filepath)
+                returned_path = bpse.write_shapefile( self.imageDirectoryObj.path )
+                result_str = "Great Success: Shapefile written to: %s" % returned_path
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Oops. Seems like that didn't work.")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # User hit cancel
+            return False
+                
+    
+    def loadGpsLog(self):
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory='data/gps', filter='GPS Files (*.gpx *.log)') )
+        if log_filepath:            
+            try:            
+                if log_filepath.lower().endswith('.gpx'):
+                    gf = gpx_file( log_filepath )
+                    result_str = gf.read_to_db()
+                else:
+                    result_str = read_gps_log( log_filepath )
+                msg = "Great Success: %s" % result_str
+                self.statusBar().showMessage( msg, 8000)
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Something bad happened. Are you sure that was a GPS log file?")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # This means the user hit 'cancel'
+            return False
+            
+        
+    def loadDepthLog(self):
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory='data/sensus', filter='Sensus Log Files (*.csv)') )
+        if log_filepath:
+            try:        
+                result_str = read_depth_temp_log( log_filepath )
+                msg = "Great Success: %s" % result_str
+                self.statusBar().showMessage( msg, 8000)
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Your CSV file was probably not formatted as expected. Are you sure it was a sensus log file?")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # This means the user hit 'cancel' 
+            return False
                 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
