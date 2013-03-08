@@ -126,6 +126,12 @@ def interpolate_depth(t_secs,t1_secs,t2_secs,d1m,d2m):
     y = np.array([ d[min(d.keys())], d[max(d.keys())] ])
     f = interpolate.interp1d(x,y)
     return float( f( float(t_secs) ) )
+    
+def seconds_since_arbitrary( dt_obj, arbitrary_ordinal=1 ):
+    """
+    Return seconds since an arbitrary date.
+    """
+    return float( ( dt_obj - dt.fromordinal( arbitrary_ordinal ) ).seconds )
 
 def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     """For a given datetime object, return the depth from the raw_log db. Go through the 
@@ -140,9 +146,9 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     t = ( dt_obj, ) 
     rows = cur.execute("select utctime, depthm from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 2", t).fetchall()
     t1 = dt.strptime(rows[0][0],'%Y-%m-%d %H:%M:%S')
-    t1_secs = float( t1.strftime('%s') )
+    t1_secs = seconds_since_arbitrary( t1 )
     t2 = dt.strptime(rows[1][0],'%Y-%m-%d %H:%M:%S')
-    t2_secs = float( t2.strftime('%s') )
+    t2_secs = seconds_since_arbitrary( t2 )
     d1m = rows[0][1]
     d2m = rows[1][1]
     # Clean up
@@ -153,7 +159,7 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     # time (dt_obj). They could both be before or after. By putting the times in
     # an array, we can easily get the min and max time so we can check.
     times = np.array( [t1_secs,t2_secs] )
-    dt_obj_secs = float( dt_obj.strftime('%s') ) + dt_obj.microsecond * 1E-6
+    dt_obj_secs = seconds_since_arbitrary( dt_obj ) + dt_obj.microsecond * 1E-6
     
     # if the closest available time stamp is further away than our threshold
     # then we will return False
