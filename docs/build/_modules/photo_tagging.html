@@ -60,7 +60,7 @@
 <span class="c"># without it. Perhaps I should figure out if I really need it or not.</span>
 <span class="n">exiv</span><span class="o">.</span><span class="n">xmp</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;http://svarchiteuthis.com/benthicphoto/&#39;</span><span class="p">,</span> <span class="s">&#39;BenthicPhoto&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="image_directory"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory">[docs]</a><span class="k">class</span> <span class="nc">image_directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="image_directory"><a class="viewcode-back" href="../index.html#photo_tagging.image_directory">[docs]</a><span class="k">class</span> <span class="nc">image_directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
             <span class="n">jpgs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">)</span> <span class="p">]</span>
@@ -98,7 +98,7 @@
                 <span class="n">d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d_list</span><span class="p">)</span>
         
-<div class="viewcode-block" id="image_directory.depth_plot"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory.depth_plot">[docs]</a>    <span class="k">def</span> <span class="nf">depth_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_directory.depth_plot"><a class="viewcode-back" href="../index.html#photo_tagging.image_directory.depth_plot">[docs]</a>    <span class="k">def</span> <span class="nf">depth_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a plot of the depth profile with photo times and depths marked.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -135,14 +135,14 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="c">#print &quot;after plt show&quot;</span>
         </div>
-<div class="viewcode-block" id="image_directory.depth_temp_tag"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="image_directory.depth_temp_tag"><a class="viewcode-back" href="../index.html#photo_tagging.image_directory.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Depth tag all the photos in the directory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
             <span class="n">img</span><span class="o">.</span><span class="n">depth_temp_tag</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
 </div></div>
-<div class="viewcode-block" id="image_file"><a class="viewcode-back" href="../code.html#photo_tagging.image_file">[docs]</a><span class="k">class</span> <span class="nc">image_file</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file"><a class="viewcode-back" href="../index.html#photo_tagging.image_file">[docs]</a><span class="k">class</span> <span class="nc">image_file</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An object to make accessing image files and metadata easier.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -185,7 +185,7 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
             
-<div class="viewcode-block" id="image_file.exif_dict"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.exif_dict">[docs]</a>    <span class="k">def</span> <span class="nf">exif_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_panasonic_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.exif_dict"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.exif_dict">[docs]</a>    <span class="k">def</span> <span class="nf">exif_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_panasonic_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a dict with all exif and xmp keys and values.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -204,7 +204,7 @@
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span>
     
     <span class="nd">@property</span>
-<div class="viewcode-block" id="image_file.datetime"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.datetime">[docs]</a>    <span class="k">def</span> <span class="nf">datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.datetime"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.datetime">[docs]</a>    <span class="k">def</span> <span class="nf">datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Try to get a datetime object for the image&#39;s creation from the </span>
 <span class="sd">        Exif.Photo.DateTimeOriginal value via pyexiv2.</span>
@@ -303,7 +303,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Xmp.BenthicPhoto.habitat&#39;</span><span class="p">)</span>
             
     <span class="nd">@property</span>
-<div class="viewcode-block" id="image_file.position"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.position"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Look at the exif data and return a position object (as defined in</span>
 <span class="sd">        gps_log_io). Return None if there&#39;s no GPSInfo in the exif.</span>
@@ -405,7 +405,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
         
     <span class="nd">@property</span>
-<div class="viewcode-block" id="image_file.logger_depth"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.logger_depth">[docs]</a>    <span class="k">def</span> <span class="nf">logger_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.logger_depth"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.logger_depth">[docs]</a>    <span class="k">def</span> <span class="nf">logger_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the logged depth out of the db that matches the photo&#39;s timestamp.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -416,7 +416,7 @@
             <span class="k">return</span> <span class="bp">None</span>
         </div>
     <span class="nd">@property</span>
-<div class="viewcode-block" id="image_file.logger_temp"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.logger_temp">[docs]</a>    <span class="k">def</span> <span class="nf">logger_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.logger_temp"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.logger_temp">[docs]</a>    <span class="k">def</span> <span class="nf">logger_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the logged temperature out of the db that matches the photo&#39;s timestamp.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -426,7 +426,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
         </div>
-<div class="viewcode-block" id="image_file.depth_temp_tag"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.depth_temp_tag"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the depth and temp readings out of the db that match the photo&#39;s origination</span>
 <span class="sd">        time (considering that the photo&#39;s time stamp is in the local timezone and the</span>
@@ -439,7 +439,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">None</span>
         </div>
-<div class="viewcode-block" id="image_file.geotag"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.geotag">[docs]</a>    <span class="k">def</span> <span class="nf">geotag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.geotag"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.geotag">[docs]</a>    <span class="k">def</span> <span class="nf">geotag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get a position that matches the time of creation for the image out</span>
 <span class="sd">        of the database and set the exif data accordingly. We assume that </span>
@@ -467,7 +467,7 @@
         <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">:</span>
             <span class="k">print</span> <span class="s">&quot;Longitudes match&quot;</span>
         
-<div class="viewcode-block" id="image_file.remove_geotagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_geotagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_geotagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.remove_geotagging"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.remove_geotagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_geotagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -478,7 +478,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
                 </div>
-<div class="viewcode-block" id="image_file.remove_depthtagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_depthtagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_depthtagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.remove_depthtagging"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.remove_depthtagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_depthtagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -489,7 +489,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
                 </div>
-<div class="viewcode-block" id="image_file.remove_temptagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_temptagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_temptagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.remove_temptagging"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.remove_temptagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_temptagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -500,7 +500,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
                 </div>
-<div class="viewcode-block" id="image_file.remove_substratetagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_substratetagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_substratetagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.remove_substratetagging"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.remove_substratetagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_substratetagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -509,7 +509,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
                 </div>
-<div class="viewcode-block" id="image_file.remove_all_tagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_all_tagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_all_tagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="image_file.remove_all_tagging"><a class="viewcode-back" href="../index.html#photo_tagging.image_file.remove_all_tagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_all_tagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>

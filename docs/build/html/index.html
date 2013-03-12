@@ -26,7 +26,8 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Benthic Photo Survey 0.1 documentation" href="#" /> 
+    <link rel="top" title="Benthic Photo Survey 0.1 documentation" href="#" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
   </head>
   <body>
     <div class="related">
@@ -38,6 +39,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             accesskey="N">next</a> |</li>
         <li><a href="#">Benthic Photo Survey 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -49,120 +53,20 @@
             
   <div class="section" id="welcome-to-benthic-photo-survey-s-documentation">
 <h1>Welcome to Benthic Photo Survey&#8217;s documentation!<a class="headerlink" href="#welcome-to-benthic-photo-survey-s-documentation" title="Permalink to this headline">¶</a></h1>
-<p>Contents:</p>
+<p>Benthic Photo Survey (BPS) is a software tool (written in Python) that is intended to simplify the task of collecting reference data (sometimes called groundtruth data) for remote sensing of the marine environment. Using a digital camera in a water proof housing, a consumer grade handheld GPS, and (optionally) a depth logger a user can collect data in the field.</p>
+<img alt="_images/BPS_overview.png" src="_images/BPS_overview.png" />
+<p>The photos and logs (GPS and Depth) are then loaded into BPS. BPS can then tag the photos with position, depth, and temperature (if using the Sensus Ultra depth/temperature logger). The the users can view each photo in BPS and tag each photo with a substrate and habitat type. All data (position, depth, temperature, habitat, and substrate) are stored in the exif portion of the jpeg photos.</p>
+<p>Once the photos are all tagged, BPS can export a GIS Shapefile with habitat, substrate, depth, and temperature attributed points for each photo&#8217;s location. This shapefile can then be used to create a training set for supervised classification or as reference data for accuracy assessment.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html">Code Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="code.html#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
-<span class="target" id="module-photo_tagging"></span><dl class="class">
-<dt id="photo_tagging.image_directory">
-<em class="property">class </em><tt class="descclassname">photo_tagging.</tt><tt class="descname">image_directory</tt><big>(</big><em>dir_path</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_directory" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="photo_tagging.image_directory.depth_plot">
-<tt class="descname">depth_plot</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_directory.depth_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_directory.depth_plot" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a plot of the depth profile with photo times and depths marked.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_directory.depth_temp_tag">
-<tt class="descname">depth_temp_tag</tt><big>(</big><em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_directory.depth_temp_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_directory.depth_temp_tag" title="Permalink to this definition">¶</a></dt>
-<dd><p>Depth tag all the photos in the directory.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="photo_tagging.image_file">
-<em class="property">class </em><tt class="descclassname">photo_tagging.</tt><tt class="descname">image_file</tt><big>(</big><em>img_path</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>An object to make accessing image files and metadata easier.</p>
-<dl class="attribute">
-<dt id="photo_tagging.image_file.datetime">
-<tt class="descname">datetime</tt><a class="reference internal" href="_modules/photo_tagging.html#image_file.datetime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.datetime" title="Permalink to this definition">¶</a></dt>
-<dd><p>Try to get a datetime object for the image&#8217;s creation from the 
-Exif.Photo.DateTimeOriginal value via pyexiv2.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.depth_temp_tag">
-<tt class="descname">depth_temp_tag</tt><big>(</big><em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.depth_temp_tag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.depth_temp_tag" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the depth and temp readings out of the db that match the photo&#8217;s origination
-time (considering that the photo&#8217;s time stamp is in the local timezone and the
-logs are in UTC) and write those values to the image&#8217;s exif data.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.exif_dict">
-<tt class="descname">exif_dict</tt><big>(</big><em>exclude_panasonic_keys=True</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.exif_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.exif_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dict with all exif and xmp keys and values.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.geotag">
-<tt class="descname">geotag</tt><big>(</big><em>verbose=True</em><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.geotag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.geotag" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get a position that matches the time of creation for the image out
-of the database and set the exif data accordingly. We assume that 
-the photo timestamp is local and the gps position is utc.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="photo_tagging.image_file.logger_depth">
-<tt class="descname">logger_depth</tt><a class="reference internal" href="_modules/photo_tagging.html#image_file.logger_depth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.logger_depth" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logged depth out of the db that matches the photo&#8217;s timestamp.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="photo_tagging.image_file.logger_temp">
-<tt class="descname">logger_temp</tt><a class="reference internal" href="_modules/photo_tagging.html#image_file.logger_temp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.logger_temp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the logged temperature out of the db that matches the photo&#8217;s timestamp.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="photo_tagging.image_file.position">
-<tt class="descname">position</tt><a class="reference internal" href="_modules/photo_tagging.html#image_file.position"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.position" title="Permalink to this definition">¶</a></dt>
-<dd><p>Look at the exif data and return a position object (as defined in
-gps_log_io). Return None if there&#8217;s no GPSInfo in the exif.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.remove_all_tagging">
-<tt class="descname">remove_all_tagging</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.remove_all_tagging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.remove_all_tagging" title="Permalink to this definition">¶</a></dt>
-<dd><p>You probably won&#8217;t need to do this but I did a few times during testing.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.remove_depthtagging">
-<tt class="descname">remove_depthtagging</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.remove_depthtagging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.remove_depthtagging" title="Permalink to this definition">¶</a></dt>
-<dd><p>You probably won&#8217;t need to do this but I did a few times during testing.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.remove_geotagging">
-<tt class="descname">remove_geotagging</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.remove_geotagging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.remove_geotagging" title="Permalink to this definition">¶</a></dt>
-<dd><p>You probably won&#8217;t need to do this but I did a few times during testing.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.remove_substratetagging">
-<tt class="descname">remove_substratetagging</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.remove_substratetagging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.remove_substratetagging" title="Permalink to this definition">¶</a></dt>
-<dd><p>You probably won&#8217;t need to do this but I did a few times during testing.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="photo_tagging.image_file.remove_temptagging">
-<tt class="descname">remove_temptagging</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/photo_tagging.html#image_file.remove_temptagging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#photo_tagging.image_file.remove_temptagging" title="Permalink to this definition">¶</a></dt>
-<dd><p>You probably won&#8217;t need to do this but I did a few times during testing.</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
-<div class="section" id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
 </div>
 
 
@@ -174,11 +78,16 @@ gps_log_io). Return None if there&#8217;s no GPSInfo in the exif.</p>
   <h3><a href="#">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Welcome to Benthic Photo Survey&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#contents">Contents</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
 </ul>
 
+  <h4>Next topic</h4>
+  <p class="topless"><a href="intro.html"
+                        title="next chapter">Introduction</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -210,6 +119,9 @@ gps_log_io). Return None if there&#8217;s no GPSInfo in the exif.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="intro.html" title="Introduction"
+             >next</a> |</li>
         <li><a href="#">Benthic Photo Survey 0.1 documentation</a> &raquo;</li> 
       </ul>
     </div>
