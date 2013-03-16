@@ -6,15 +6,31 @@ Quantitative methods for the derivation of habitat maps from satellite and aeria
 What You Need to use BPS
 ------------------------
 
-Benthic Photo Survey is designed to work with inexpensive and relatively easy to aquire equipment, partly because that's all that's really required and partly because that's all I can afford. Here's what you'll need:
+Benthic Photo Survey is designed to work with inexpensive and relatively easy to acquire equipment, partly because that's all that's really required and partly because that's all I can afford. Here's what you'll need:
 
-1. A subersible digital camera that produces jpeg images. I use a `Panasonic Lumix DMC-TS4`_ in an `Ikelite housing`_. This camera has a built in compass that records the direction that the camera is faceing when the photo is taken and BPS passes the direction into the shapefile that is created. However, this is not a requirement and any camera that produces jpeg images should be compatable with BPS.
+1. A submersible digital camera that produces jpeg images. I use a `Panasonic Lumix DMC-TS4`_ in an `Ikelite housing`_. This camera has a built in compass that records the direction that the camera is facing when the photo is taken and BPS passes the direction into the shapefile that is created. However, this is not a requirement and any camera that produces jpeg images should be compatible with BPS.
 
-2. A GPS that can be towed by a snorkeler or diver. If you're working with fairly high resolution imagery, you'll want a GPS reciever with WAAS capability. I am using a Garmin GPS 60 CSX. I tow mine in a small waterproof plastic box on a float. See `GPS Photo Transects for Benthic Cover Manual`_ by Roelfsema and Phinn [RP2010]_ for details on how to build a float. BPS can import NMEA text files and GPX files.
+2. A GPS that can be towed by a snorkeler or diver. If you're working with fairly high resolution imagery, you'll want a GPS receiver with WAAS capability. I am using a Garmin GPS 60 CSX. I tow mine in a small waterproof plastic box on a float. See `GPS Photo Transects for Benthic Cover Manual`_ by Roelfsema and Phinn [RP2010]_ for details on how to build a float. BPS can import NMEA text files and GPX files.
 
 3. A depth logger is optional but if you're going to spend the time and money to go in the field, it seems worthwhile. BPS is set up to import log files from the `Sensus Ultra`_ depth and temperature logger. It should be fairly easy to adapt it to deal with a different logger but that would require a bit of coding.
 
 4. A computer to run BPS. BPS was developed on Ubuntu but should work on Windows and Mac as well.
+
+
+What BPS Actually Does
+----------------------
+
+There are 4 steps to what BPS does. 
+
+1. It imports your GPS and/or depth and temperature logs into a database. 
+
+2. It writes data from those logs to the exif portion of each of your jpeg photos based on the time stamp on each photo and the time stamps in the respective logs. 
+
+3. You use BPS to tag each photo with a habitat and/or depth and temperature.
+
+4. BPS can export a point shapefile with a point at each location where a photo was taken. Each point is attributed with the habitat, substrate, depth, temperature, direction, and file path to the photo.
+
+
 
 .. _Panasonic Lumix DMC-TS4:
     http://panasonic.net/avc/lumix/compact/ts4_ft4/index.html
