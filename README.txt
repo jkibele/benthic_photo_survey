@@ -1,0 +1,1 @@
+Check out the documentation. It should be installed in ./docs/build/html/ relative to the location of this README file. Start with index.html.
