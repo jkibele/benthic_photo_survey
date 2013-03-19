@@ -8,6 +8,6 @@ setup(name='BenthicPhotoSurvey',
       author='Jared Kibele',
       author_email='jkibele@gmail.com',
       url='https://bitbucket.org/jkibele/benthic_photo_survey',
-      packages=[''],
+      packages=['benthic_photo_survey'],
      )
 
