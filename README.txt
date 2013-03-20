@@ -1,1 +1,1 @@
-Check out the documentation. It should be installed in ./docs/build/html/ relative to the location of this README file. Start with index.html.
+Check out the documentation over at http://pythonhosted.org/BenthicPhotoSurvey/  Or, if you've installed benthic photo survey, the documentation shoud be installed in ./docs/build/html/index.html relative to the location of this README file.
