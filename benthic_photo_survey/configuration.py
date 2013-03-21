@@ -6,6 +6,12 @@ LOCAL_TIME_ZONE = 'Pacific/Auckland' # Find your local timezone name here: http:
 # logged positions and depths in seperate databases.
 db_path = '../data/db/raw_log.db'
 
+# Default directories: These lines just determine where your file dialogs
+# will open to when you load gps logs, depth logs, and photos
+CONF_GPS_DIR = '../data/gps'
+CONF_DEPTH_DIR = '../data/sensus'
+CONF_PHOTO_DIR = '../data/images'
+
 # the following three items are for testing and shouldn't need to be
 # changed.
 dt_testlog = '../test_data/sensus/sensus_test.csv'

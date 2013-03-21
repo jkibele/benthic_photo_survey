@@ -90,12 +90,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.substrateListWidget.setCurrentItem( None )
 
     def loadPhotoDirectory(self):
-        photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory='data/images') )
-        self.imageDirectoryObj = image_directory( photo_dir )
-        self.setPhotoDisplay()
-        self.setPhotoData()
-        msg = "Photo Directory Set to: %s" % photo_dir
-        self.statusBar().showMessage( msg, 8000)
+        photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=CONF_PHOTO_DIR) )
+        if photo_dir:
+            self.imageDirectoryObj = image_directory( photo_dir )
+            self.setPhotoDisplay()
+            self.setPhotoData()
+            msg = "Photo Directory Set to: %s" % photo_dir
+            self.statusBar().showMessage( msg, 8000)
+        else: # User hit cancel
+            return False
         
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
@@ -232,7 +235,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
     
     def loadGpsLog(self):
-        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory='data/gps', filter='GPS Files (*.gpx *.log)') )
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=CONF_GPS_DIR, filter='GPS Files (*.gpx *.log)') )
         if log_filepath:            
             try:            
                 if log_filepath.lower().endswith('.gpx'):
@@ -257,7 +260,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         
     def loadDepthLog(self):
-        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory='data/sensus', filter='Sensus Log Files (*.csv)') )
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=CONF_DEPTH_DIR, filter='Sensus Log Files (*.csv)') )
         if log_filepath:
             try:        
                 result_str = read_depth_temp_log( log_filepath )
