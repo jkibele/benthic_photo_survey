@@ -4,13 +4,13 @@ LOCAL_TIME_ZONE = 'Pacific/Auckland' # Find your local timezone name here: http:
 # to change this if you are using multiple camera/gps/depth logger
 # setups at the same time. In that case, you'll need to keep your
 # logged positions and depths in seperate databases.
-db_path = 'data/db/raw_log.db'
+db_path = '../data/db/raw_log.db'
 
 # the following three items are for testing and shouldn't need to be
 # changed.
-dt_testlog = 'test_data/sensus/sensus_test.csv'
-gps_testlog = 'test_data/gps/GPS_20120722_194204.log'
-test_image = 'test_data/images/P6251541.jpg'
+dt_testlog = '../test_data/sensus/sensus_test.csv'
+gps_testlog = '../test_data/gps/GPS_20120722_194204.log'
+test_image = '../test_data/images/P6251541.jpg'
 
 #--------------bps_export------------------------------
 CONF_INPUT_EPSG = 4326 #This is the projection that your GPS is recording in.
