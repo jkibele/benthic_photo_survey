@@ -1,4 +1,4 @@
-import pyexiv2 as exiv # see not about pyexiv2 in notes.txt
+import pyexiv2 as exiv # see note about pyexiv2 in notes.txt
 from ast import literal_eval
 from depth_temp_log_io import *
 from configuration import *
