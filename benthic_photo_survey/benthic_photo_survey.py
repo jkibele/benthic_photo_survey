@@ -1,3 +1,5 @@
+#! /usr/bin python
+
 import sys, os
 import glob
 from depth_temp_log_io import *
