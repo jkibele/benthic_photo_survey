@@ -1,487 +1,295 @@
+#!/usr/bin/env python
+
+import sys, os
 import glob
-import os
-import wx
-from wx.lib.pubsub import Publisher
-from depth_temp_log_io import *
-from photo_tagging import *
-from gps_log_io import *
-from bps_export import *
+try:
+    from benthic_photo_survey.depth_temp_log_io import *
+    from benthic_photo_survey.photo_tagging import *
+    from benthic_photo_survey.gps_log_io import *
+    from benthic_photo_survey.bps_export import *
+except ImportError:
+    from depth_temp_log_io import *
+    from photo_tagging import *
+    from gps_log_io import *
+    from bps_export import *
+from PyQt4 import QtCore
+from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
+    QMessageBox
+from ui_bps import Ui_MainWindow
 
-class bpsPanel(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        width, height = wx.DisplaySize()
-        self.picPaths = []
-        self.image_dir = None
-        self.currentPicture = 0
-        self.totalPictures = 0
-        self.photoMaxSize = height - 200
+class MainWindow(QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)                                         
+        self.setupUi(self)
+        self.imageDirectoryObj = None
+        # imf will be the current image file object        
+        self.imf = None 
+        self.currentPhotoIndex = 0
+        self.habitatListWidget.addItems( CONF_HABITATS )
+        self.substrateListWidget.addItems( CONF_SUBSTRATES )
         
-    
-
-class MyFrame(wx.Frame):
-    def __init__(self, *args, **kwds):
-        # begin wxGlade: MyFrame.__init__
-        kwds["style"] = wx.DEFAULT_FRAME_STYLE
-        wx.Frame.__init__(self, *args, **kwds)
-        self.myPanel = bpsPanel(self)
-        self.exif_data_staticbox = wx.StaticBox(self.myPanel, -1, "Exif Data")
-        self.select_substrate_staticbox = wx.StaticBox(self.myPanel, -1, "Habitat and Substrate")
-        self.photo_info_staticbox = wx.StaticBox(self.myPanel, -1, "Photo Info")
+    def resizeEvent( self, event ):
+        super(MainWindow, self).resizeEvent( event )
+        self.setPhotoDisplay()        
         
-        Publisher().subscribe(self.updateImages, ("update images"))
-        Publisher().subscribe(self.resizeFrame, ("resize"))
-        
-        # Menu Bar
-        self.bps_menubar = wx.MenuBar()
-        # ------File Menu
-        self.file_menu = wx.Menu()
-        self.load_photos = wx.MenuItem(self.file_menu, wx.NewId(), "Load &Photos", "", wx.ITEM_NORMAL)
-        self.file_menu.AppendItem(self.load_photos)
-        self.load_gps = wx.MenuItem(self.file_menu, wx.NewId(), "Load &GPS Log", "", wx.ITEM_NORMAL)
-        self.file_menu.AppendItem(self.load_gps)
-        self.load_depth = wx.MenuItem(self.file_menu, wx.NewId(), "Load &Depth Log", "", wx.ITEM_NORMAL)
-        self.file_menu.AppendItem(self.load_depth)
-        self.file_menu.AppendSeparator()
-        self.quit_menu = wx.MenuItem(self.file_menu, wx.ID_EXIT, "&Quit", "", wx.ITEM_NORMAL)
-        self.file_menu.AppendItem(self.quit_menu)
-        self.bps_menubar.Append(self.file_menu, "&File")
-        # ------Export Menu
-        self.export_menu = wx.Menu()
-        self.shp_export = wx.MenuItem(self.export_menu, wx.NewId(), "Export &Shapefile", "", wx.ITEM_NORMAL)
-        self.export_menu.AppendItem(self.shp_export)
-        self.depth_graph = wx.MenuItem(self.export_menu, wx.NewId(), "Depth Profile &Graph", "", wx.ITEM_NORMAL)
-        self.export_menu.AppendItem(self.depth_graph)
-        self.bps_menubar.Append(self.export_menu, "&Export")
-        
-        self.SetMenuBar(self.bps_menubar)
-        # Menu Bar end
-        
-        self.btn_geotag = wx.Button(self.myPanel, -1, "Geotag")
-        self.btn_depth_tag = wx.Button(self.myPanel, -1, "Depth Temp Tag")
-        self.btn_tag_all = wx.Button(self.myPanel, -1, "Tag \'em All")
-        #self.the_image = wx.StaticBitmap(self.myPanel, -1, wx.Bitmap("/home/jkibele/Pictures/us_in_little_boat.jpg", wx.BITMAP_TYPE_ANY))
-        img = wx.EmptyImage(self.myPanel.photoMaxSize,self.myPanel.photoMaxSize)
-        self.the_image = wx.StaticBitmap(self.myPanel, wx.ID_ANY, wx.BitmapFromImage(img))
-        #print self.the_image.__class__.__name__
-        self.btn_prev = wx.Button(self.myPanel, -1, "< Prev")
-        self.btn_next = wx.Button(self.myPanel, -1, "Next >")
-        self.dir_label = wx.StaticText(self.myPanel, -1, "Directory:")
-        self.directory = wx.StaticText(self.myPanel, -1, " ")
-        self.filename_label = wx.StaticText(self.myPanel, -1, "Filename:")
-        self.filename = wx.StaticText(self.myPanel, -1, " ")
-        self.img_num = wx.StaticText(self.myPanel, -1, "0 of 0 in directory")
-        self.date_label = wx.StaticText(self.myPanel, -1, "Date:")
-        self.date = wx.StaticText(self.myPanel, -1, " ")
-        self.time_label = wx.StaticText(self.myPanel, -1, "Time:")
-        self.time = wx.StaticText(self.myPanel, -1, " ")
-        self.lat_label = wx.StaticText(self.myPanel, -1, "Latitude:")
-        self.latitude = wx.StaticText(self.myPanel, -1, " ")
-        self.lon_label = wx.StaticText(self.myPanel, -1, "Longitude:")
-        self.longitude = wx.StaticText(self.myPanel, -1, " ")
-        self.direction_label = wx.StaticText(self.myPanel, -1, "Direction:")
-        self.direction = wx.StaticText(self.myPanel, -1, " ")
-        self.depth_label = wx.StaticText(self.myPanel, -1, "Depth:")
-        self.depth = wx.StaticText(self.myPanel, -1, " ")
-        self.temp_label = wx.StaticText(self.myPanel, -1, "Temperature:")
-        self.temperature = wx.StaticText(self.myPanel, -1, " ")
-        self.habitat_label = wx.StaticText(self.myPanel, -1, "Habitat:")
-        self.habitat = wx.StaticText(self.myPanel, -1, " ")
-        self.subst_label = wx.StaticText(self.myPanel, -1, "Substrate:")
-        self.substrate = wx.StaticText(self.myPanel, -1, " ")
-        self.habitatSelector = wx.ListBox(self.myPanel, -1, choices=CONF_HABITATS)
-        self.substSelector = wx.ListBox(self.myPanel, -1, choices=CONF_SUBSTRATES)
-        self.substSelectLabel = wx.StaticText(self.myPanel, -1, "Double click to set value.")
-
-        self.__set_properties()
-        self.__do_layout()
-
-        self.Bind(wx.EVT_MENU, self.loadPhotos, self.load_photos)
-        self.Bind(wx.EVT_MENU, self.loadGPS, self.load_gps)
-        self.Bind(wx.EVT_MENU, self.loadDepth, self.load_depth)
-        self.Bind(wx.EVT_MENU, self.appQuit, self.quit_menu)
-        self.Bind(wx.EVT_MENU, self.shpExport, self.shp_export)
-        self.Bind(wx.EVT_MENU, self.depthGraph, self.depth_graph)
-        self.Bind(wx.EVT_BUTTON, self.geotag, self.btn_geotag)
-        self.Bind(wx.EVT_BUTTON, self.depth_tag, self.btn_depth_tag)
-        self.Bind(wx.EVT_BUTTON, self.tag_all, self.btn_tag_all)
-        self.Bind(wx.EVT_BUTTON, self.onPrevious, self.btn_prev)
-        self.Bind(wx.EVT_BUTTON, self.onNext, self.btn_next)
-        self.Bind(wx.EVT_CHAR_HOOK, self.onKeyDown)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.setHabitat, self.habitatSelector)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.setSubstrate, self.substSelector)
-        # end wxGlade
-
-    def __set_properties(self):
-        # begin wxGlade: MyFrame.__set_properties
-        self.SetTitle("Benthic Photo Survey")
-        
-        self.habitatSelector.SetMinSize((120, 160))
-        self.habitatSelector.SetSelection(0)
-        self.substSelector.SetMinSize((120, 160))
-        self.substSelector.SetSelection(0)
-        # end wxGlade
-
-    def __do_layout(self):
-        # begin wxGlade: MyFrame.__do_layout
-        self.ubberSizer = wx.BoxSizer(wx.VERTICAL)
-        mainGrid = wx.FlexGridSizer(1, 2, 0, 0)
-        rightColumn = wx.FlexGridSizer(3, 1, 0, 0)
-        select_substrate = wx.StaticBoxSizer(self.select_substrate_staticbox, wx.VERTICAL)
-        exif_data = wx.StaticBoxSizer(self.exif_data_staticbox, wx.HORIZONTAL)
-        exif_grid = wx.FlexGridSizer(9, 2, 0, 0)
-        photo_info = wx.StaticBoxSizer(self.photo_info_staticbox, wx.VERTICAL)
-        self.left_column = wx.BoxSizer(wx.VERTICAL)
-        button_holder = wx.BoxSizer(wx.HORIZONTAL)
-        upper_button_holder = wx.GridSizer(1, 3, 0, 0)
-        upper_button_holder.Add(self.btn_geotag, 0, wx.ALL, 5)
-        upper_button_holder.Add(self.btn_depth_tag, 0, wx.ALL, 5)
-        upper_button_holder.Add(self.btn_tag_all, 0, wx.ALL, 5)
-        self.left_column.Add(upper_button_holder, 1, wx.ALL, 5)
-        self.left_column.Add(self.the_image, 0, wx.ALL|wx.CENTER, 5)
-        button_holder.Add(self.btn_prev, 0, wx.ALL, 10)
-        button_holder.Add((300, 20), 0, wx.ALIGN_CENTER_VERTICAL, 0)
-        button_holder.Add(self.btn_next, 0, wx.ALL, 10)
-        self.left_column.Add(button_holder, 1, wx.ALIGN_CENTER_HORIZONTAL, 0)
-        mainGrid.Add(self.left_column, 1, wx.EXPAND, 0)
-        photo_info.Add(self.dir_label, 0, 0, 0)
-        photo_info.Add(self.directory, 0, wx.ALIGN_RIGHT, 0)
-        photo_info.Add(self.filename_label, 0, wx.TOP, 5)
-        photo_info.Add(self.filename, 0, wx.ALIGN_RIGHT, 0)
-        photo_info.Add(self.img_num, 0, wx.TOP, 5)
-        rightColumn.Add(photo_info, 1, wx.ALL|wx.EXPAND, 5)
-        exif_grid.Add(self.date_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.date, 0, 0, 0)
-        exif_grid.Add(self.time_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.time, 0, 0, 0)
-        exif_grid.Add(self.lat_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.latitude, 0, 0, 0)
-        exif_grid.Add(self.lon_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.longitude, 0, 0, 0)
-        exif_grid.Add(self.direction_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.direction, 0, 0, 0)
-        exif_grid.Add(self.depth_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.depth, 0, 0, 0)
-        exif_grid.Add(self.temp_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.temperature, 0, 0, 0)
-        exif_grid.Add(self.habitat_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.habitat, 0, 0, 0)
-        exif_grid.Add(self.subst_label, 0, wx.RIGHT|wx.ALIGN_RIGHT, 5)
-        exif_grid.Add(self.substrate, 0, 0, 0)
-        exif_data.Add(exif_grid, 1, wx.ALL|wx.EXPAND, 5)
-        rightColumn.Add(exif_data, 1, wx.ALL|wx.EXPAND, 5)
-        selector_holder = wx.BoxSizer(wx.HORIZONTAL)
-        selector_holder.Add(self.habitatSelector, 0, wx.ALL|wx.EXPAND, 5)
-        selector_holder.Add(self.substSelector, 0, wx.ALL|wx.EXPAND, 5)
-        select_substrate.Add(selector_holder, 0, wx.ALL|wx.EXPAND, 5)
-        select_substrate.Add(self.substSelectLabel, 0, wx.ALIGN_CENTER_HORIZONTAL, 0)
-        rightColumn.Add(select_substrate, 1, wx.ALL|wx.EXPAND, 5)
-        mainGrid.Add(rightColumn, 1, wx.TOP|wx.EXPAND, 20)
-        self.myPanel.SetSizer(mainGrid)
-        mainGrid.AddGrowableCol(0)
-        self.ubberSizer.Add(self.myPanel, 1, wx.EXPAND, 0)
-        self.SetSizer(self.ubberSizer)
-        self.ubberSizer.Fit(self)
-        self.Layout()
-        #print self.substSelector.Strings
-        # end wxGlade
-
-    #----------------------------------------------------------------------
-    def loadPhotos(self, event): # wxGlade: MyFrame.<event_handler>
+    def setPhotoDisplay(self):
         """
-        Opens a DirDialog to allow the user to open a folder with pictures
+        If there's a currently set imageDirectoryObj, set the current image file
+        (self.imf) to match the currentPhotoIndex, size it properly and set it to
+        display.
         """
-        print os.path.join(os.getcwd(),'data/images')
-        #print wx.VERSION_STRING
-        dlg = wx.DirDialog(self, "Choose a directory", defaultPath=os.path.join(os.getcwd(),'data/images'),
-                           style=wx.DD_DEFAULT_STYLE)
+        if self.imageDirectoryObj:
+            self.imf = self.imageDirectoryObj.images[ self.currentPhotoIndex ]
+            photo_pixmap = QPixmap( self.imf.file_path )
+            self.scaled_photo = photo_pixmap.scaled(self.photoDisplay.size(), QtCore.Qt.KeepAspectRatio)
+            self.photoDisplay.setPixmap( self.scaled_photo )
+            
+    def setPhotoData(self):
+        self.loadExifData()
+        self.loadPhotoDirectoryData()
         
-        if dlg.ShowModal() == wx.ID_OK:
-            #print dlg.GetPath()
-            self.folderPath = dlg.GetPath()
-            self.myPanel.image_dir = self.folderPath
-            #print self.folderPath
-            self.myPanel.picPaths = glob.glob(self.folderPath + os.path.sep + "*.JPG")
-            self.myPanel.picPaths = self.myPanel.picPaths + glob.glob(self.folderPath + os.path.sep + "*.jpg")
-            #print self.myPanel.picPaths
-            self.myPanel.picPaths.sort()
-            #print self.myPanel.picPaths
-            Publisher().sendMessage("update images", self.myPanel.picPaths)
-            dlg.Destroy()
-        return True
-
-    #----------------------------------------------------------------------
-    def loadImage(self, image):
-        """"""
-        direc, image_name = os.path.split(image)
-        self.imf = image_file(image)
-        img = wx.Image(image, wx.BITMAP_TYPE_ANY)
-        # scale the image, preserving the aspect ratio
-        W = img.GetWidth()
-        H = img.GetHeight()
-        if W > H:
-            NewW = self.myPanel.photoMaxSize
-            NewH = self.myPanel.photoMaxSize * H / W
-        else:
-            NewH = self.myPanel.photoMaxSize
-            NewW = self.myPanel.photoMaxSize * W / H
-        img = img.Scale(NewW,NewH)
-        # the image
-        self.the_image.SetBitmap(wx.BitmapFromImage(img))
-        # photo info
-        self.filename.SetLabel(image_name)
-        direc = '...' + direc[-30:]
-        self.directory.SetLabel(direc)
-        num_str = "%i of %i" % (self.myPanel.currentPicture + 1, self.myPanel.totalPictures)
-        self.img_num.SetLabel(num_str)
-        # exif data
-        self.loadExif()
-        
-        self.Refresh()
-        Publisher().sendMessage("resize", "")
-        
-    #----------------------------------------------------------------------
-    def loadExif(self):
+    def loadPhotoDirectoryData(self):
+        self.filenameValue.setText(self.imf.file_name)
+        direc = '...' + self.imageDirectoryObj.path[-30:]
+        self.directoryValue.setText(direc)
+        num_str = "%i of %i" % (self.currentPhotoIndex + 1, self.imageDirectoryObj.image_count )
+        self.photoCountValue.setText(num_str)
+            
+    def loadExifData(self):
         if self.imf.datetime:
             pdate = self.imf.datetime.strftime('%d/%m/%Y')
             ptime = self.imf.datetime.strftime('%H:%M:%S')
         else:
             pdate = 'None'
             ptime = 'None'
-        self.time.SetLabel( ptime )
-        self.date.SetLabel( pdate )
+        self.timeValue.setText( ptime )
+        self.dateValue.setText( pdate )
         if self.imf.position:
             latstr, lonstr = unicode(self.imf.position).split(',')
         else:
             latstr, lonstr = 'None','None'
-        self.latitude.SetLabel( latstr )
-        self.longitude.SetLabel( lonstr )
-        self.direction.SetLabel( str(self.imf.exif_direction) )
+        self.latitudeValue.setText( latstr )
+        self.longitudeValue.setText( lonstr )
+        self.directionValue.setText( str(self.imf.exif_direction) )
         if self.imf.exif_depth:
             dstr = "%.2f m" % self.imf.exif_depth
         else:
             dstr = 'None'
-        self.depth.SetLabel( dstr )
+        self.depthValue.setText( dstr )
         if self.imf.xmp_temperature:
             tstr = str(self.imf.xmp_temperature) + ' ' + self.imf.xmp_temp_units
         else:
             tstr = 'None'
-        self.temperature.SetLabel( tstr )
+        self.temperatureValue.setText( tstr )
         hab = self.imf.xmp_habitat
-        self.habitat.SetLabel( str(hab) )
-        if hab: # Set the selection in the list box
-            index = self.habitatSelector.Strings.index( unicode( hab ) )
-            self.habitatSelector.SetSelection( index )
+        self.habitatValue.setText( str(hab) )
+        if hab: # Set the selection in the listbox
+            hab_list_item = self.habitatListWidget.findItems( str(hab), QtCore.Qt.MatchFlags() )[0]
+            self.habitatListWidget.setCurrentItem( hab_list_item )
+        else:
+            self.habitatListWidget.setCurrentItem( None )
             
         subs = self.imf.xmp_substrate
-        self.substrate.SetLabel( str(subs) )
+        self.substrateValue.setText( str(subs) )
         if subs:
-            index = self.substSelector.Strings.index( str( subs ) )
-            self.substSelector.SetSelection( index )
-        
-        self.substrate.Refresh()
-        
-    #---------------------------------------------------------------------
-    def onKeyDown(self, event):
-        keycode = event.GetKeyCode()
-        if keycode == wx.WXK_RIGHT:
-            self.nextPicture()
-        elif keycode == wx.WXK_LEFT:
-            self.previousPicture()
-        event.Skip()
-        
-    #----------------------------------------------------------------------
-    def nextPicture(self):
-        """
-        Loads the next picture in the directory
-        """
-        if self.myPanel.currentPicture == self.myPanel.totalPictures-1:
-            self.myPanel.currentPicture = 0
+            subst_list_item = self.substrateListWidget.findItems( str(subs), QtCore.Qt.MatchFlags() )[0]
+            self.substrateListWidget.setCurrentItem( subst_list_item )
         else:
-            self.myPanel.currentPicture += 1
-        print self.myPanel.picPaths
-        self.loadImage(self.myPanel.picPaths[self.myPanel.currentPicture])
-        
-    #----------------------------------------------------------------------
-    def previousPicture(self):
-        """
-        Displays the previous picture in the directory
-        """
-        if self.myPanel.currentPicture == 0:
-            self.myPanel.currentPicture = self.myPanel.totalPictures - 1
-        else:
-            self.myPanel.currentPicture -= 1
-        self.loadImage(self.myPanel.picPaths[self.myPanel.currentPicture])
-        
-    #----------------------------------------------------------------------
-    def update(self, event):
-        """
-        Called when the slideTimer's timer event fires. Loads the next
-        picture from the folder by calling th nextPicture method
-        """
-        self.nextPicture()
-        
-    #----------------------------------------------------------------------
-    def updateImages(self, msg):
-        """
-        Updates the picPaths list to contain the current folder's images
-        """
-        self.myPanel.picPaths = msg.data
-        self.myPanel.currentPicture = 0
-        self.myPanel.totalPictures = len(self.myPanel.picPaths)
-        try:
-            self.loadImage(self.myPanel.picPaths[0])
-        except:
-            pass
-        
-    #----------------------------------------------------------------------
-    def onNext(self, event):
-        """
-        Calls the nextPicture method
-        """
-        self.nextPicture()
-    
-    #----------------------------------------------------------------------
-    def onPrevious(self, event):
-        """
-        Calls the previousPicture method
-        """
-        self.previousPicture()
-        
-    #----------------------------------------------------------------------
-    def resizeFrame(self, msg):
-        """"""
-        self.ubberSizer.Fit(self)
+            self.substrateListWidget.setCurrentItem( None )
 
-    #----------------------------------------------------------------------
-    def loadGPS(self, event): # wxGlade: MyFrame.<event_handler>
-        dlg = wx.FileDialog(self, "Choose a GPS file", defaultDir=os.path.join(os.getcwd(),'data/gps'),
-                           style=wx.FD_DEFAULT_STYLE)
-        result_str =''
-        if dlg.ShowModal() == wx.ID_OK:
-            fp = dlg.GetPath()
-            if fp.lower().endswith('.gpx'):
-                gf = gpx_file(fp)
-                result_str = gf.read_to_db()
-            elif fp.lower().endswith('.log'):
-                result_str = read_gps_log(fp)
-            else:
-                wx.MessageBox('Import Failed. The GPS log needs to have a .gpx or .log extension', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
-                return False
-            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
-            dlg.Destroy()
-        event.Skip()
-        self.Refresh()
-        return True
-
-    #----------------------------------------------------------------------
-    def loadDepth(self, event): # wxGlade: MyFrame.<event_handler>
-        dlg = wx.FileDialog(self, "Choose a depth logger file",defaultDir=os.path.join(os.getcwd(),'data/sensus'),
-                           style=wx.FD_DEFAULT_STYLE)
-        result_str =''
-        if dlg.ShowModal() == wx.ID_OK:
-            fp = dlg.GetPath()
-            if fp.lower().endswith('.csv'):
-                result_str = read_depth_temp_log(fp)
-            else:
-                wx.MessageBox('Import Failed. The Depth / Temp log needs to have a .csv extension', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
-                return False
-            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
-            dlg.Destroy()
-        self.Refresh()
-        return True
-    
-    #----------------------------------------------------------------------
-    def appQuit(self, event): # wxGlade: MyFrame.<event_handler>
-        self.Close()
-        event.Skip()
-        
-    #----------------------------------------------------------------------
-    def depthGraph(self, event):
-        imd = image_directory(self.myPanel.image_dir)
-        imd.depth_plot()
-        return True
-        
-    #----------------------------------------------------------------------
-    def shpExport(self, event):
-        dlg = wx.FileDialog(self, "Create a shapefile", wildcard='Shapefiles (*.shp)|*.shp', 
-                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT, defaultDir=os.path.join(os.getcwd(),'data/shapefiles') )
-        if dlg.ShowModal() == wx.ID_OK:
-            fp = dlg.GetPath()
-            bpse = bps_shp_exporter(fp)
-            returned_path = bpse.write_shapefile( self.folderPath )
-            result_str = "Shapefile written to: %s" % returned_path
-            wx.MessageBox(result_str,'Great Success', wx.OK | wx.ICON_INFORMATION)
-            dlg.Destroy()
-        self.Refresh()
-        return True
-
-    #----------------------------------------------------------------------
-    def geotag(self, event): # wxGlade: MyFrame.<event_handler>
-        r = self.imf.geotag()
-        if not r:
-            wx.MessageBox('I could not geotag this image. Either I could not find a position with a close enough time code or perhaps something more insidious and evil happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+    def loadPhotoDirectory(self):
+        photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=CONF_PHOTO_DIR) )
+        if photo_dir:
+            self.imageDirectoryObj = image_directory( photo_dir )
+            self.setPhotoDisplay()
+            self.setPhotoData()
+            msg = "Photo Directory Set to: %s" % photo_dir
+            self.statusBar().showMessage( msg, 8000)
+        else: # User hit cancel
             return False
+        
+    def nextPhoto(self):
+        if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
+            self.currentPhotoIndex += 1
         else:
-            self.loadExif()
-            return True
-
-    #----------------------------------------------------------------------
-    def depth_tag(self, event): # wxGlade: MyFrame.<event_handler>
-        r = self.imf.depth_temp_tag()
-        if not r:
-            wx.MessageBox('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+            self.currentPhotoIndex = 0
+        self.setPhotoDisplay()
+        self.setPhotoData()
+        
+    def previousPhoto(self):
+        if self.currentPhotoIndex == 0:
+            self.currentPhotoIndex = self.imageDirectoryObj.image_count - 1
+        else:
+            self.currentPhotoIndex -= 1
+        self.setPhotoDisplay()
+        self.setPhotoData()
+        
+    def setSubstrate(self, item_index):
+        item = self.substrateListWidget.itemFromIndex( item_index )
+        hab = str( item.text() )
+        self.imf.set_xmp_substrate( hab )
+        self.loadExifData()
+    
+    def setHabitat(self, item_index):
+        item = self.habitatListWidget.itemFromIndex( item_index )
+        hab = str( item.text() )
+        self.imf.set_xmp_habitat( hab )
+        self.loadExifData()
+    
+    def geoTag(self):
+        if self.imf:
+            r = self.imf.geotag()
+            if not r:
+                msg = QMessageBox( )
+                msg.setText('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.')
+                msg.setWindowTitle("Epic Failure")
+                msg.exec_()
+                return False
+            else:
+                self.loadExifData()
+                return True
+        else:
+            msg = QMessageBox()
+            msg.setText("Please load a photo directory using the file menu.")
+            msg.setWindowTitle("What photo?")
+            msg.exec_()
             return False
-        else:
-            self.loadExif()
-            return True
             
-    #----------------------------------------------------------------------
-    def tag_all(self, event):
-        rd_cnt = 0
+    def geoTagAll(self):
         rg_cnt = 0
-        #rdict = {}
-        if len( self.myPanel.picPaths ) > 0:
-            for pp in self.myPanel.picPaths:
-                imf = image_file(pp)
-                if imf.depth_temp_tag():
-                    rd_cnt += 1
+        if self.imageDirectoryObj and self.imageDirectoryObj.image_count > 0:
+            for imf in self.imageDirectoryObj.images:
                 if imf.geotag():
                     rg_cnt += 1
-            if rd_cnt==rg_cnt==self.myPanel.totalPictures:
+            if rg_cnt==self.imageDirectoryObj.image_count:
                 title_str = 'Great Success!'
             else:
                 title_str = 'Moderate Success'
-            info_str = "Out of %i total photos, I geotagged %i and tagged %i with depth and temperature. You\'re welcome." % (self.myPanel.totalPictures,rg_cnt,rd_cnt)
-            wx.MessageBox(info_str,title_str, wx.OK | wx.ICON_INFORMATION)
-            self.loadExif()
+            info_str = "Out of %i total photos, I geotagged %i. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
+            
+            self.loadExifData()
         else:
-            wx.MessageBox('I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.', 'Epic Failure', wx.OK | wx.ICON_INFORMATION)
+            info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
+            title_str = 'Epic Failure'
+        mbox = QMessageBox()
+        mbox.setText( info_str )
+        mbox.setWindowTitle( title_str )
+        mbox.exec_()
+    
+    def depthTempTag(self):
+        if self.imf:
+            r = self.imf.depth_temp_tag()
+            if not r:
+                msg = QMessageBox( )
+                msg.setText('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.')
+                msg.setWindowTitle("Epic Failure")
+                msg.exec_()
+                return False
+            else:
+                self.loadExifData()
+                return True
+        else:
+            msg = QMessageBox()
+            msg.setText("Please load a photo directory using the file menu.")
+            msg.setWindowTitle("What photo?")
+            msg.exec_()
             return False
+            
+    def depthTempTagAll(self):
+        rg_cnt = 0
+        if self.imageDirectoryObj.image_count > 0:
+            for imf in self.imageDirectoryObj.images:
+                if imf.depth_temp_tag():
+                    rg_cnt += 1
+            if rg_cnt==self.imageDirectoryObj.image_count:
+                title_str = 'Great Success!'
+            else:
+                title_str = 'Moderate Success'
+            info_str = "Out of %i total photos, I tagged %i with depth and temperature. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
+            
+            self.loadExifData()
+        else:
+            info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
+            title_str = 'Epic Failure'
+        mbox = QMessageBox()
+        mbox.setText( info_str )
+        mbox.setWindowTitle( title_str )
+        mbox.exec_()
+    
+    def depthPlot(self):
+        self.imageDirectoryObj.depth_plot()
+    
+    def exportShapefile(self):
+        shp_filepath = str( QFileDialog.getSaveFileName(self, 'Save Shapefile',
+                                                        directory='data/shapefiles',
+                                                        filter='Shapefiles (*.shp)') )
+        if shp_filepath:
+            try:
+                bpse = bps_shp_exporter(shp_filepath)
+                returned_path = bpse.write_shapefile( self.imageDirectoryObj.path )
+                result_str = "Great Success: Shapefile written to: %s" % returned_path
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Oops. Seems like that didn't work.")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # User hit cancel
+            return False
+                
+    
+    def loadGpsLog(self):
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=CONF_GPS_DIR, filter='GPS Files (*.gpx *.log)') )
+        if log_filepath:            
+            try:            
+                if log_filepath.lower().endswith('.gpx'):
+                    gf = gpx_file( log_filepath )
+                    result_str = gf.read_to_db()
+                else:
+                    result_str = read_gps_log( log_filepath )
+                msg = "Great Success: %s" % result_str
+                self.statusBar().showMessage( msg, 8000)
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Something bad happened. Are you sure that was a GPS log file?")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # This means the user hit 'cancel'
+            return False
+            
         
-    #----------------------------------------------------------------------
-    def setHabitat(self, event):
-        index = event.GetSelection()
-        chosen_habitat = self.habitatSelector.GetString(index)
-        self.imf.set_xmp_habitat(chosen_habitat)
-        self.loadExif()
-        event.Skip()
-        
-    #----------------------------------------------------------------------
-    def setSubstrate(self, event): # wxGlade: MyFrame.<event_handler>
-        index = event.GetSelection()
-        chosen_substrate = self.substSelector.GetString(index)
-        self.imf.set_xmp_substrate(chosen_substrate)
-        self.loadExif()
-        event.Skip()
-
-# end of class MyFrame
-
-
-if __name__ == "__main__":
-    benthicPS = wx.PySimpleApp(0)
-    wx.InitAllImageHandlers()
-    benthic_photo_survey = MyFrame(None, -1, "")
-    benthicPS.SetTopWindow(benthic_photo_survey)
-    benthic_photo_survey.Show()
-    benthicPS.MainLoop()
+    def loadDepthLog(self):
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=CONF_DEPTH_DIR, filter='Sensus Log Files (*.csv)') )
+        if log_filepath:
+            try:        
+                result_str = read_depth_temp_log( log_filepath )
+                msg = "Great Success: %s" % result_str
+                self.statusBar().showMessage( msg, 8000)
+                return True
+            except:
+                import traceback
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                mbox = QMessageBox()
+                mbox.setText("Your CSV file was probably not formatted as expected. Are you sure it was a sensus log file?")
+                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+                mbox.setWindowTitle("Epic Failure")
+                mbox.exec_()
+                return False
+        else: # This means the user hit 'cancel' 
+            return False
+                
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    frame = MainWindow()
+    frame.show()
+    app.exec_()
+    
