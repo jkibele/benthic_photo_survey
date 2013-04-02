@@ -1,0 +1,659 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>photo_tagging &mdash; Benthic Photo Survey 0.3.3 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.3.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Benthic Photo Survey 0.3.3 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="../index.html">Benthic Photo Survey 0.3.3 documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for photo_tagging</h1><div class="highlight"><pre>
+<span class="kn">import</span> <span class="nn">pyexiv2</span> <span class="kn">as</span> <span class="nn">exiv</span> <span class="c"># see not about pyexiv2 in notes.txt</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">depth_temp_log_io</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">configuration</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">gps_log_io</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="c"># That namespace url doesn&#39;t really exist. The custom tags seem to work</span>
+<span class="c"># without it. Perhaps I should figure out if I really need it or not.</span>
+<span class="n">exiv</span><span class="o">.</span><span class="n">xmp</span><span class="o">.</span><span class="n">register_namespace</span><span class="p">(</span><span class="s">&#39;http://svarchiteuthis.com/benthicphoto/&#39;</span><span class="p">,</span> <span class="s">&#39;BenthicPhoto&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="image_directory"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory">[docs]</a><span class="k">class</span> <span class="nc">image_directory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+            <span class="n">jpgs</span> <span class="o">=</span> <span class="p">[</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">)</span> <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> is not a directory.&quot;</span> <span class="o">%</span> <span class="n">dir_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">dir_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="o">=</span> <span class="p">[</span> <span class="n">image_file</span><span class="p">(</span><span class="n">img</span><span class="p">)</span> <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="n">jpgs</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span> <span class="c"># sort the images by datetime of the image</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">__shift_datetimes__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_delta_obj</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shift the &#39;date original&#39; values of all photos in the directory. See the</span>
+<span class="sd">        warnings in the image_file.__set_datetime__ method doc string. You should</span>
+<span class="sd">        be careful about using this method.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
+            <span class="n">new_dt</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">__shift_datetime__</span><span class="p">(</span> <span class="n">time_delta_obj</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span> <span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">local_datetimes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="n">x</span><span class="o">.</span><span class="n">datetime</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">utc_datetimes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="n">x</span><span class="o">.</span><span class="n">utc_datetime</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span> <span class="p">]</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_depths</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">img</span><span class="o">.</span><span class="n">exif_depth</span><span class="p">:</span>
+                <span class="n">d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">exif_depth</span> <span class="o">*</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">d_list</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="image_directory.depth_plot"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory.depth_plot">[docs]</a>    <span class="k">def</span> <span class="nf">depth_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a plot of the depth profile with photo times and depths marked.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">drs</span> <span class="o">=</span> <span class="n">dive_record_set</span><span class="p">(</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">drs</span><span class="o">.</span><span class="n">depth_time_array</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="c"># depths * -1 to make negative values</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">drs</span><span class="o">.</span><span class="n">depth_time_array</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="c"># datetimes</span>
+            
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span> <span class="c"># imported from matplotlib</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot_date</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">marker</span><span class="o">=</span><span class="s">&#39;.&#39;</span><span class="p">,</span><span class="n">linestyle</span><span class="o">=</span><span class="s">&#39;-&#39;</span><span class="p">,</span><span class="n">tz</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">timezone</span><span class="p">(</span><span class="n">LOCAL_TIME_ZONE</span><span class="p">)</span> <span class="p">)</span> <span class="c"># LOCAL_TIME_ZONE from configuration.py)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">exif_depths</span><span class="p">,</span><span class="s">&#39;r*&#39;</span><span class="p">,</span><span class="n">markersize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">picker</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;Date and Time&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;Depth (meters)&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s">&#39;Photos with Depth and Time&#39;</span><span class="p">)</span>
+        <span class="c">#print &quot;Before def onpick&quot;</span>
+        <span class="k">def</span> <span class="nf">onpick</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+            <span class="k">global</span> <span class="n">ann</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ann</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">file_path</span> <span class="p">)</span>
+            <span class="n">ann_text</span> <span class="o">=</span> <span class="s">&quot;Photo: </span><span class="si">%s</span><span class="se">\n</span><span class="s">depth: </span><span class="si">%g</span><span class="se">\n</span><span class="s">date: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">fname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depths</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y/%m/</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">ann</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">ann_text</span><span class="p">,</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depths</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span> <span class="n">xytext</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span><span class="o">-</span><span class="mi">20</span><span class="p">),</span> 
+                                <span class="n">textcoords</span><span class="o">=</span><span class="s">&#39;offset points&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s">&#39;top&#39;</span><span class="p">,</span>
+                                <span class="n">bbox</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">boxstyle</span><span class="o">=</span><span class="s">&#39;round,pad=0.2&#39;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.3</span><span class="p">),</span>
+                                <span class="n">arrowprops</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">arrowstyle</span><span class="o">=</span><span class="s">&#39;-&gt;&#39;</span><span class="p">,</span> <span class="n">connectionstyle</span><span class="o">=</span><span class="s">&#39;arc3,rad=0.5&#39;</span><span class="p">,</span> 
+                                                <span class="n">color</span><span class="o">=</span><span class="s">&#39;red&#39;</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+            <span class="k">print</span> <span class="s">&quot;Photo: </span><span class="si">%s</span><span class="s">, index: </span><span class="si">%i</span><span class="s">, depth: </span><span class="si">%g</span><span class="s">, date: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">fname</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depths</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_datetimes</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y/%m/</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="c">#print &quot;Before mpl_connect&quot;    </span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">mpl_connect</span><span class="p">(</span><span class="s">&#39;pick_event&#39;</span><span class="p">,</span> <span class="n">onpick</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="c">#print &quot;after plt show&quot;</span>
+        </div>
+<div class="viewcode-block" id="image_directory.depth_temp_tag"><a class="viewcode-back" href="../code.html#photo_tagging.image_directory.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Depth tag all the photos in the directory.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">img</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">images</span><span class="p">:</span>
+            <span class="n">img</span><span class="o">.</span><span class="n">depth_temp_tag</span><span class="p">(</span><span class="n">verbose</span><span class="p">)</span>
+</div></div>
+<div class="viewcode-block" id="image_file"><a class="viewcode-back" href="../code.html#photo_tagging.image_file">[docs]</a><span class="k">class</span> <span class="nc">image_file</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An object to make accessing image files and metadata easier.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">img_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="o">=</span> <span class="n">img_path</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">exiv</span><span class="o">.</span><span class="n">ImageMetadata</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">md</span> <span class="o">=</span> <span class="n">md</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span> <span class="s">&quot;The file </span><span class="si">%s</span><span class="s"> does not exist.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">img_path</span><span class="p">,)</span> <span class="p">)</span>
+            
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&quot;Image file: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">,)</span>
+        
+    <span class="k">def</span> <span class="nf">__get_exiv_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get a pyexiv2 tag. If the tag doesn&#39;t exist, return None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">tag_string</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="k">def</span> <span class="nf">__get_exiv_tag_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get a pyexiv2 tag value. If the tag doesn&#39;t exist, return None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">tag_string</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+            
+    <span class="k">def</span> <span class="nf">__get_exiv_tag_human_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">tag_string</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get a pyexiv2 tag human value. If the tag doesn&#39;t exist, return None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">tag_string</span><span class="p">]</span><span class="o">.</span><span class="n">human_value</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+            
+<div class="viewcode-block" id="image_file.exif_dict"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.exif_dict">[docs]</a>    <span class="k">def</span> <span class="nf">exif_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_panasonic_keys</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dict with all exif and xmp keys and values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">exif_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">xmp_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="n">exif_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span> <span class="n">key</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">exif_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span> <span class="n">exclude_panasonic_keys</span> <span class="ow">and</span> <span class="s">&#39;Panasonic&#39;</span> <span class="ow">in</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_human_value</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                    <span class="n">exif_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span> <span class="n">key</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_human_value</span><span class="p">(</span><span class="n">key</span><span class="p">)[:</span><span class="mi">100</span><span class="p">]</span> <span class="p">}</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">exif_dict</span>
+    </div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">file_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">file_path</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="image_file.datetime"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.datetime">[docs]</a>    <span class="k">def</span> <span class="nf">datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try to get a datetime object for the image&#39;s creation from the </span>
+<span class="sd">        Exif.Photo.DateTimeOriginal value via pyexiv2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.Photo.DateTimeOriginal&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tzname</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.Photo.DateTimeOriginal&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">make_aware_of_local_tz</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.Photo.DateTimeOriginal&#39;</span><span class="p">)</span> <span class="p">)</span>
+            </div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">utc_datetime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">utc_from_local</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_direction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSImgDirection&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSImgDirection&#39;</span><span class="p">)</span> <span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_lat_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSLatitude&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_latref_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSLatitudeRef&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_lon_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSLongitude&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_lonref_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSLongitudeRef&#39;</span><span class="p">)</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_depth_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSAltitude&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">exif_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ret_val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSAltitude&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ret_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Exif.GPSInfo.GPSAltitude&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_float</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="n">ret_val</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="n">ret_val</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">__exif_depth_temp_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is a bit of a hack. I couldn&#39;t find a good place to store temperature</span>
+<span class="sd">        data in the exif so I went with storing a python dictionary as a string</span>
+<span class="sd">        in Exif.Photo.UserComment. I think I&#39;m going to stop using this and store</span>
+<span class="sd">        this stuff in custom xmp tags instead. UserComment is accessible to many</span>
+<span class="sd">        photo management apps so it seems likely to get corrupted. I made it a </span>
+<span class="sd">        private method but maybe I should have just deleted it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dstr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="s">&#39;Exif.Photo.UserComment&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">return</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">dstr</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">__exif_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This just exposes the temperature value from the hack mentioned in the</span>
+<span class="sd">        doc string for exif_depth_temp_dict. I&#39;m going to stop writing to this</span>
+<span class="sd">        tag so don&#39;t be surprised if this returns nothing. Actually, I think I</span>
+<span class="sd">        may just make it a private method because I don&#39;t want to delete it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depth_temp_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depth_temp_dict</span><span class="p">[</span><span class="s">&#39;temp&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmp_temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Xmp.BenthicPhoto.temperature&#39;</span><span class="p">)</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmp_temp_units</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Xmp.BenthicPhoto.temp_units&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmp_substrate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Xmp.BenthicPhoto.substrate&#39;</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">xmp_habitat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_exiv_tag_value</span><span class="p">(</span><span class="s">&#39;Xmp.BenthicPhoto.habitat&#39;</span><span class="p">)</span>
+            
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="image_file.position"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Look at the exif data and return a position object (as defined in</span>
+<span class="sd">        gps_log_io). Return None if there&#39;s no GPSInfo in the exif.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_lat_tag</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_lon_tag</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_latref_tag</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_lonref_tag</span><span class="p">:</span>
+            <span class="n">lat</span> <span class="o">=</span> <span class="n">latitude</span><span class="o">.</span><span class="n">from_exif_coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exif_lat_tag</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">exif_latref_tag</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">lon</span> <span class="o">=</span> <span class="n">longitude</span><span class="o">.</span><span class="n">from_exif_coord</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exif_lon_tag</span><span class="o">.</span><span class="n">value</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">exif_lonref_tag</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">position</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+            </div>
+    <span class="k">def</span> <span class="nf">__set_datetime__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dt_obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the date original in the exif. I don&#39;t think you want to do this</span>
+<span class="sd">        but I did want to once. If you lose the origination time for your </span>
+<span class="sd">        image you can not sync it to your gps track or your depth log so </span>
+<span class="sd">        leave this alone unless you&#39;re sure you know what you&#39;re doing. </span>
+<span class="sd">        If you screw up your data don&#39;t come crying to me. I tried to warn</span>
+<span class="sd">        you.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;Exif.Photo.DateTimeOriginal&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">exiv</span><span class="o">.</span><span class="n">ExifTag</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">dt_obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span>
+        
+    <span class="k">def</span> <span class="nf">__shift_datetime__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">time_delta_obj</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Shift the &#39;date original&#39; in the exif by the given time delta. See the</span>
+<span class="sd">        warnings in the doc string of __set_datetime__ method. You should be </span>
+<span class="sd">        careful with this.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_datetime__</span><span class="p">(</span> <span class="n">current_dt</span> <span class="o">+</span> <span class="n">time_delta_obj</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;datetime of </span><span class="si">%s</span><span class="s"> changed from </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="p">,</span> <span class="n">current_dt</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%X</span><span class="s">, </span><span class="si">%x</span><span class="s">&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%X</span><span class="s">, </span><span class="si">%x</span><span class="s">&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">datetime</span>
+            
+    <span class="k">def</span> <span class="nf">__set_exif_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the relevant exif tags to match the position object handed in.</span>
+<span class="sd">        The position object is defined over in gps_log_io.py</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Exif.GPSInfo.GPS&#39;</span>
+        <span class="n">add_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;Latitude&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">exif_coord</span><span class="p">,</span>
+                    <span class="n">pre</span><span class="o">+</span><span class="s">&#39;LatitudeRef&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">hemisphere</span><span class="p">,</span>
+                    <span class="n">pre</span><span class="o">+</span><span class="s">&#39;Longitude&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">exif_coord</span><span class="p">,</span>
+                    <span class="n">pre</span><span class="o">+</span><span class="s">&#39;LongitudeRef&#39;</span><span class="p">:</span> <span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">hemisphere</span> <span class="p">}</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">add_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">exiv</span><span class="o">.</span><span class="n">ExifTag</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+        
+    <span class="k">def</span> <span class="nf">__set_exif_depth_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">temp</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pyexiv2.utils</span> <span class="kn">import</span> <span class="n">Rational</span>
+        <span class="k">if</span> <span class="n">depth</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c"># This can happen because there&#39;s a bit of slop in the conversion from pressure to depth</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;Given depth was a negative value.&quot;</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">temp</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c"># temperature isn&#39;t important at this point so if it&#39;s not there we&#39;ll just call it zero</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Exif.GPSInfo.GPS&#39;</span>
+        <span class="c">#dt_str = &quot;{&#39;depth&#39;:%g,&#39;temp&#39;:%g}&quot; % (depth,temp)</span>
+        <span class="n">dfrac</span> <span class="o">=</span> <span class="n">Fraction</span><span class="o">.</span><span class="n">from_float</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span><span class="o">.</span><span class="n">limit_denominator</span><span class="p">()</span>
+        <span class="n">add_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;Altitude&#39;</span><span class="p">:</span> <span class="n">Rational</span><span class="p">(</span><span class="n">dfrac</span><span class="o">.</span><span class="n">numerator</span><span class="p">,</span><span class="n">dfrac</span><span class="o">.</span><span class="n">denominator</span><span class="p">),</span>
+                    <span class="n">pre</span><span class="o">+</span><span class="s">&#39;AltitudeRef&#39;</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+                    <span class="p">}</span>
+                    <span class="c">#&#39;Exif.Photo.UserComment&#39;: dt_str }</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">add_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">exiv</span><span class="o">.</span><span class="n">ExifTag</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">True</span>
+        
+    <span class="k">def</span> <span class="nf">__set_xmp_depth_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">temp</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">depth</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">temp</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c"># temperature isn&#39;t important at this point so if it&#39;s not there we&#39;ll just call it zero</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Xmp.BenthicPhoto.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;depth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">depth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;depth_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;meters&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;temperature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;temp_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;celsius&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">set_xmp_substrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subst_str</span><span class="p">):</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Xmp.BenthicPhoto.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;substrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subst_str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">set_xmp_habitat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subst_str</span><span class="p">):</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Xmp.BenthicPhoto.&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="s">&#39;habitat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subst_str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="image_file.logger_depth"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.logger_depth">[docs]</a>    <span class="k">def</span> <span class="nf">logger_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the logged depth out of the db that matches the photo&#39;s timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">:</span>
+            <span class="n">depth</span> <span class="o">=</span> <span class="n">get_depth_for_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">,</span><span class="n">reject_threshold</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">depth</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        </div>
+    <span class="nd">@property</span>
+<div class="viewcode-block" id="image_file.logger_temp"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.logger_temp">[docs]</a>    <span class="k">def</span> <span class="nf">logger_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the logged temperature out of the db that matches the photo&#39;s timestamp.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">get_temp_for_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">,</span><span class="n">reject_threshold</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">temp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        </div>
+<div class="viewcode-block" id="image_file.depth_temp_tag"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.depth_temp_tag">[docs]</a>    <span class="k">def</span> <span class="nf">depth_temp_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the depth and temp readings out of the db that match the photo&#39;s origination</span>
+<span class="sd">        time (considering that the photo&#39;s time stamp is in the local timezone and the</span>
+<span class="sd">        logs are in UTC) and write those values to the image&#39;s exif data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_exif_depth_temp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_depth</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_temp</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_xmp_depth_temp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_depth</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_temp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depth_tag</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exif_depth_tag</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        </div>
+<div class="viewcode-block" id="image_file.geotag"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.geotag">[docs]</a>    <span class="k">def</span> <span class="nf">geotag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a position that matches the time of creation for the image out</span>
+<span class="sd">        of the database and set the exif data accordingly. We assume that </span>
+<span class="sd">        the photo timestamp is local and the gps position is utc.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">get_position_for_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">pos</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;-------------------GeoTagg--------------------------------&quot;</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> is going to get set to </span><span class="si">%s</span><span class="s"> as </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_path</span> <span class="p">),</span> <span class="nb">unicode</span><span class="p">(</span> <span class="n">pos</span> <span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">exif_coord</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">exif_coord</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s"> in dms&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">dms</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">dms</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__set_exif_position</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span>
+        </div>
+    <span class="k">def</span> <span class="nf">__compare_position__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is just for testing. Check to see if the value stored in the db</span>
+<span class="sd">        matches what we display after conversion. I want to make sure I&#39;m not</span>
+<span class="sd">        throwing away precision in coordinate conversions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">get_position_for_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">utc_datetime</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">print</span> <span class="s">&quot;  db says: </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s"> </span><span class="se">\n</span><span class="s">exif says: </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">,</span> <span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">nmea_string</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Latitudes match&quot;</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="o">.</span><span class="n">lon</span><span class="o">.</span><span class="n">nmea_string</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;Longitudes match&quot;</span>
+        
+<div class="viewcode-block" id="image_file.remove_geotagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_geotagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_geotagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geokeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Latitude&#39;</span><span class="p">,</span><span class="s">&#39;LatitudeRef&#39;</span><span class="p">,</span><span class="s">&#39;Longitude&#39;</span><span class="p">,</span><span class="s">&#39;LongitudeRef&#39;</span><span class="p">]</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Exif.GPSInfo.GPS&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="n">gk</span> <span class="k">for</span> <span class="n">gk</span> <span class="ow">in</span> <span class="n">geokeys</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__contains__</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                </div>
+<div class="viewcode-block" id="image_file.remove_depthtagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_depthtagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_depthtagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geokeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Altitude&#39;</span><span class="p">,</span><span class="s">&#39;AltitudeRef&#39;</span><span class="p">]</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Exif.GPSInfo.GPS&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="n">gk</span> <span class="k">for</span> <span class="n">gk</span> <span class="ow">in</span> <span class="n">geokeys</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__contains__</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                </div>
+<div class="viewcode-block" id="image_file.remove_temptagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_temptagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_temptagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geokeys</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;depth&#39;</span><span class="p">,</span><span class="s">&#39;depth_units&#39;</span><span class="p">,</span><span class="s">&#39;temperature&#39;</span><span class="p">,</span><span class="s">&#39;temp_units&#39;</span><span class="p">]</span>
+        <span class="n">pre</span> <span class="o">=</span> <span class="s">&#39;Xmp.BenthicPhoto.&#39;</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">pre</span><span class="o">+</span><span class="n">gk</span> <span class="k">for</span> <span class="n">gk</span> <span class="ow">in</span> <span class="n">geokeys</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__contains__</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                </div>
+<div class="viewcode-block" id="image_file.remove_substratetagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_substratetagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_substratetagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;Xmp.BenthicPhoto.substrate&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__contains__</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">md</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                </div>
+<div class="viewcode-block" id="image_file.remove_all_tagging"><a class="viewcode-back" href="../code.html#photo_tagging.image_file.remove_all_tagging">[docs]</a>    <span class="k">def</span> <span class="nf">remove_all_tagging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        You probably won&#39;t need to do this but I did a few times during testing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_geotagging</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_depthtagging</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_temptagging</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_substratetagging</span><span class="p">()</span>
+</div></div>
+<span class="k">def</span> <span class="nf">exif_tag_jpegs</span><span class="p">(</span><span class="n">photo_dir</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">photo_dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">):</span>
+            <span class="n">imf</span> <span class="o">=</span> <span class="n">image_file</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">photo_dir</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">imf</span><span class="o">.</span><span class="n">depth_temp_tag</span><span class="p">()</span>
+            <span class="n">imf</span><span class="o">.</span><span class="n">geotag</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">imf</span><span class="o">.</span><span class="n">exif_depth_tag</span><span class="p">:</span>
+                <span class="n">dstr</span> <span class="o">=</span> <span class="n">imf</span><span class="o">.</span><span class="n">exif_depth_tag</span><span class="o">.</span><span class="n">human_value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dstr</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
+            <span class="k">if</span> <span class="n">imf</span><span class="o">.</span><span class="n">exif_temperature</span><span class="p">:</span>
+                <span class="n">tstr</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%g</span><span class="s"> C&quot;</span> <span class="o">%</span> <span class="n">imf</span><span class="o">.</span><span class="n">exif_temperature</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tstr</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
+            <span class="k">print</span> <span class="s">&quot;Image: </span><span class="si">%s</span><span class="s"> - Depth: </span><span class="si">%s</span><span class="s">, Temp </span><span class="si">%s</span><span class="s">, Position: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">dstr</span><span class="p">,</span><span class="n">tstr</span><span class="p">,</span><span class="n">imf</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s">&#39;Tag a photos with position, depth, and temperature from a gps and a Sensus Ultra depth and temperature logger.&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s">&#39;photo_dir&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s">&#39;The directory that contains photos you would like tagged.&#39;</span><span class="p">)</span>
+    
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    
+    <span class="n">exif_tag_jpegs</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">photo_dir</span><span class="p">)</span>
+    
+
+
+
+
+
+<span class="c">#### Pretty much just testing garbage below here #######</span>
+<span class="c">#### Why don&#39;t I delete it? Good question.       #######</span>
+
+<span class="k">def</span> <span class="nf">check_time_tags</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">get_photo_metadata</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">timetags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">exif_keys</span> <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;Time&#39;</span><span class="p">)</span><span class="o">&lt;&gt;-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">timetags</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="n">md</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">read_gps_crap</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">get_photo_metadata</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gpstag</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s">&#39;Exif.Image.GPSTag&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">human_value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">gpstag</span> <span class="o">=</span> <span class="s">&#39;not set&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s">&#39;Exif.GPSInfo.GPSLatitude&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">human_value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">lat</span> <span class="o">=</span> <span class="s">&#39;not set&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s">&#39;Exif.GPSInfo.GPSLongitude&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">human_value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">lon</span> <span class="o">=</span> <span class="s">&#39;not set&#39;</span>
+    
+    <span class="k">print</span> <span class="s">&quot;GPSTag: </span><span class="si">%s</span><span class="s">, Lat: </span><span class="si">%s</span><span class="s">, Lon: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">gpstag</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">lat</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span> <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">read_gps_crap_from_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">):</span>
+            <span class="n">read_gps_crap</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+            
+<span class="k">def</span> <span class="nf">shift_time_for_photos</span><span class="p">(</span><span class="n">direc</span><span class="p">,</span><span class="n">time_delta</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">direc</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">):</span>
+            <span class="n">imf</span> <span class="o">=</span> <span class="n">image_file</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">direc</span><span class="p">,</span><span class="n">fname</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="n">orig_time</span> <span class="o">=</span> <span class="n">imf</span><span class="o">.</span><span class="n">datetime</span>
+            <span class="n">imf</span><span class="o">.</span><span class="n">__set_datetime__</span><span class="p">(</span> <span class="n">orig_time</span> <span class="o">+</span> <span class="n">time_delta</span> <span class="p">)</span>
+            <span class="k">print</span> <span class="s">&quot;Changed </span><span class="si">%s</span><span class="s"> from </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s">.&quot;</span> <span class="o">%</span> <span class="p">(</span> <span class="n">fname</span><span class="p">,</span> <span class="n">orig_time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%H:%M&#39;</span><span class="p">),</span> <span class="n">imf</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%H:%M&#39;</span><span class="p">)</span> <span class="p">)</span>
+            
+<span class="k">def</span> <span class="nf">photo_times_for_dir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">dir</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">fname</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.jpg&#39;</span><span class="p">):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">get_photo_metadata</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+            <span class="n">ptime</span> <span class="o">=</span> <span class="n">get_photo_datetime</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ptime</span><span class="p">:</span>
+                <span class="n">ending</span> <span class="o">=</span> <span class="n">ptime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s"> %H:%M:%S&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ending</span> <span class="o">=</span> <span class="s">&#39;no time tag&#39;</span>
+            <span class="k">print</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">ending</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_photo_metadata</span><span class="p">(</span><span class="n">img_path</span><span class="p">):</span>
+    <span class="n">md</span> <span class="o">=</span> <span class="n">exiv</span><span class="o">.</span><span class="n">ImageMetadata</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+    <span class="n">md</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">md</span>
+    
+<span class="k">def</span> <span class="nf">get_photo_datetime</span><span class="p">(</span><span class="n">md</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If I find inconsistency in exif tags, I may have to get a little more creative</span>
+<span class="sd">    here.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ptime</span> <span class="o">=</span> <span class="n">md</span><span class="p">[</span><span class="s">&#39;Exif.Photo.DateTimeOriginal&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="n">ptime</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">ptime</span>
+
+
+    
+    
+    
+    
+    
+    
+    
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="../index.html">Benthic Photo Survey 0.3.3 documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jared Kibele.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

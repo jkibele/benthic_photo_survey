@@ -1,0 +1,158 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Introduction &mdash; Benthic Photo Survey 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Benthic Photo Survey 0.1 documentation" href="index.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Welcome to Benthic Photo Survey’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Benthic Photo Survey’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Benthic Photo Survey 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Quantitative methods for the derivation of habitat maps from satellite and aerial imagery require reference data (sometimes called ground truth data) to create training sets for supervised classification and for the accuracy assessment of the resulting maps. These data generally need to represent the real world habitat type at many points and, in the case of benthic habitat mapping, the depth at each of those points can also be quite useful. Collecting and processing these data can be a challenging and time consuming task and may be part of the reason that too few benthic habitat mapping studies include adequate accuracy assessment. Benthic Photo Survey (BPS) was created to make this process less painful and, hopefully, make it easier to collect training data and produce an accuracy assessment of the resulting map.</p>
+<div class="section" id="what-you-need-to-use-bps">
+<h2>What You Need to use BPS<a class="headerlink" href="#what-you-need-to-use-bps" title="Permalink to this headline">¶</a></h2>
+<p>Benthic Photo Survey is designed to work with inexpensive and relatively easy to aquire equipment, partly because that&#8217;s all that&#8217;s really required and partly because that&#8217;s all I can afford. Here&#8217;s what you&#8217;ll need:</p>
+<ol class="arabic simple">
+<li>A subersible digital camera that produces jpeg images. I use a <a class="reference external" href="http://panasonic.net/avc/lumix/compact/ts4_ft4/index.html">Panasonic Lumix DMC-TS4</a> in an <a class="reference external" href="http://www.ikelite.com/web_two/pan_ts3.html">Ikelite housing</a>. This camera has a built in compass that records the direction that the camera is faceing when the photo is taken and BPS passes the direction into the shapefile that is created. However, this is not a requirement and any camera that produces jpeg images should be compatable with BPS.</li>
+<li>A GPS that can be towed by a snorkeler or diver. If you&#8217;re working with fairly high resolution imagery, you&#8217;ll want a GPS reciever with WAAS capability. I am using a Garmin GPS 60 CSX. I tow mine in a small waterproof plastic box on a float. See <a class="reference external" href="http://ww2.gpem.uq.edu.au/CRSSIS/publications/GPS_Photo_Transects_for_Benthic_Cover_Manual.pdf">GPS Photo Transects for Benthic Cover Manual</a> by Roelfsema and Phinn <a class="reference internal" href="#rp2010">[RP2010]</a> for details on how to build a float. BPS can import NMEA text files and GPX files.</li>
+<li>A depth logger is optional but if you&#8217;re going to spend the time and money to go in the field, it seems worthwhile. BPS is set up to import log files from the <a class="reference external" href="http://reefnet.ca/products/sensus/">Sensus Ultra</a> depth and temperature logger. It should be fairly easy to adapt it to deal with a different logger but that would require a bit of coding.</li>
+<li>A computer to run BPS. BPS was developed on Ubuntu but should work on Windows and Mac as well.</li>
+</ol>
+</div>
+<div class="section" id="what-bps-actually-does">
+<h2>What BPS Actually Does<a class="headerlink" href="#what-bps-actually-does" title="Permalink to this headline">¶</a></h2>
+<p>There are 4 steps to what BPS does.</p>
+<ol class="arabic simple">
+<li>It imports your GPS and/or depth and temperature logs into a database.</li>
+<li>It writes data from those logs to the exif portion of each of your jpeg photos based on the time stamp on each photo and the time stamps in the respective logs.</li>
+<li>You use BPS to tag each photo with a habitat and/or depth and temperature.</li>
+<li>BPS can export a point shapefile with a point at each location where a photo was taken. Each point is attributed with the habitat, substrate, depth, temperature, direction, and file path to the photo.</li>
+</ol>
+<p class="rubric">Citations</p>
+<table class="docutils citation" frame="void" id="rp2010" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[RP2010]</a></td><td>Roelfsema, C., Phinn, S., 2010. Integrating field data with high spatial resolution
+multispectral satellite imagery for calibration and validation of coral reef benthic community
+maps. J. Appl. Remote Sens 4, 043527–043527.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Introduction</a><ul>
+<li><a class="reference internal" href="#what-you-need-to-use-bps">What You Need to use BPS</a></li>
+<li><a class="reference internal" href="#what-bps-actually-does">What BPS Actually Does</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to Benthic Photo Survey&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/intro.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Benthic Photo Survey’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">Benthic Photo Survey 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jared Kibele.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
