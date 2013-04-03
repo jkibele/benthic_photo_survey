@@ -3,10 +3,10 @@
 import sys, os
 import glob
 try:
-    from benthic_photo_survey.depth_temp_log_io import *
-    from benthic_photo_survey.photo_tagging import *
-    from benthic_photo_survey.gps_log_io import *
-    from benthic_photo_survey.bps_export import *
+    from bps_package.depth_temp_log_io import *
+    from bps_package.photo_tagging import *
+    from bps_package.gps_log_io import *
+    from bps_package.bps_export import *
 except ImportError:
     from depth_temp_log_io import *
     from photo_tagging import *

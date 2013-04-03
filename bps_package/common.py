@@ -18,7 +18,15 @@ def hex_to_rgb(value):
     return tuple(int(value[i:i+lv/3], 16) for i in range(0, lv, lv/3))
 
 def connection_and_cursor(path_to_db):
-    """Connect to the db and pass back the connection and cursor"""
+    """Connect to the db and pass back the connection and cursor. Create db
+    and directories if needed."""
+    if not os.path.exists(path_to_db):
+        p, db_name = os.path.split(path_to_db)
+        if p:
+            plist = p.split(os.path.sep)
+            for i in range(len(plist)):
+                os.mkdir(os.path.sep.join(plist[:i+1]))
+        
     conn = sqlite3.connect(path_to_db, detect_types=sqlite3.PARSE_DECLTYPES)
     cur = conn.cursor()
     return conn,cur
