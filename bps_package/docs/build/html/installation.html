@@ -108,8 +108,8 @@ blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ p
 <li><dl class="first docutils">
 <dt>Satisify Install Requirements 1 - 4 with PythonXY</dt>
 <dd><ol class="first last arabic simple">
-<li>Download the latest <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> installer from the <a class="reference external" href="http://code.google.com/p/pythonxy/wiki/Downloads?tm=2">PythonXY Windows Download Page</a>.</li>
-<li>Run the installer, and make sure that Python2.7.x (currently 2.7.3 but that may change, you just don&#8217;t want 3.x), GDAL, PyQt4.x, and Matplotlib are selected. You can check whatever additional items you&#8217;d like installed as well.</li>
+<li>Download the latest <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> installer from the <a class="reference external" href="http://code.google.com/p/pythonxy/wiki/Downloads?tm=2">PythonXY Windows Download Page</a>. Just click on one of the <tt class="docutils literal"><span class="pre">.exe</span></tt> files listed under &#8216;Current Release&#8217;. The multiple links all lead to the same file, just on different servers.</li>
+<li>Run the installer, and make sure that Python2.7.x (currently 2.7.3 but that may change, you just don&#8217;t want 3.x), GDAL, PyQt4.x, pip, and Matplotlib are selected. These items are listed under the expandable python menu. You can check whatever additional items you&#8217;d like installed as well.</li>
 <li>Click through the dialogs to finish the installation process.</li>
 </ol>
 </dd>
@@ -118,7 +118,7 @@ blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ p
 <li><dl class="first docutils">
 <dt>Install <a class="reference external" href="http://code.google.com/p/pynmea/">pynmea</a> with pip</dt>
 <dd><ol class="first last arabic simple">
-<li>Go to the <a class="reference external" href="http://www.computerhope.com/issues/chdos.htm">command prompt</a> and type <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pynmea</span></tt>. If it installs, then you can move on to the pyexiv2 step below and ignore the sub-steps that follow immediately after this one.</li>
+<li>Go to the <a class="reference external" href="http://www.computerhope.com/issues/chdos.htm">command prompt</a> and type <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pynmea</span></tt>. If you installed pip in the previous step, that command should work and you should be able to move on to the &#8216;installing pyexiv2&#8217; step below. If there was a problem with pip, you can use the sub-steps below to install it.</li>
 <li>If you get a message that says something about the &#8216;command pip not found&#8217;, then try typing <tt class="docutils literal"><span class="pre">easy_install</span> <span class="pre">pip</span></tt> at the <a class="reference external" href="http://www.computerhope.com/issues/chdos.htm">command prompt</a>. If that doesn&#8217;t work, you&#8217;ll need to install <a class="reference external" href="https://pypi.python.org/pypi/distribute">python-distribute</a> and <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> as described in the next sub-step. If it does work (and it installs pip), just go back to the previous sub-step and it should work.</li>
 <li>Download the correct installer for your system architecture (32 or 64 bit) from the list of <a class="reference external" href="http://www.lfd.uci.edu/~gohlke/pythonlibs/#distribute">python-distribute installers</a>. We installed python2.7.x so you want the one that matches your system architecture and ends with py2.7.exe. After running that installer, you should be able to type <tt class="docutils literal"><span class="pre">easy_install</span> <span class="pre">pip</span></tt> followed by <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pynmea</span></tt>. The good news is that python-distribute and pip can be used to install all sorts of useful python stuff and, now that you have them installed, that&#8217;ll be easy.</li>
 </ol>
@@ -138,6 +138,10 @@ blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ p
 <dt>Install <a class="reference external" href="http://git-scm.com/">git</a> if you don&#8217;t already have it</dt>
 <dd><ol class="first last arabic simple">
 <li>Go to the <a class="reference external" href="http://git-scm.com/downloads">git download page</a>, download the installer for your system, and run it.</li>
+<li>The default list of components on the &#8216;Select Components&#8217; screen is fine.</li>
+<li>The choice of &#8216;Start Menu Folder&#8217; doesn&#8217;t really matter. I used the default.</li>
+<li>On the next screen, choose &#8220;Run Git from the Windows command prompt&#8221;.</li>
+<li>On the &#8216;Configure Line Ending&#8217; screen, select the default of &#8216;Checkout Windows-style, commit, unix-style&#8217;.</li>
 </ol>
 </dd>
 </dl>

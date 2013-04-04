@@ -457,6 +457,15 @@ class image_file(object):
             self.md.__delitem__(key)
             self.md.write()
                 
+    def remove_habitattagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        key = 'Xmp.BenthicPhoto.habitat'
+        if self.md.__contains__(key):
+            self.md.__delitem__(key)
+            self.md.write()
+                
     def remove_all_tagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -465,6 +474,7 @@ class image_file(object):
         self.remove_depthtagging()
         self.remove_temptagging()
         self.remove_substratetagging()
+        self.remove_habitattagging()
 
 def exif_tag_jpegs(photo_dir):
     for fname in os.listdir(photo_dir):

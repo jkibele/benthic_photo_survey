@@ -59,11 +59,11 @@ Windows
 The following steps will demostrate how to install the software required to run BPS, use the `git`_ version control system to download BPS, and then run BPS on Windows.
 
 - Satisify Install Requirements 1 - 4 with PythonXY
-    1. Download the latest `PythonXY`_ installer from the `PythonXY Windows Download Page`_.
-    #. Run the installer, and make sure that Python2.7.x (currently 2.7.3 but that may change, you just don't want 3.x), GDAL, PyQt4.x, and Matplotlib are selected. You can check whatever additional items you'd like installed as well.
+    1. Download the latest `PythonXY`_ installer from the `PythonXY Windows Download Page`_. Just click on one of the ``.exe`` files listed under 'Current Release'. The multiple links all lead to the same file, just on different servers.
+    #. Run the installer, and make sure that Python2.7.x (currently 2.7.3 but that may change, you just don't want 3.x), GDAL, PyQt4.x, pip, and Matplotlib are selected. These items are listed under the expandable python menu. You can check whatever additional items you'd like installed as well.
     #. Click through the dialogs to finish the installation process.
 - Install `pynmea`_ with pip
-    1. Go to the `command prompt`_ and type ``pip install pynmea``. If it installs, then you can move on to the pyexiv2 step below and ignore the sub-steps that follow immediately after this one.
+    1. Go to the `command prompt`_ and type ``pip install pynmea``. If you installed pip in the previous step, that command should work and you should be able to move on to the 'installing pyexiv2' step below. If there was a problem with pip, you can use the sub-steps below to install it.
     #. If you get a message that says something about the 'command pip not found', then try typing ``easy_install pip`` at the `command prompt`_. If that doesn't work, you'll need to install `python-distribute`_ and `pip`_ as described in the next sub-step. If it does work (and it installs pip), just go back to the previous sub-step and it should work.
     #. Download the correct installer for your system architecture (32 or 64 bit) from the list of `python-distribute installers`_. We installed python2.7.x so you want the one that matches your system architecture and ends with py2.7.exe. After running that installer, you should be able to type ``easy_install pip`` followed by ``pip install pynmea``. The good news is that python-distribute and pip can be used to install all sorts of useful python stuff and, now that you have them installed, that'll be easy.
 - Install pyexiv2
@@ -75,6 +75,8 @@ The following steps will demostrate how to install the software required to run 
     1. Open a `command prompt`_ and navigate to a directory where you would like to install BPS
     #. Type ``git clone https://jkibele@bitbucket.org/jkibele/benthic_photo_survey.git``. This will clone the contents of BPS code repository to your computer.
     #. If, after changes have been made to BPS, you want the latest version you can return to a command prompt in this directory and type ``git pull``.
+
+That should do it. Make sure you make a note of where you installed BPS. Then take a look at the :doc:`tutorial`. I intend to add a section there specifically about using the test data for a dry run. For now just check out the "Using BPS" section and look for the ``test_data`` directory at the same level as the ``data`` directory. There are some images, a gps log, and a sensus depth log in there that you can use to get the hang of it.
 
 Mac
 ---
