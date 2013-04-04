@@ -49,7 +49,7 @@ If you are deploying more than one camera / gps / depth logger set up at a time,
 Using BPS
 ---------
 
-1. Launch BPS by navigating to the benthic_photo_survey directory and typing: ``python benthic_photo_survey.py`` in the command line. Some windows installations will require that you just type ``./benthic_photo_survey.py``
+1. Launch BPS by navigating to the ``bps_package`` directory and typing: ``python bps_gui.py`` in the command line. Some windows installations will require that you just type ``bps_gui.py``. If you installed bps with git, ``bps_package`` directory will be ``benthic_photo_survey/bps_package`` relative to wherever you put it.
 
 2. Load your GPS file. Select 'Load GPS Log' from the file menu, select your GPX file and click 'Open'. This will load the positions and time stamps into a database specified in configuration.py.
 

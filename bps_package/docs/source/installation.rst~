@@ -8,7 +8,7 @@ The following items need to be installed in order for BPS to work. Make sure you
 
 1. `Python 2.7`_ BPS may work on older versions of Python but I wouldn't bet on it
 2. `GDAL`_ 1.8 or greater 
-3. `Matplotlib`_ 1.1.1 or greater, can be installed as part of `SciPy`_ or with PythonXY (see end of this section).
+3. `Matplotlib`_ 1.1.1 or greater, can be installed as part of `SciPy`_ or with `PythonXY`_ (see end of this section).
 4. `PyQt4`_
 5. `pynmea`_ can be installed with `pip`_ by typing ``pip install pynmea`` at the command prompt (or ``sudo pip install pynmea`` if you're on Linux or Mac and need root privileges to install).
 6. `pyexiv2`_ has actually been deprecated now. I will eventually rewrite the code to use GExiv2 but, for now, pyexiv2 is required.

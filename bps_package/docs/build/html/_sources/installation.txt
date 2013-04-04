@@ -76,6 +76,8 @@ The following steps will demostrate how to install the software required to run 
     #. Type ``git clone https://jkibele@bitbucket.org/jkibele/benthic_photo_survey.git``. This will clone the contents of BPS code repository to your computer.
     #. If, after changes have been made to BPS, you want the latest version you can return to a command prompt in this directory and type ``git pull``.
 
+That should do it. Make sure you make a note of where you installed BPS. Then take a look at the :doc:`tutorial`. I intend to add a section there specifically about using the test data for a dry run. For now just check out the "Using BPS" section and look for the ``test_data`` directory at the same level as the ``data`` directory. There are some images, a gps log, and a sensus depth log in there that you can use to get the hang of it.
+
 Mac
 ---
 
