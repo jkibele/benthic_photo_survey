@@ -25,7 +25,9 @@ def connection_and_cursor(path_to_db):
         if p:
             plist = p.split(os.path.sep)
             for i in range(len(plist)):
-                os.mkdir(os.path.sep.join(plist[:i+1]))
+                dirpath = os.path.sep.join(plist[:i+1])
+                if not os.path.exists( dirpath ):
+                    os.mkdir(dirpath)
         
     conn = sqlite3.connect(path_to_db, detect_types=sqlite3.PARSE_DECLTYPES)
     cur = conn.cursor()
