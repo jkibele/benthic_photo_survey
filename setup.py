@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='BenthicPhotoSurvey',
-      version='0.3.17',
+      version='0.3.18',
       description='Benthic Photo Survey',
       author='Jared Kibele',
       author_email='jkibele@gmail.com',
