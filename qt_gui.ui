@@ -635,6 +635,8 @@
     <addaction name="actionLoad_Depth_Log"/>
     <addaction name="actionLoad_Photo_Directory"/>
     <addaction name="separator"/>
+    <addaction name="actionPreferences"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuOutput">
@@ -706,6 +708,11 @@
   <action name="actionDepth_Temp_Tag_All">
    <property name="text">
     <string>Depth/Temp Tag All</string>
+   </property>
+  </action>
+  <action name="actionPreferences">
+   <property name="text">
+    <string>Preferences</string>
    </property>
   </action>
  </widget>
@@ -935,6 +942,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPreferences</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>preferenceDialog()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>nextPhoto()</slot>
@@ -951,5 +974,6 @@
   <slot>loadDepthLog()</slot>
   <slot>depthPlot()</slot>
   <slot>exportShapefile()</slot>
+  <slot>preferenceDialog()</slot>
  </slots>
 </ui>

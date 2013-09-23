@@ -14,8 +14,17 @@ except ImportError:
     from bps_export import *
 from PyQt4 import QtCore
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
-    QMessageBox
+    QMessageBox, QDialog
 from ui_bps import Ui_MainWindow
+from ui_preferences import Ui_PrefDialog
+
+class StartPrefs(QDialog, Ui_PrefDialog):
+    def __init__(self,parent=None):
+        QDialog.__init__(self,parent)
+        self.setupUi(self)
+        
+    def getValues(self):
+        return "blah"
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -286,6 +295,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return False
         else: # This means the user hit 'cancel' 
             return False
+            
+    def preferenceDialog(self):
+        #write this dialog launching code
+        dlg = StartPrefs(parent=self)
+        dlg.exec_()
                 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
