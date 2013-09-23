@@ -23,26 +23,47 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
         QDialog.__init__(self,parent)
         self.setupUi(self)
+        self.settings = QSettings("jkibele","BenthicPhotoSurvey")
+        self.habkeditlistbox.setItems( self.getHablistSettings() )
+        self.substkeditlistwidget.setItems( self.getSubstSettings() )
         
-    def getValues(self):
-        return "blah"
+    def accept(self):
+        self.settings.setValue("hablist", self.habkeditlistbox.items() )
+        self.settings.setValue("substlist", self.substkeditlistwidget.items() )
+        super(StartPrefs, self).accept()
+        
+    def getHablistSettings(self):
+        return self.settings.value("hablist",CONF_HABITATS).toStringList() 
+        
+    def getSubstSettings(self):
+        return self.settings.value("substlist",CONF_SUBSTRATES).toStringList() 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        settings = QSettings("jkibele","BenthicPhotoSurvey")
-        hablist = settings.value("hablist",CONF_HABITATS)                                         
+        self.settings = QSettings("jkibele","BenthicPhotoSurvey")                                    
         self.setupUi(self)
         self.imageDirectoryObj = None
         # imf will be the current image file object        
         self.imf = None 
         self.currentPhotoIndex = 0
-        self.habitatListWidget.addItems( hablist )
-        self.substrateListWidget.addItems( CONF_SUBSTRATES )
+        self.applySettings()
         
     def resizeEvent( self, event ):
         super(MainWindow, self).resizeEvent( event )
         self.setPhotoDisplay()        
+        
+    def applySettings(self):
+        self.habitatListWidget.clear()
+        self.habitatListWidget.addItems( self.getHablistSettings() )
+        self.substrateListWidget.clear()
+        self.substrateListWidget.addItems( self.getSubstSettings() )
+        
+    def getHablistSettings(self):
+        return self.settings.value("hablist",CONF_HABITATS).toStringList()
+        
+    def getSubstSettings(self):
+        return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
         
     def setPhotoDisplay(self):
         """
@@ -303,6 +324,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         #write this dialog launching code
         dlg = StartPrefs(parent=self)
         dlg.exec_()
+        if dlg.Accepted==1:
+            self.applySettings()
+
                 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
