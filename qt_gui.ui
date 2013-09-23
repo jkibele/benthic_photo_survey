@@ -712,7 +712,7 @@
   </action>
   <action name="actionPreferences">
    <property name="text">
-    <string>Preferences</string>
+    <string>Preferences...</string>
    </property>
   </action>
  </widget>

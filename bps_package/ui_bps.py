@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Fri Sep 20 16:46:38 2013
+# Created: Mon Sep 23 17:54:56 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -399,5 +399,5 @@ class Ui_MainWindow(object):
         self.actionDepth_Plot.setText(QtGui.QApplication.translate("MainWindow", "Depth &Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.actionGeo_Tag_All_Photos.setText(QtGui.QApplication.translate("MainWindow", "Geo Tag All Photos", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDepth_Temp_Tag_All.setText(QtGui.QApplication.translate("MainWindow", "Depth/Temp Tag All", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPreferences.setText(QtGui.QApplication.translate("MainWindow", "Preferences", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionPreferences.setText(QtGui.QApplication.translate("MainWindow", "Preferences...", None, QtGui.QApplication.UnicodeUTF8))
 

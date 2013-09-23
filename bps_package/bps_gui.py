@@ -13,6 +13,7 @@ except ImportError:
     from gps_log_io import *
     from bps_export import *
 from PyQt4 import QtCore
+from PyQt4.QtCore import QSettings
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
     QMessageBox, QDialog
 from ui_bps import Ui_MainWindow
@@ -28,13 +29,15 @@ class StartPrefs(QDialog, Ui_PrefDialog):
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)                                         
+        super(MainWindow, self).__init__(parent)
+        settings = QSettings("jkibele","BenthicPhotoSurvey")
+        hablist = settings.value("hablist",CONF_HABITATS)                                         
         self.setupUi(self)
         self.imageDirectoryObj = None
         # imf will be the current image file object        
         self.imf = None 
         self.currentPhotoIndex = 0
-        self.habitatListWidget.addItems( CONF_HABITATS )
+        self.habitatListWidget.addItems( hablist )
         self.substrateListWidget.addItems( CONF_SUBSTRATES )
         
     def resizeEvent( self, event ):
