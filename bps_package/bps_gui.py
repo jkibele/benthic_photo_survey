@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, json
 import glob
 try:
     from bps_package.depth_temp_log_io import *
@@ -13,9 +13,9 @@ except ImportError:
     from gps_log_io import *
     from bps_export import *
 from PyQt4 import QtCore
-from PyQt4.QtCore import QSettings
+from PyQt4.QtCore import QSettings, QModelIndex
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
-    QMessageBox, QDialog
+    QMessageBox, QDialog, QColor, QColorDialog
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
 
@@ -24,19 +24,41 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         QDialog.__init__(self,parent)
         self.setupUi(self)
         self.settings = QSettings("jkibele","BenthicPhotoSurvey")
+        self.settings.clear()
         self.habkeditlistbox.setItems( self.getHablistSettings() )
         self.substkeditlistwidget.setItems( self.getSubstSettings() )
+        self.updateColorList()
         
     def accept(self):
         self.settings.setValue("hablist", self.habkeditlistbox.items() )
         self.settings.setValue("substlist", self.substkeditlistwidget.items() )
         super(StartPrefs, self).accept()
         
+    def updateColorList(self):
+        self.habColorListWidget.clear()
+        self.habColorListWidget.addItems( self.habkeditlistbox.items() )
+        for itemNum in range(self.habColorListWidget.count()):
+            habitem = self.habColorListWidget.item(itemNum)
+            habitem.setBackgroundColor( QColor( self.getHabColorList()[itemNum] ) )
+    
+    def editItemColor(self,qlwItem):
+        new_qcolor = QColorDialog.getColor(parent=self)
+        qlwItem.setBackgroundColor( new_qcolor )
+        cdict = self.getHabColorDict()
+        cdict[qlwItem.text().toString()] = new_qcolor.name().toString()
+        
     def getHablistSettings(self):
         return self.settings.value("hablist",CONF_HABITATS).toStringList() 
         
     def getSubstSettings(self):
-        return self.settings.value("substlist",CONF_SUBSTRATES).toStringList() 
+        return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
+        
+    def getHabColorList(self):
+        return self.settings.value("habcolorlist", CONF_HAB_COLORS ).toStringList()
+        
+    def setHabColorList(self):
+        colorlist = self.habColorListWidget
+        self.settings.value("habcolorlist", )
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):

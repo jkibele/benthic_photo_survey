@@ -29,33 +29,9 @@
       <attribute name="title">
        <string>Habitats</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="KEditListBox" name="habkeditlistbox"/>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="habitatColorTab">
-      <attribute name="title">
-       <string>Habitat Colors</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <layout class="QFormLayout" name="formLayout">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Placeholder</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="KColorButton" name="kcolorbutton"/>
-         </item>
-        </layout>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="KEditListWidget" name="habkeditlistbox"/>
        </item>
       </layout>
      </widget>
@@ -63,9 +39,40 @@
       <attribute name="title">
        <string>Substrates</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
         <widget class="KEditListWidget" name="substkeditlistwidget"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="itemColorTab">
+      <attribute name="title">
+       <string>Colors</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QGroupBox" name="habColorGroupBox">
+         <property name="title">
+          <string>Habitat Colors</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QListWidget" name="habColorListWidget"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="substColorGroupBox">
+         <property name="title">
+          <string>Substrate Colors</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <widget class="QListWidget" name="substColorListWidget"/>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -85,19 +92,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>KEditListBox</class>
-   <extends>QGroupBox</extends>
-   <header>keditlistbox.h</header>
-  </customwidget>
-  <customwidget>
    <class>KEditListWidget</class>
    <extends>QWidget</extends>
    <header>keditlistwidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KColorButton</class>
-   <extends>QPushButton</extends>
-   <header>kcolorbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -134,5 +131,41 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>habColorListWidget</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>editItemColor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>89</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>351</x>
+     <y>441</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tabWidget</sender>
+   <signal>currentChanged(int)</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>updateColorList()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>201</x>
+     <y>29</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>638</x>
+     <y>31</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
+ <slots>
+  <slot>updateColorList()</slot>
+  <slot>editItemColor()</slot>
+ </slots>
 </ui>
