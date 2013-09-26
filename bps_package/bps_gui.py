@@ -24,7 +24,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         QDialog.__init__(self,parent)
         self.setupUi(self)
         self.settings = QSettings("jkibele","BenthicPhotoSurvey")
-        self.settings.clear()
+        #self.settings.clear()
         self.habkeditlistbox.setItems( self.getHablistSettings() )
         self.substkeditlistwidget.setItems( self.getSubstSettings() )
         self.updateColorList()
@@ -55,6 +55,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         
     def getHabColorList(self):
         return self.settings.value("habcolorlist", CONF_HAB_COLORS ).toStringList()
+        
+    def getHabColorListFromWidget(self,widget=self.habColorListWidget):
+        colors = []        
+        for itemNum in range(self.habColorListWidget.count()):
+            habitem = self.habColorListWidget.item(itemNum)
+            colors.append( habitem.backgroundColor().toString() )
+        return colors
         
     def setHabColorList(self):
         colorlist = self.habColorListWidget
