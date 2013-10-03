@@ -48,7 +48,7 @@ class PrefRow(object):
             
     @property
     def validCode(self):
-        if type(self.code)==int:
+        if type(self.code)==int and self.code > 0:
             return True
         else:
             return False
@@ -76,7 +76,7 @@ class PrefRow(object):
         itemlist = [self.code,self.name,self.color]
         print itemlist
         for i,thing in enumerate(itemlist):
-            item = QTableWidgetItem( thing )
+            item = QTableWidgetItem( str(thing) )
             if i==len(itemlist)-1:
                 item.setBackgroundColor( self.q_color )
             print "Adding %s to row %i" % (item.text(),rownum)
@@ -128,12 +128,31 @@ class PrefArray(object):
             row.addToTableWidget(self.widget,i)
         
     def saveToSettings(self):
-        json_str = json.dumps( self.toList() )
-        self.settings.setValue( self.settings_tag, json_str )
+        if self.rowsValid:
+            print "rows are valid and I'm going to save %s" % (self.rows)
+            json_str = json.dumps( self.toList() )
+            self.settings.setValue( self.settings_tag, json_str )
+            return True
+        else:
+            return False
         
     def loadFromSettings(self):
         json_str = str( self.settings.value(self.settings_tag,'[[null, null, null]]').toString() )
         self.fromJson(json_str)
+        
+    def loadFromWidget(self):
+        """
+        Load values from the QTableWidget. This will overwrite the rows.
+        """
+        self.rows = []
+        row_cnt = self.widget.rowCount()
+        print "row_cnt in loadFromWidget=%i" % row_cnt
+        for r in range(row_cnt):
+            newpr = PrefRow()
+            newpr.code = int( self.widget.item(r,0).text() )
+            newpr.name = unicode( self.widget.item(r,1).text() )
+            newpr.color = unicode( self.widget.item(r,2).text() )  
+            self.rows.append(newpr)
         
     def fromJson(self,json_str):
         """
@@ -195,16 +214,36 @@ class StartPrefs(QDialog, Ui_Dialog):
             newRow.addToTableWidget(self.habTableWidget,self.habTableWidget.rowCount())
     
     def removeHabRow(self):
-        pass
+        currRow = self.habTableWidget.currentRow()
+        self.habTableWidget.removeRow( currRow )
     
     def moveHabUp(self):
-        pass
-    
+        row = self.habTableWidget.currentRow()
+        column = self.habTableWidget.currentColumn();
+        if row > 0:
+            self.habTableWidget.insertRow(row-1)
+            for i in range(self.habTableWidget.columnCount()):
+               self.habTableWidget.setItem(row-1,i,self.habTableWidget.takeItem(row+1,i))
+               self.habTableWidget.setCurrentCell(row-1,column)
+            self.habTableWidget.removeRow(row+1)
+            
     def moveHabDown(self):
-        pass
+        row = self.habTableWidget.currentRow()
+        column = self.habTableWidget.currentColumn();
+        if row < self.habTableWidget.rowCount()-1:
+            self.habTableWidget.insertRow(row+2)
+            for i in range(self.habTableWidget.columnCount()):
+               self.habTableWidget.setItem(row+2,i,self.habTableWidget.takeItem(row,i))
+               self.habTableWidget.setCurrentCell(row+2,column)
+            self.habTableWidget.removeRow(row)
     
     def changeHabColor(self):
-        pass
+        currRow = self.habTableWidget.currentRow()
+        color_item = QTableWidgetItem()
+        new_qcolor = QColorDialog.getColor(parent=self)
+        color_item.setBackgroundColor( new_qcolor )
+        color_item.setText( new_qcolor.name() )
+        self.habTableWidget.setItem(currRow,2,color_item)
     
     def habHelp(self):
         widg = self.habTableWidget
@@ -214,6 +253,17 @@ class StartPrefs(QDialog, Ui_Dialog):
         pr.name = widg.item(currRow,1).text()
         pr.color = widg.item(currRow,2).text()
         print pr
+        
+    def accept(self):
+        newpa = HabPrefArray(widget=self.habTableWidget)
+        newpa.loadFromWidget()
+        if newpa.saveToSettings():
+            super(StartPrefs, self).accept()
+        else:
+            msg = QMessageBox()
+            msg.setText("Something is wrong. ...I should make this more informative.")
+            msg.setWindowTitle("Something Wrong with Prefs")
+            msg.exec_()
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -227,6 +277,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dlg.exec_()
         if dlg.Accepted==1:
             self.applySettings()
+            
+    def applySettings(self):
+        # re-draw stuff as needed
+        pass
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
