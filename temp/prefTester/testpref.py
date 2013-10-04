@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import sys, json
+from types import IntType, StringType, UnicodeType
 from PyQt4 import QtCore
 from PyQt4.QtCore import QSettings, QModelIndex
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
@@ -40,10 +41,9 @@ class PrefRow(object):
     
     @property
     def validName(self):
-        try:
-            str(self.name)
+        if type(self.name)==StringType or type(self.name)==UnicodeType:
             return True
-        except:
+        else: 
             return False
             
     @property
@@ -55,9 +55,9 @@ class PrefRow(object):
         
     @property
     def validColor(self):
-        if self.color:
+        if type(self.color)==StringType or type(self.color)==UnicodeType:
             return True
-        else:
+        else: 
             return False
         
     @property
@@ -74,12 +74,12 @@ class PrefRow(object):
         self.setCode()
         self.setColor()
         itemlist = [self.code,self.name,self.color]
-        print itemlist
+        #print itemlist
         for i,thing in enumerate(itemlist):
             item = QTableWidgetItem( str(thing) )
             if i==len(itemlist)-1:
                 item.setBackgroundColor( self.q_color )
-            print "Adding %s to row %i" % (item.text(),rownum)
+            #print "Adding %s to row %i" % (item.text(),rownum)
             widget.setItem(rownum,i,item)
             
     def setCode(self):
@@ -129,11 +129,28 @@ class PrefArray(object):
         
     def saveToSettings(self):
         if self.rowsValid:
-            print "rows are valid and I'm going to save %s" % (self.rows)
             json_str = json.dumps( self.toList() )
             self.settings.setValue( self.settings_tag, json_str )
             return True
         else:
+            #print "row not valid"
+            for row in self.rows:
+                if not row.isValid:
+                    if not row.validCode:
+                        msg = QMessageBox()
+                        msg.setText("Habitat codes must be non-zero integers (whole numbers).")
+                        msg.setWindowTitle("Invalid Habitat Code")
+                        msg.exec_()
+                    if not row.validName:
+                        msg = QMessageBox()
+                        msg.setText("You entered an invalide habitat name. I'm not sure how you even did that.")
+                        msg.setWindowTitle("Invalid Habitat Name")
+                        msg.exec_()
+                    if not row.validColor:
+                        msg = QMessageBox()
+                        msg.setText("You apparently entered an invalid color. Try selecting the row and clicking the 'Choose Color' button.")
+                        msg.setWindowTitle("Invalid Habitat Color")
+                        msg.exec_()
             return False
         
     def loadFromSettings(self):
@@ -146,10 +163,16 @@ class PrefArray(object):
         """
         self.rows = []
         row_cnt = self.widget.rowCount()
-        print "row_cnt in loadFromWidget=%i" % row_cnt
+        #print "row_cnt in loadFromWidget=%i" % row_cnt
         for r in range(row_cnt):
             newpr = PrefRow()
-            newpr.code = int( self.widget.item(r,0).text() )
+            try:
+                newpr.code = int( self.widget.item(r,0).text() )
+            except ValueError:
+                try:
+                    newpr.code = float( self.widget.item(r,0).text() )
+                except:
+                    newpr.code = None
             newpr.name = unicode( self.widget.item(r,1).text() )
             newpr.color = unicode( self.widget.item(r,2).text() )  
             self.rows.append(newpr)
@@ -160,7 +183,7 @@ class PrefArray(object):
         PrefRows and load those into a PrefArray.
         """
         # turn the json into a list of lists (rows)
-        print json_str
+        #print json_str
         jlist = json.loads(json_str)
         self.clear()
         for row in jlist:
@@ -201,17 +224,28 @@ class StartPrefs(QDialog, Ui_Dialog):
         self.habPrefArray = HabPrefArray(widget=self.habTableWidget)
         self.habPrefArray.loadFromSettings()
         # setup habitat table
-        self.habTableWidget.setColumnCount(3)
         self.habTableWidget.setRowCount(self.habPrefArray.rowCount)
         if self.habPrefArray.rowsValid:
             self.habPrefArray.addToTableWidget()
         self.habTableWidget.setHorizontalHeaderLabels(["Code","Habitat","Color"])
+        
+    def generalHelp(self):
+        pass
+    
+    def generalChooseDB(self):
+        pass
+    
+    def generalChooseWorkingDir(self):
+        pass
+    
+    def timezoneHelp(self):
+        pass
+    
+    def substratesHelp(self):
+        pass
     
     def addHabRow(self):
-        if self.habLineEdit.text():
-            newRow = PrefRow(name=unicode(self.habLineEdit.text()) )
-            self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
-            newRow.addToTableWidget(self.habTableWidget,self.habTableWidget.rowCount())
+        self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
     
     def removeHabRow(self):
         currRow = self.habTableWidget.currentRow()
@@ -252,7 +286,11 @@ class StartPrefs(QDialog, Ui_Dialog):
         pr.code = widg.item(currRow,0).text()
         pr.name = widg.item(currRow,1).text()
         pr.color = widg.item(currRow,2).text()
-        print pr
+        #print pr
+        
+    def habItemDoubleClicked(self,qwtItem):
+        if qwtItem.column()==2:
+            self.changeHabColor()
         
     def accept(self):
         newpa = HabPrefArray(widget=self.habTableWidget)
@@ -260,10 +298,7 @@ class StartPrefs(QDialog, Ui_Dialog):
         if newpa.saveToSettings():
             super(StartPrefs, self).accept()
         else:
-            msg = QMessageBox()
-            msg.setText("Something is wrong. ...I should make this more informative.")
-            msg.setWindowTitle("Something Wrong with Prefs")
-            msg.exec_()
+            pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
