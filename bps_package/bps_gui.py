@@ -3,6 +3,7 @@
 import sys, os, json
 from types import IntType, StringType, UnicodeType
 import glob
+from slugify import slugify
 try:
     from bps_package.depth_temp_log_io import *
     from bps_package.photo_tagging import *
@@ -13,13 +14,19 @@ except ImportError:
     from photo_tagging import *
     from gps_log_io import *
     from bps_export import *
+
 from PyQt4 import QtCore
 from PyQt4.QtCore import QSettings, QModelIndex
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
-    QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem
+    QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
 
+try:
+    _fromUtf8 = QtCore.QString.fromUtf8
+except AttributeError:
+    _fromUtf8 = lambda s: s
+    
 class PrefRow(object):
     def __init__(self,name=None,code=None,color=None,parent=None):
         """
@@ -373,11 +380,26 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def resizeEvent( self, event ):
         super(MainWindow, self).resizeEvent( event )
-        self.setPhotoDisplay()        
+        self.setPhotoDisplay()
         
+    def setupHabSelector(self):
+        htw = self.habitatTableWidget
+        htw.clear()
+        habList = self.getHablistSettings()
+        htw.setRowCount( len(habList) )
+        htw.setColumnCount( 1 )
+        htw.setVerticalHeaderLabels(habList)
+        for i,hab in enumerate(habList):
+            sbname = slugify(hab) + "SpinBox"
+            newsb = QDoubleSpinBox(self)
+            newsb.setMaximum(1.0)
+            newsb.setSingleStep(0.1)
+            newsb.setObjectName(_fromUtf8(sbname))
+            self.__setattr__(sbname,newsb)
+            htw.setCellWidget(i,0,newsb)
+                
     def applySettings(self):
-        self.habitatListWidget.clear()
-        self.habitatListWidget.addItems( self.getHablistSettings() )
+        self.setupHabSelector()
         self.substrateListWidget.clear()
         self.substrateListWidget.addItems( self.getSubstSettings() )
         self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
@@ -442,10 +464,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         hab = self.imf.xmp_habitat
         self.habitatValue.setText( str(hab) )
         if hab: # Set the selection in the listbox
-            hab_list_item = self.habitatListWidget.findItems( str(hab), QtCore.Qt.MatchFlags() )[0]
-            self.habitatListWidget.setCurrentItem( hab_list_item )
+            #hab_list_item = self.habitatListWidget.findItems( str(hab), QtCore.Qt.MatchFlags() )[0]
+            #self.habitatListWidget.setCurrentItem( hab_list_item )
+            pass
         else:
-            self.habitatListWidget.setCurrentItem( None )
+            #self.habitatListWidget.setCurrentItem( None )
+            pass
             
         subs = self.imf.xmp_substrate
         self.substrateValue.setText( str(subs) )
@@ -492,10 +516,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.loadExifData()
     
     def setHabitat(self, item_index):
-        item = self.habitatListWidget.itemFromIndex( item_index )
-        hab = str( item.text() )
-        self.imf.set_xmp_habitat( hab )
-        self.loadExifData()
+        #item = self.habitatListWidget.itemFromIndex( item_index )
+        #hab = str( item.text() )
+        #self.imf.set_xmp_habitat( hab )
+        #self.loadExifData()
+        pass
     
     def geoTag(self):
         if self.imf:
