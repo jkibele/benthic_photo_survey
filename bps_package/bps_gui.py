@@ -227,6 +227,12 @@ class HabPrefArray(PrefArray):
         qset = QSettings("jkibele","BenthicPhotoSurvey")
         stag = "habitats"
         super(HabPrefArray, self).__init__(rowList=rowList,settings=qset,settings_tag=stag,widget=widget)
+        
+    def toHabList(self):
+        outlist = []
+        for r in self.rows:
+            outlist.append(r.name)
+        return outlist
 
 class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
@@ -240,15 +246,63 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if self.habPrefArray.rowsValid:
             self.habPrefArray.addToTableWidget()
         self.habTableWidget.setHorizontalHeaderLabels(["Code","Habitat","Color"])
+        # setup general tab
+        self.db_path = self.settings.value("db_path",CONF_DB_PATH).toString()
+        self.databaseLineEdit.setText( self.db_path )
+        self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR).toString()
+        self.workingDirLineEdit.setText( self.working_dir )
+        self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString()
+        self.inputEPSGLineEdit.setText( self.inputEPSG )
+        self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString()
+        self.outputEPSGLineEdit.setText( self.outputEPSG )
+        # setup time zone tab
+        self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE).toString()
+        self.ktimezonewidget.setSelected( self.timezone, True )
+        # setup substrate tab
+        self.substList = self.settings.value("substList",CONF_SUBSTRATES).toStringList()
+        self.substkeditlistwidget.setItems( self.substList )
+        
+    def accept(self):
+        newpa = HabPrefArray(widget=self.habTableWidget)
+        newpa.loadFromWidget()
+        if newpa.saveToSettings(): # ensure habitat settings don't bork
+            # then save other settings
+            self.generalSaveSettings()
+            self.timezone = self.ktimezonewidget.selection()[0]
+            self.settings.setValue( "timezone",self.timezone )
+            self.substList = self.substkeditlistwidget.items()
+            self.settings.setValue( "substList",self.substList )
+            super(StartPrefs, self).accept()
+        else:
+            pass
+        
+    def generalSaveSettings(self):
+        self.db_path = self.databaseLineEdit.text()
+        self.working_dir = self.workingDirLineEdit.text()
+        self.inputEPSG = self.inputEPSGLineEdit.text()
+        self.outputEPSG = self.outputEPSGLineEdit.text()
+        set_list = ['db_path','working_dir','inputEPSG','outputEPSG']
+        for s in set_list:
+            self.settings.setValue( s, self.__getattribute__(s) )
         
     def generalHelp(self):
         pass
     
     def generalChooseDB(self):
-        pass
+        new_db_path = QFileDialog.getSaveFileName(self,"Choose or Create Database File",self.db_path,filter="SQLite db(*.db)",options=QFileDialog.DontConfirmOverwrite)
+        if new_db_path:
+            self.db_path = new_db_path         
+            self.databaseLineEdit.setText( self.db_path )
+        else:
+            return False
     
     def generalChooseWorkingDir(self):
-        pass
+        new_wdir = QFileDialog.getExistingDirectory(self,"Choose a Working Directory",self.working_dir)
+        if new_wdir:
+            self.working_dir = new_wdir         
+            self.workingDirLineEdit.setText( self.working_dir )
+        else:
+            return False
     
     def timezoneHelp(self):
         pass
@@ -287,9 +341,10 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         currRow = self.habTableWidget.currentRow()
         color_item = QTableWidgetItem()
         new_qcolor = QColorDialog.getColor(parent=self)
-        color_item.setBackgroundColor( new_qcolor )
-        color_item.setText( new_qcolor.name() )
-        self.habTableWidget.setItem(currRow,2,color_item)
+        if new_qcolor.isValid():
+            color_item.setBackgroundColor( new_qcolor )
+            color_item.setText( new_qcolor.name() )
+            self.habTableWidget.setItem(currRow,2,color_item)
     
     def habHelp(self):
         widg = self.habTableWidget
@@ -303,14 +358,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def habItemDoubleClicked(self,qwtItem):
         if qwtItem.column()==2:
             self.changeHabColor()
-        
-    def accept(self):
-        newpa = HabPrefArray(widget=self.habTableWidget)
-        newpa.loadFromWidget()
-        if newpa.saveToSettings():
-            super(StartPrefs, self).accept()
-        else:
-            pass
+    
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -332,9 +380,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.habitatListWidget.addItems( self.getHablistSettings() )
         self.substrateListWidget.clear()
         self.substrateListWidget.addItems( self.getSubstSettings() )
+        self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
         
     def getHablistSettings(self):
-        return self.settings.value("hablist",CONF_HABITATS).toStringList()
+        hpa = HabPrefArray()
+        hpa.loadFromSettings()
+        return hpa.toHabList()
         
     def getSubstSettings(self):
         return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
@@ -405,7 +456,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.substrateListWidget.setCurrentItem( None )
 
     def loadPhotoDirectory(self):
-        photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=CONF_PHOTO_DIR) )
+        default_dir = os.path.join( str(self.working_dir.toString()), "images" )
+        if not os.path.exists( default_dir ):
+            os.mkdir( default_dir )
+        photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=default_dir) )
         if photo_dir:
             self.imageDirectoryObj = image_directory( photo_dir )
             self.setPhotoDisplay()
@@ -527,12 +581,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.imageDirectoryObj.depth_plot()
     
     def exportShapefile(self):
+        default_dir = os.path.join( str(self.working_dir.toString()), "shapefiles" )
+        if not os.path.exists( default_dir ):
+            os.mkdir( default_dir )
         shp_filepath = str( QFileDialog.getSaveFileName(self, 'Save Shapefile',
-                                                        directory='data/shapefiles',
+                                                        directory=default_dir,
                                                         filter='Shapefiles (*.shp)') )
         if shp_filepath:
             try:
-                bpse = bps_shp_exporter(shp_filepath)
+                inputEPSG = int( self.settings.value("inputEPSG",CONF_INPUT_EPSG) )
+                outputEPSG = int( self.settings.value("outputEPSG",CONF_OUTPUT_EPSG) )
+                bpse = bps_shp_exporter(shp_filepath,espg_in=inputEPSG,epsg_out=outputEPSG)
                 returned_path = bpse.write_shapefile( self.imageDirectoryObj.path )
                 result_str = "Great Success: Shapefile written to: %s" % returned_path
                 return True
@@ -550,7 +609,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
     
     def loadGpsLog(self):
-        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=CONF_GPS_DIR, filter='GPS Files (*.gpx *.log)') )
+        default_dir = os.path.join( str(self.working_dir.toString()), "gps" )
+        if not os.path.exists( default_dir ):
+            os.mkdir( default_dir )
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=default_dir, filter='GPS Files (*.gpx *.log)') )
         if log_filepath:            
             try:            
                 if log_filepath.lower().endswith('.gpx'):
@@ -575,7 +637,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         
     def loadDepthLog(self):
-        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=CONF_DEPTH_DIR, filter='Sensus Log Files (*.csv)') )
+        default_dir = os.path.join( str(self.working_dir.toString()), "sensus" )
+        if not os.path.exists( default_dir ):
+            os.mkdir( default_dir )
+        log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=default_dir, filter='Sensus Log Files (*.csv)') )
         if log_filepath:
             try:        
                 result_str = read_depth_temp_log( log_filepath )

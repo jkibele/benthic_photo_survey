@@ -1,16 +1,11 @@
 LOCAL_TIME_ZONE = 'Pacific/Auckland' # Find your local timezone name here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
-# This is where your database will be created. You should only need
-# to change this if you are using multiple camera/gps/depth logger
-# setups at the same time. In that case, you'll need to keep your
-# logged positions and depths in seperate databases.
-db_path = 'data/db/raw_log.db'
+# This is all changing. User's should manage their preferences through the 
+# preferences dialog in the file menu of BPS. This file will should only 
+# affect the default values that show up the first time the application is run.
+CONF_DB_PATH = 'bps_package/data/db/raw_log.db'
 
-# Default directories: These lines just determine where your file dialogs
-# will open to when you load gps logs, depth logs, and photos
-CONF_GPS_DIR = 'data/gps'
-CONF_DEPTH_DIR = 'data/sensus'
-CONF_PHOTO_DIR = 'data/images'
+CONF_WORKING_DIR = 'bps_package/data'
 
 # the following three items are for testing and shouldn't need to be
 # changed.

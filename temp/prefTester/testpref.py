@@ -275,9 +275,10 @@ class StartPrefs(QDialog, Ui_Dialog):
         currRow = self.habTableWidget.currentRow()
         color_item = QTableWidgetItem()
         new_qcolor = QColorDialog.getColor(parent=self)
-        color_item.setBackgroundColor( new_qcolor )
-        color_item.setText( new_qcolor.name() )
-        self.habTableWidget.setItem(currRow,2,color_item)
+        if new_qcolor.isValid():
+            color_item.setBackgroundColor( new_qcolor )
+            color_item.setText( new_qcolor.name() )
+            self.habTableWidget.setItem(currRow,2,color_item)
     
     def habHelp(self):
         widg = self.habTableWidget

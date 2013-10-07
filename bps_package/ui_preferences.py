@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Fri Oct  4 18:05:31 2013
+# Created: Mon Oct  7 11:56:53 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,9 +48,9 @@ class Ui_PrefDialog(object):
         self.workingDirLineEdit.setReadOnly(True)
         self.workingDirLineEdit.setObjectName(_fromUtf8("workingDirLineEdit"))
         self.gridLayout_2.addWidget(self.workingDirLineEdit, 1, 1, 1, 1)
-        self.lineEdit_3 = QtGui.QLineEdit(self.generalTab)
-        self.lineEdit_3.setObjectName(_fromUtf8("lineEdit_3"))
-        self.gridLayout_2.addWidget(self.lineEdit_3, 2, 1, 1, 1)
+        self.inputEPSGLineEdit = QtGui.QLineEdit(self.generalTab)
+        self.inputEPSGLineEdit.setObjectName(_fromUtf8("inputEPSGLineEdit"))
+        self.gridLayout_2.addWidget(self.inputEPSGLineEdit, 2, 1, 1, 1)
         self.toolButton_2 = QtGui.QToolButton(self.generalTab)
         self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
         self.gridLayout_2.addWidget(self.toolButton_2, 1, 2, 1, 1)
@@ -69,6 +69,11 @@ class Ui_PrefDialog(object):
         self.timezoneTab.setObjectName(_fromUtf8("timezoneTab"))
         self.gridLayout_3 = QtGui.QGridLayout(self.timezoneTab)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
+        spacerItem1 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_3.addItem(spacerItem1, 2, 1, 1, 1)
+        self.pushButton_2 = QtGui.QPushButton(self.timezoneTab)
+        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
+        self.gridLayout_3.addWidget(self.pushButton_2, 2, 0, 1, 1)
         self.label = QtGui.QLabel(self.timezoneTab)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout_3.addWidget(self.label, 0, 0, 1, 2)
@@ -78,11 +83,6 @@ class Ui_PrefDialog(object):
         self.ktimezonewidget.headerItem().setText(1, _fromUtf8("2"))
         self.ktimezonewidget.headerItem().setText(2, _fromUtf8("3"))
         self.gridLayout_3.addWidget(self.ktimezonewidget, 1, 0, 1, 2)
-        self.pushButton_2 = QtGui.QPushButton(self.timezoneTab)
-        self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.gridLayout_3.addWidget(self.pushButton_2, 2, 0, 1, 1)
-        spacerItem1 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_3.addItem(spacerItem1, 2, 1, 1, 1)
         self.tabWidget.addTab(self.timezoneTab, _fromUtf8(""))
         self.habitatTab = QtGui.QWidget()
         self.habitatTab.setObjectName(_fromUtf8("habitatTab"))
@@ -132,9 +132,9 @@ class Ui_PrefDialog(object):
         self.substratesTab.setObjectName(_fromUtf8("substratesTab"))
         self.gridLayout_4 = QtGui.QGridLayout(self.substratesTab)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.keditlistwidget = KEditListWidget(self.substratesTab)
-        self.keditlistwidget.setObjectName(_fromUtf8("keditlistwidget"))
-        self.gridLayout_4.addWidget(self.keditlistwidget, 0, 0, 1, 2)
+        self.substkeditlistwidget = KEditListWidget(self.substratesTab)
+        self.substkeditlistwidget.setObjectName(_fromUtf8("substkeditlistwidget"))
+        self.gridLayout_4.addWidget(self.substkeditlistwidget, 0, 0, 1, 2)
         self.pushButton_3 = QtGui.QPushButton(self.substratesTab)
         self.pushButton_3.setMaximumSize(QtCore.QSize(85, 16777215))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
@@ -177,8 +177,8 @@ class Ui_PrefDialog(object):
         self.databaseLabel.setText(QtGui.QApplication.translate("PrefDialog", "Database", None, QtGui.QApplication.UnicodeUTF8))
         self.outputEPSGLabel.setText(QtGui.QApplication.translate("PrefDialog", "Output EPSG", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.generalTab), QtGui.QApplication.translate("PrefDialog", "General", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("PrefDialog", "Choose the time zone you are working in", None, QtGui.QApplication.UnicodeUTF8))
         self.pushButton_2.setText(QtGui.QApplication.translate("PrefDialog", "Help?", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("PrefDialog", "Choose the time zone you are working in", None, QtGui.QApplication.UnicodeUTF8))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.timezoneTab), QtGui.QApplication.translate("PrefDialog", "Time Zone", None, QtGui.QApplication.UnicodeUTF8))
         self.habAddButton.setText(QtGui.QApplication.translate("PrefDialog", "Add", None, QtGui.QApplication.UnicodeUTF8))
         self.habRemoveButton.setText(QtGui.QApplication.translate("PrefDialog", "Remove", None, QtGui.QApplication.UnicodeUTF8))

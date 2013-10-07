@@ -8,7 +8,7 @@ class dive_record_set(object):
     stuff with them. If the given start and end datetime objects are naive,
     we'll assume they're in the local time zone as defined in configuration.py
     """
-    def __init__(self, start_dt, end_dt, path_to_db=db_path):
+    def __init__(self, start_dt, end_dt, path_to_db):
         if start_dt.tzinfo == None:
             start_dt = make_aware_of_local_tz(start_dt)
         if end_dt.tzinfo == None:
@@ -72,7 +72,7 @@ def depth_from_pressure(mbars):
     presure is 1atm. """
     return (mbars - 1013.25) / 101.41830484045322 
 
-def read_depth_temp_log(filepath,path_to_db=db_path,verbose=False):
+def read_depth_temp_log(filepath,path_to_db,verbose=False):
     """Read in a single depth / temp csv file  into a sqlite db for persistence 
     and easy searching. Records must have a unique combination of device identifier,
     file number, and datetime stamp. If a conflict is found, the old record will be

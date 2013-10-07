@@ -322,7 +322,7 @@ class gpx_file(object):
                 pass # If we get here it's because there is a track point with no timestamp so we don't want it
         return result
         
-    def read_to_db(self, dbp=db_path):
+    def read_to_db(self, dbp):
         if not self.track_points:
             print "The file %s has no track points." % (self.file_path,)
             return None
@@ -398,7 +398,7 @@ def group_nmea_sentences_by_timestamp(obj_list):
     #    print "timestamp: %s group contains: %s" % (str(g[0].timestamp), ', '.join([z.__class__.__name__ for z in g]))
     return groups
 
-def read_gps_log(filepath,path_to_db=db_path):
+def read_gps_log(filepath,path_to_db):
     """Read in a single nmea gps log into the sqlite database. Currently requiring
     the GPRMC sentence and optionally reading the number of satellites from the
     GPGGA sentence when it is available.
