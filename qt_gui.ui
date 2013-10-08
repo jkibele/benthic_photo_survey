@@ -574,12 +574,12 @@
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="habitatTab" native="true">
+      <widget class="QWidget" name="habitatTab">
        <attribute name="title">
         <string>Habitat</string>
        </attribute>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0" colspan="3">
          <widget class="QTableWidget" name="habitatTableWidget">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Maximum" vsizetype="Expanding">
@@ -608,6 +608,57 @@
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
           </attribute>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="habSaveButton">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>60</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>118</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="2">
+         <widget class="KLed" name="habLED">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indicates that habitat types add to 1 and can be saved.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
          </widget>
         </item>
        </layout>
@@ -740,6 +791,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>KLed</class>
+   <extends>QWidget</extends>
+   <header>kled.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -947,6 +1005,38 @@
     <hint type="destinationlabel">
      <x>459</x>
      <y>313</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>habSaveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setHabitat()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>731</x>
+     <y>577</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>915</x>
+     <y>361</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substrateListWidget</sender>
+   <signal>doubleClicked(QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>setSubstrate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>796</x>
+     <y>458</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>911</x>
+     <y>327</y>
     </hint>
    </hints>
   </connection>

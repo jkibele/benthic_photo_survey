@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, json
+import sys, os, json, operator, random
 from types import IntType, StringType, UnicodeType
 import glob
 from slugify import slugify
@@ -383,6 +383,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setPhotoDisplay()
         
     def setupHabSelector(self):
+        self.habLED.off()
         htw = self.habitatTableWidget
         htw.clear()
         habList = self.getHablistSettings()
@@ -390,13 +391,90 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         htw.setColumnCount( 1 )
         htw.setVerticalHeaderLabels(habList)
         for i,hab in enumerate(habList):
-            sbname = slugify(hab) + "SpinBox"
+            newsb = self.spinBoxFromHabName(hab)
+            htw.setCellWidget(i,0,newsb)
+            QtCore.QObject.connect(newsb, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), self.checkHabValues)
+            
+    def loadHabSelector(self,hab_dict):
+        for hab,num in hab_dict.items():
+            sb = self.spinBoxFromHabName(hab)
+            sb.setValue(num)
+        self.checkHabValues()
+            
+    def zeroHabSelector(self):
+        htw = self.habitatTableWidget
+        habList = self.getHablistSettings()
+        for hab in habList:
+            sb = self.spinBoxFromHabName(hab)
+            sb.setValue(0.0)
+            
+    def checkHabValues(self):
+        tot = self.totalFromHabSelector
+        if tot<1.0:
+            self.habLED.off()
+            self.habLED.setColor( QColor('green') )
+            self.habSaveButton.setDisabled(True)
+        elif tot==1.0:
+            self.habLED.on()
+            self.habLED.setColor( QColor('green') )
+            self.habSaveButton.setDisabled(False)
+        else:
+            self.habLED.off()
+            self.habLED.setColor( QColor('red') )
+            self.habSaveButton.setDisabled(True)
+        
+    @property
+    def totalFromHabSelector(self):
+        htw = self.habitatTableWidget
+        habList = self.getHablistSettings()
+        tot = 0.0
+        for hab in habList:
+            sb = self.spinBoxFromHabName(hab)
+            tot += sb.value()
+        return tot
+            
+    def spinBoxFromHabName(self,habname):
+        """
+        If the spin box exists, return it. If not make it and return it.
+        """
+        sbname = slugify(habname) + "SpinBox"
+        try:
+            return self.__getattribute__(sbname)
+        except AttributeError:
             newsb = QDoubleSpinBox(self)
             newsb.setMaximum(1.0)
             newsb.setSingleStep(0.1)
             newsb.setObjectName(_fromUtf8(sbname))
             self.__setattr__(sbname,newsb)
-            htw.setCellWidget(i,0,newsb)
+            return newsb
+            
+    def setHabitat(self):
+        htw = self.habitatTableWidget
+        hab_dict = {}
+        for row in range(htw.rowCount()):
+            hab = str( htw.verticalHeaderItem(row).text() )
+            sb = self.spinBoxFromHabName(hab)
+            hab_dict[hab] = round( sb.value(), 4 )
+        self.imf.set_xmp_fuzzy_habitats( hab_dict )
+        # find the most common habitat and set that as the hard classification
+        # first see if how many are tied for 1st place
+        hdv = sorted(hab_dict.values())
+        hdv.reverse()
+        ties = hdv.count(hdv[0])
+        # turn the dict into a sorted list of tuples        
+        habs_sorted = sorted(hab_dict.iteritems(), key=operator.itemgetter(1))
+        habs_sorted.reverse() # in place, so now sorted high to low
+        if ties==1: # no ties, only one maxiumum. easy.
+            # store the first 'key' value as the hard hab classification
+            self.imf.set_xmp_habitat( habs_sorted[0][0] )
+        else:
+            # if I just used the first one here, I'd always get the lower
+            # alphabetic label in the case of a tie. This way, I will get
+            # a random choice in the event of a tie.
+            tiedlist = habs_sorted[0:ties]
+            hab_name = random.choice(tiedlist)[0]
+            self.imf.set_xmp_habitat( hab_name )
+        self.loadExifData()
                 
     def applySettings(self):
         self.setupHabSelector()
@@ -463,13 +541,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.temperatureValue.setText( tstr )
         hab = self.imf.xmp_habitat
         self.habitatValue.setText( str(hab) )
-        if hab: # Set the selection in the listbox
-            #hab_list_item = self.habitatListWidget.findItems( str(hab), QtCore.Qt.MatchFlags() )[0]
-            #self.habitatListWidget.setCurrentItem( hab_list_item )
-            pass
+        fuzzy_hab_dict = self.imf.xmp_fuzzy_hab_dict
+        if fuzzy_hab_dict: # Set the values in the habitat selector
+            self.loadHabSelector( fuzzy_hab_dict )
         else:
-            #self.habitatListWidget.setCurrentItem( None )
-            pass
+            self.zeroHabSelector()
             
         subs = self.imf.xmp_substrate
         self.substrateValue.setText( str(subs) )
@@ -514,13 +590,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         hab = str( item.text() )
         self.imf.set_xmp_substrate( hab )
         self.loadExifData()
-    
-    def setHabitat(self, item_index):
-        #item = self.habitatListWidget.itemFromIndex( item_index )
-        #hab = str( item.text() )
-        #self.imf.set_xmp_habitat( hab )
-        #self.loadExifData()
-        pass
     
     def geoTag(self):
         if self.imf:

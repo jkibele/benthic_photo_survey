@@ -1,4 +1,5 @@
 import pyexiv2 as exiv # see note about pyexiv2 in notes.txt
+import json
 from ast import literal_eval
 from depth_temp_log_io import *
 from configuration import *
@@ -249,6 +250,14 @@ class image_file(object):
     @property
     def xmp_habitat(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.habitat')
+        
+    @property
+    def xmp_fuzzy_hab_dict(self):
+        hd_json = self.__get_exiv_tag_value('Xmp.BenthicPhoto.fuzzy_hab_dict')
+        if hd_json:
+            return json.loads(hd_json)
+        else:
+            return None
             
     @property
     def position(self):
@@ -350,6 +359,12 @@ class image_file(object):
     def set_xmp_habitat(self, subst_str):
         pre = 'Xmp.BenthicPhoto.'
         self.md[pre+'habitat'] = subst_str
+        self.md.write()
+        
+    def set_xmp_fuzzy_habitats(self, habdict):
+        habdict_json_str = json.dumps(habdict)
+        pre = 'Xmp.BenthicPhoto.'
+        self.md[pre+'fuzzy_hab_dict'] = habdict_json_str
         self.md.write()
         
     @property

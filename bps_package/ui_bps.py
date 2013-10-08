@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Mon Oct  7 17:18:33 2013
+# Created: Tue Oct  8 17:25:22 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -275,8 +275,8 @@ class Ui_MainWindow(object):
         self.habAndSubstTabWidget.setObjectName(_fromUtf8("habAndSubstTabWidget"))
         self.habitatTab = QtGui.QWidget()
         self.habitatTab.setObjectName(_fromUtf8("habitatTab"))
-        self.horizontalLayout_2 = QtGui.QHBoxLayout(self.habitatTab)
-        self.horizontalLayout_2.setObjectName(_fromUtf8("horizontalLayout_2"))
+        self.gridLayout_3 = QtGui.QGridLayout(self.habitatTab)
+        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         self.habitatTableWidget = QtGui.QTableWidget(self.habitatTab)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -289,7 +289,27 @@ class Ui_MainWindow(object):
         self.habitatTableWidget.setObjectName(_fromUtf8("habitatTableWidget"))
         self.habitatTableWidget.horizontalHeader().setVisible(False)
         self.habitatTableWidget.horizontalHeader().setStretchLastSection(True)
-        self.horizontalLayout_2.addWidget(self.habitatTableWidget)
+        self.gridLayout_3.addWidget(self.habitatTableWidget, 0, 0, 1, 3)
+        self.habSaveButton = QtGui.QPushButton(self.habitatTab)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Maximum, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.habSaveButton.sizePolicy().hasHeightForWidth())
+        self.habSaveButton.setSizePolicy(sizePolicy)
+        self.habSaveButton.setMaximumSize(QtCore.QSize(60, 16777215))
+        self.habSaveButton.setObjectName(_fromUtf8("habSaveButton"))
+        self.gridLayout_3.addWidget(self.habSaveButton, 1, 0, 1, 1)
+        spacerItem3 = QtGui.QSpacerItem(118, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_3.addItem(spacerItem3, 1, 1, 1, 1)
+        self.habLED = KLed(self.habitatTab)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.habLED.sizePolicy().hasHeightForWidth())
+        self.habLED.setSizePolicy(sizePolicy)
+        self.habLED.setMinimumSize(QtCore.QSize(25, 25))
+        self.habLED.setObjectName(_fromUtf8("habLED"))
+        self.gridLayout_3.addWidget(self.habLED, 1, 2, 1, 1)
         self.habAndSubstTabWidget.addTab(self.habitatTab, _fromUtf8(""))
         self.substTab = QtGui.QWidget()
         self.substTab.setObjectName(_fromUtf8("substTab"))
@@ -368,6 +388,8 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.actionExport_Shapefile, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.exportShapefile)
         QtCore.QObject.connect(self.actionLoad_Photo_Directory, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.loadPhotoDirectory)
         QtCore.QObject.connect(self.actionPreferences, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.preferenceDialog)
+        QtCore.QObject.connect(self.habSaveButton, QtCore.SIGNAL(_fromUtf8("clicked()")), MainWindow.setHabitat)
+        QtCore.QObject.connect(self.substrateListWidget, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), MainWindow.setSubstrate)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -393,6 +415,8 @@ class Ui_MainWindow(object):
         self.substrateLabel.setText(QtGui.QApplication.translate("MainWindow", "Substrate", None, QtGui.QApplication.UnicodeUTF8))
         self.timeLabel.setText(QtGui.QApplication.translate("MainWindow", "Time", None, QtGui.QApplication.UnicodeUTF8))
         self.habitatTableWidget.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Hover and roll mouse wheel to set habitat proportions</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
+        self.habSaveButton.setText(QtGui.QApplication.translate("MainWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
+        self.habLED.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Indicates that habitat types add to 1 and can be saved.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.habitatTab), QtGui.QApplication.translate("MainWindow", "Habitat", None, QtGui.QApplication.UnicodeUTF8))
         self.substrateListWidget.setToolTip(QtGui.QApplication.translate("MainWindow", "Double Click to set Substrate", None, QtGui.QApplication.UnicodeUTF8))
         self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.substTab), QtGui.QApplication.translate("MainWindow", "Substrate", None, QtGui.QApplication.UnicodeUTF8))
@@ -413,3 +437,4 @@ class Ui_MainWindow(object):
         self.actionDepth_Temp_Tag_All.setText(QtGui.QApplication.translate("MainWindow", "Depth/Temp Tag All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPreferences.setText(QtGui.QApplication.translate("MainWindow", "Preferences...", None, QtGui.QApplication.UnicodeUTF8))
 
+from PyKDE4.kdeui import KLed
