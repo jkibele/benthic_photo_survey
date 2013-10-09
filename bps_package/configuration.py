@@ -7,6 +7,9 @@ CONF_DB_PATH = 'bps_package/data/db/raw_log.db'
 
 CONF_WORKING_DIR = 'bps_package/data'
 
+CONF_QSETTINGS_DEVELOPER = 'jkibele'
+CONF_QSETTINGS_APPLICATION = 'BenthicPhotoSurvey'
+
 # the following three items are for testing and shouldn't need to be
 # changed.
 dt_testlog = 'test_data/sensus/sensus_test.csv'

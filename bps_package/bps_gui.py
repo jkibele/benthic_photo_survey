@@ -173,7 +173,7 @@ class PrefArray(object):
             return False
         
     def loadFromSettings(self):
-        json_str = str( self.settings.value(self.settings_tag,'[[null, null, null]]').toString() )
+        json_str = str( self.settings.value(self.settings_tag,'[["kelp", 1, "#009900"]]').toString() )
         self.fromJson(json_str)
         
     def loadFromWidget(self):
@@ -202,7 +202,7 @@ class PrefArray(object):
         PrefRows and load those into a PrefArray.
         """
         # turn the json into a list of lists (rows)
-        #print json_str
+        print "json str: %s" % json_str
         jlist = json.loads(json_str)
         self.clear()
         for row in jlist:
@@ -231,7 +231,7 @@ class HabPrefArray(PrefArray):
     A PrefArray that's pre-populated with habitat preference specific values.
     """
     def __init__(self,rowList=None, widget=None):
-        qset = QSettings("jkibele","BenthicPhotoSurvey")
+        qset = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)
         stag = "habitats"
         super(HabPrefArray, self).__init__(rowList=rowList,settings=qset,settings_tag=stag,widget=widget)
         
@@ -245,7 +245,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
         QDialog.__init__(self,parent)
         self.setupUi(self)
-        self.settings = QSettings("jkibele","BenthicPhotoSurvey")
+        self.settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)
         self.habPrefArray = HabPrefArray(widget=self.habTableWidget)
         self.habPrefArray.loadFromSettings()
         # setup habitat table
@@ -254,19 +254,37 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.habPrefArray.addToTableWidget()
         self.habTableWidget.setHorizontalHeaderLabels(["Code","Habitat","Color"])
         # setup general tab
-        self.db_path = self.settings.value("db_path",CONF_DB_PATH).toString()
+        try:
+            self.db_path = self.settings.value("db_path",CONF_DB_PATH).toString()
+        except AttributeError:
+            self.db_path = self.settings.value("db_path",CONF_DB_PATH)
         self.databaseLineEdit.setText( self.db_path )
-        self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR).toString()
+        try:
+            self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR).toString()
+        except AttributeError:
+            self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
         self.workingDirLineEdit.setText( self.working_dir )
-        self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString()
+        try:
+            self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString()
+        except AttributeError:
+            self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG)
         self.inputEPSGLineEdit.setText( self.inputEPSG )
-        self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString()
+        try:
+            self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString()
+        except AttributeError:
+            self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG)
         self.outputEPSGLineEdit.setText( self.outputEPSG )
         # setup time zone tab
-        self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE).toString()
+        try:
+            self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE).toString()
+        except AttributeError:
+            self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE)
         self.ktimezonewidget.setSelected( self.timezone, True )
         # setup substrate tab
-        self.substList = self.settings.value("substList",CONF_SUBSTRATES).toStringList()
+        try:
+            self.substList = self.settings.value("substList",CONF_SUBSTRATES).toStringList()
+        except AttributeError:
+            self.substList = self.settings.value("substList",CONF_SUBSTRATES)
         self.substkeditlistwidget.setItems( self.substList )
         
     def accept(self):
@@ -280,6 +298,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.substList = self.substkeditlistwidget.items()
             self.settings.setValue( "substList",self.substList )
             super(StartPrefs, self).accept()
+            print "no bork yet in accept"
         else:
             pass
         
@@ -370,7 +389,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.settings = QSettings("jkibele","BenthicPhotoSurvey")                                    
+        self.settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)                                    
         self.setupUi(self)
         self.imageDirectoryObj = None
         # imf will be the current image file object        
@@ -437,15 +456,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         If the spin box exists, return it. If not make it and return it.
         """
+        print "looking for habname: %s" % habname
         sbname = slugify(habname) + "SpinBox"
+        htw = self.habitatTableWidget
         try:
-            return self.__getattribute__(sbname)
-        except AttributeError:
-            newsb = QDoubleSpinBox(self)
+            #This is never working. WTF?
+            widget_habs = [ htw.verticalHeaderItem(row).text() for row in range(htw.rowCount()) ]
+            widhab_rowdict = dict( [ (hab,i) for i,hab in enumerate(widget_habs) ] )
+            row = widhab_rowdict[habname] # KeyError if this hab not there
+            sb = htw.cellWidget(row,0)
+            print "Getting existing SB: %s" % sbname
+            return sb
+        except KeyError:
+            print "making SB: %s" % sbname
+            newsb = QDoubleSpinBox(self.habitatTableWidget)
             newsb.setMaximum(1.0)
             newsb.setSingleStep(0.1)
             newsb.setObjectName(_fromUtf8(sbname))
-            self.__setattr__(sbname,newsb)
+            # the spinbox will be owned by table once it becomes a cell widget
+            #self.habitatTableWidget.__setattr__(sbname,newsb)
             return newsb
             
     def setHabitat(self):
@@ -488,7 +517,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         return hpa.toHabList()
         
     def getSubstSettings(self):
-        return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
+        try:
+            return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
+        except AttributeError:
+            return self.settings.value("substlist",CONF_SUBSTRATES)
         
     def setPhotoDisplay(self):
         """
@@ -759,6 +791,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         dlg.exec_()
         if dlg.Accepted==1:
             self.applySettings()
+        else:
+            print "Preference dialog rejected"
 
                 
 if __name__ == '__main__':
