@@ -173,7 +173,10 @@ class PrefArray(object):
             return False
         
     def loadFromSettings(self):
-        json_str = str( self.settings.value(self.settings_tag,'[["kelp", 1, "#009900"]]').toString() )
+        try:
+            json_str = str( self.settings.value(self.settings_tag,'[["kelp", 1, "#009900"]]').toString() )
+        except AttributeError:
+            json_str = str( self.settings.value(self.settings_tag,'[["kelp", 1, "#009900"]]') )
         self.fromJson(json_str)
         
     def loadFromWidget(self):
@@ -202,7 +205,7 @@ class PrefArray(object):
         PrefRows and load those into a PrefArray.
         """
         # turn the json into a list of lists (rows)
-        print "json str: %s" % json_str
+        #print "json str: %s" % json_str
         jlist = json.loads(json_str)
         self.clear()
         for row in jlist:
@@ -298,7 +301,6 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.substList = self.substkeditlistwidget.items()
             self.settings.setValue( "substList",self.substList )
             super(StartPrefs, self).accept()
-            print "no bork yet in accept"
         else:
             pass
         
@@ -402,10 +404,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setPhotoDisplay()
         
     def setupHabSelector(self):
+        habList = self.getHablistSettings()
         self.habLED.off()
         htw = self.habitatTableWidget
+        for sb in htw.findChildren(QDoubleSpinBox):
+            # it turns out that this is crucial
+            # segmentations faults if you don't do this
+            sb.setParent(None)
         htw.clear()
-        habList = self.getHablistSettings()
         htw.setRowCount( len(habList) )
         htw.setColumnCount( 1 )
         htw.setVerticalHeaderLabels(habList)
@@ -413,6 +419,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             newsb = self.spinBoxFromHabName(hab)
             htw.setCellWidget(i,0,newsb)
             QtCore.QObject.connect(newsb, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), self.checkHabValues)
+        if self.imf:
+            self.loadExifData()
             
     def loadHabSelector(self,hab_dict):
         for hab,num in hab_dict.items():
@@ -450,31 +458,25 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for hab in habList:
             sb = self.spinBoxFromHabName(hab)
             tot += sb.value()
-        return tot
+        return round(tot,4)
             
     def spinBoxFromHabName(self,habname):
         """
         If the spin box exists, return it. If not make it and return it.
         """
-        print "looking for habname: %s" % habname
+        #print "looking for habname: %s" % habname
         sbname = slugify(habname) + "SpinBox"
         htw = self.habitatTableWidget
         try:
-            #This is never working. WTF?
-            widget_habs = [ htw.verticalHeaderItem(row).text() for row in range(htw.rowCount()) ]
-            widhab_rowdict = dict( [ (hab,i) for i,hab in enumerate(widget_habs) ] )
-            row = widhab_rowdict[habname] # KeyError if this hab not there
-            sb = htw.cellWidget(row,0)
-            print "Getting existing SB: %s" % sbname
+            sb = htw.findChild(QDoubleSpinBox,sbname)
+            assert( sb!=None )
             return sb
-        except KeyError:
-            print "making SB: %s" % sbname
+        except AssertionError:
+            #print "making SB: %s" % sbname
             newsb = QDoubleSpinBox(self.habitatTableWidget)
             newsb.setMaximum(1.0)
             newsb.setSingleStep(0.1)
             newsb.setObjectName(_fromUtf8(sbname))
-            # the spinbox will be owned by table once it becomes a cell widget
-            #self.habitatTableWidget.__setattr__(sbname,newsb)
             return newsb
             
     def setHabitat(self):
@@ -788,11 +790,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def preferenceDialog(self):
         #write this dialog launching code
         dlg = StartPrefs(parent=self)
-        dlg.exec_()
-        if dlg.Accepted==1:
+        if dlg.exec_():
             self.applySettings()
-        else:
-            print "Preference dialog rejected"
 
                 
 if __name__ == '__main__':
