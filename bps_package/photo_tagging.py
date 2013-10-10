@@ -47,6 +47,17 @@ class image_directory(object):
                 d_list.append(0.0)
         return np.array(d_list)
         
+    @property
+    def fuzzy_habitat_dict(self):
+        d = {}
+        for img in self.images:
+            for hab in img.xmp_fuzzy_habitats:
+                try:
+                    d[hab] += 1
+                except KeyError:
+                    d[hab] = 1
+        return d
+        
     def depth_plot(self):
         """
         Create a plot of the depth profile with photo times and depths marked.
@@ -249,6 +260,13 @@ class image_file(object):
         
     @property
     def xmp_habitat(self):
+        """
+        xmp_habitat will be set to the dominant habitat type of all the fuzzy
+        habitats. Specifically, the fuzzy habitat with the highest proportion.
+        In the event of a tie (multiple fuzzy habitats with the same proportion)
+        one of the tied habitats will be chosen at random. Assignment happens
+        in the setHabitat method of the MainWindow in bps_gui.py.
+        """
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.habitat')
         
     @property
@@ -258,6 +276,14 @@ class image_file(object):
             return json.loads(hd_json)
         else:
             return None
+            
+    @property
+    def xmp_fuzzy_habitats(self):
+        habdict = self.xmp_fuzzy_hab_dict
+        if habdict:
+            return habdict.keys()
+        else:
+            return []
             
     @property
     def position(self):

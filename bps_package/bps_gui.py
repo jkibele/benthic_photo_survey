@@ -600,6 +600,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.setPhotoData()
             msg = "Photo Directory Set to: %s" % photo_dir
             self.statusBar().showMessage( msg, 8000)
+            print self.imageDirectoryObj.fuzzy_habitat_dict
         else: # User hit cancel
             return False
         
