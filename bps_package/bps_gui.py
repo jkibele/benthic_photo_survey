@@ -596,13 +596,58 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=default_dir) )
         if photo_dir:
             self.imageDirectoryObj = image_directory( photo_dir )
+            self.currentPhotoIndex = 0
             self.setPhotoDisplay()
             self.setPhotoData()
             msg = "Photo Directory Set to: %s" % photo_dir
             self.statusBar().showMessage( msg, 8000)
-            print self.imageDirectoryObj.fuzzy_habitat_dict
+            #print self.imageDirectoryObj.fuzzy_habitat_dict
+            self.checkPhotoSettingCompatibility() # this is a bit useless right
+            # now. May beef this up later.
         else: # User hit cancel
             return False
+            
+    def photoDirSettingsCompatibility(self):
+        """
+        Take a look at the photos in this directory and see if they are 
+        compatable with the current habitat settings.
+        """
+        photo_habs = self.imageDirectoryObj.fuzzy_habitat_dict
+        habList = self.getHablistSettings()
+        not_in_photos = {}
+        not_in_settings = {}
+        for hab in habList:
+            if hab not in photo_habs.keys():
+                try:
+                    not_in_photos[hab] += 1
+                except KeyError:
+                    not_in_photos[hab] = 1
+        for hab in photo_habs:
+            if hab not in habList:
+                try:
+                    not_in_settings[hab] += 1
+                except KeyError:
+                    not_in_settings[hab] = 1
+        return not_in_photos, not_in_settings
+        
+    def checkPhotoSettingCompatibility(self):
+        """
+        See if the current photo directory's photo metadata is compatible with
+        the current habitat settings.
+        """
+        not_in_photos,not_in_settings = self.photoDirSettingsCompatibility()
+        if not_in_photos or not_in_settings:
+            if not_in_photos:
+                print "%i habitats in your preferences are not represented in any photos." % len(not_in_photos)
+            if not_in_settings:
+                print "%i habitats in your photos are not represented in your preferences." % len(not_in_settings)
+                print "Photo habitats are ",
+                for hab in not_in_settings:
+                    print "%s " % hab,
+                print "\n"
+            return False
+        else:
+            return True
         
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
