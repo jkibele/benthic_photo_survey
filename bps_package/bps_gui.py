@@ -257,38 +257,30 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.habPrefArray.addToTableWidget()
         self.habTableWidget.setHorizontalHeaderLabels(["Code","Habitat","Color"])
         # setup general tab
-        try:
-            self.db_path = self.settings.value("db_path",CONF_DB_PATH).toString()
-        except AttributeError:
-            self.db_path = self.settings.value("db_path",CONF_DB_PATH)
+        self.db_path = self.__settings_extract("db_path",CONF_DB_PATH)
         self.databaseLineEdit.setText( self.db_path )
-        try:
-            self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR).toString()
-        except AttributeError:
-            self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
+        self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
         self.workingDirLineEdit.setText( self.working_dir )
-        try:
-            self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString()
-        except AttributeError:
-            self.inputEPSG = self.settings.value("inputEPSG",CONF_INPUT_EPSG)
-        self.inputEPSGLineEdit.setText( self.inputEPSG )
-        try:
-            self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString()
-        except AttributeError:
-            self.outputEPSG = self.settings.value("outputEPSG",CONF_OUTPUT_EPSG)
-        self.outputEPSGLineEdit.setText( self.outputEPSG )
+        self.inputEPSG = int( self.__settings_extract("inputEPSG",CONF_INPUT_EPSG) )
+        self.inputEPSGLineEdit.setText( str(self.inputEPSG) )
+        self.outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
+        self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
         # setup time zone tab
-        try:
-            self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE).toString()
-        except AttributeError:
-            self.timezone = self.settings.value("timezone",LOCAL_TIME_ZONE)
+        self.timezone = self.__settings_extract("timezone",LOCAL_TIME_ZONE)
         self.ktimezonewidget.setSelected( self.timezone, True )
         # setup substrate tab
-        try:
-            self.substList = self.settings.value("substList",CONF_SUBSTRATES).toStringList()
-        except AttributeError:
-            self.substList = self.settings.value("substList",CONF_SUBSTRATES)
+        self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
         self.substkeditlistwidget.setItems( self.substList )
+        
+    def __settings_extract(self,settings_tag,default,isList=False):
+        try:
+            if isList:
+                val = self.settings.value(settings_tag,default).toStringList()
+            else:
+                val = self.settings.value(settings_tag,default).toString()
+        except AttributeError:
+            val = self.settings.value(settings_tag,default)
+        return val            
         
     def accept(self):
         newpa = HabPrefArray(widget=self.habTableWidget)
@@ -762,22 +754,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                         directory=default_dir,
                                                         filter='Shapefiles (*.shp)') )
         if shp_filepath:
-            try:
-                inputEPSG = int( self.settings.value("inputEPSG",CONF_INPUT_EPSG) )
-                outputEPSG = int( self.settings.value("outputEPSG",CONF_OUTPUT_EPSG) )
-                bpse = bps_shp_exporter(shp_filepath,espg_in=inputEPSG,epsg_out=outputEPSG)
-                returned_path = bpse.write_shapefile( self.imageDirectoryObj.path )
-                result_str = "Great Success: Shapefile written to: %s" % returned_path
-                return True
-            except:
-                import traceback
-                exc_type, exc_value, exc_traceback = sys.exc_info()
-                mbox = QMessageBox()
-                mbox.setText("Oops. Seems like that didn't work.")
-                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
-                mbox.setWindowTitle("Epic Failure")
-                mbox.exec_()
-                return False
+            #try:
+            inputEPSG = int( self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString() )
+            outputEPSG = int( self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString() )
+            bpse = bps_shp_exporter(shp_filepath,qsettings=None)
+            returned_path = bpse.write_shapefile( self.imageDirectoryObj )
+            result_str = "Great Success: Shapefile written to: %s" % returned_path
+            return True
+#            except:
+#                import traceback
+#                exc_type, exc_value, exc_traceback = sys.exc_info()
+#                mbox = QMessageBox()
+#                mbox.setText("Oops. Seems like that didn't work.")
+#                mbox.setDetailedText('\n'.join(traceback.format_tb(exc_traceback)))
+#                mbox.setWindowTitle("Epic Failure")
+#                mbox.exec_()
+#                return False
         else: # User hit cancel
             return False
                 

@@ -1,12 +1,41 @@
 from photo_tagging import *
 import osr
 
+## Crap. Need to refactor to work with settings instead of CONF_BLAH.
+## should pass img_dir object in to exporter while I'm at it. Maybe hand in
+## QSettings obj.
+
 class bps_shp_exporter(object):
-    def __init__(self, file_path, overwrite=True,lyr_name='bps_points',epsg_in=CONF_INPUT_EPSG,epsg_out=CONF_OUTPUT_EPSG):
+    def __init__(self, file_path, overwrite=True,lyr_name='bps_points',qsettings=None,epsg_in=CONF_INPUT_EPSG,epsg_out=CONF_OUTPUT_EPSG):
+        """
+        An object with the necessary attributes and methods to turn a directory
+        of tagged images into a shapefile.
+        
+        Attributes:
+            file_path: The path to write out the shapefile to. This must be a 
+                valid file path that ends with .shp. String type.
+            overwrite: A boolean indicating whether the file_path should be
+                overwritten if it already exists.
+            lyr_name: A string that will be used to name the feature layer in 
+                the shapefile.
+            qsettings: A PyQt4 QSettings object that will be inspected to get
+                EPSG values for input and output. If supplied, the qsettings 
+                EPSG values will be used and the those supplied directly will 
+                be ignored.
+            epsg_in: An int value representing the input EPSG value. This will 
+                be ignored if specified in qsettings.
+            epsg_out: An int value representing the output EPSG value. This will 
+                be ignored if specified in qsettings.
+        """
         self.overwrite = overwrite
         self.file_path = self.__validate_fp(file_path)
         #-----Set up the shapefile-------------------------
         self.spatialRefIn = osr.SpatialReference()
+        if qsettings:
+            epsg_in = int( qsettings.value("inputEPSG",CONF_INPUT_EPSG) )
+            epsg_out = int( qsettings.value("inputEPSG",CONF_OUTPUT_EPSG) )
+        print "epsg_in type: %s" % str(type(epsg_in))
+        print "epsg_in = %s" % epsg_in
         self.spatialRefIn.ImportFromEPSG(epsg_in)
         # if epsg_out is None, we want to output in the epsg_in spatial reference
         if epsg_out:
@@ -39,6 +68,20 @@ class bps_shp_exporter(object):
         
         self.lyrDefn = self.lyr.GetLayerDefn()
         self.feat_index = 0
+        
+    def __create_fuzzy_hab_fields(self,imgdir):
+        """
+        Create fields in the output shapefile to hold the fuzzy habitat
+        classification data.
+        """
+        fhd = imgdir.fuzzy_habitat_dict
+        habs = fhd.keys()
+        for hab in habs:
+            print "%s, type: %s" % (hab,str(type(hab)))
+            print "%s, type: %s" % (str(ogr.OFTReal),str(type(ogr.OFTReal)))
+            new_field = ogr.FieldDefn(str(hab),ogr.OFTReal)
+            self.lyr.CreateField(new_field)
+        
         
     def __validate_fp(self, file_path):
         """
@@ -90,12 +133,18 @@ class bps_shp_exporter(object):
                 feat.SetField( 'hab_num', hnd[imf.xmp_habitat] )
             if imf.xmp_substrate:
                 feat.SetField( 'subst', imf.xmp_substrate )
+            # set fuzzy hab values
+            if imf.xmp_fuzzy_hab_dict:
+                for hab,val in imf.xmp_fuzzy_hab_dict:
+                    feat.SetField( hab, val )
             self.lyr.CreateFeature(feat)
             feat.Destroy()
             self.feat_index += 1
             
     def write_prj(self):
-        # create the *.prj file
+        """
+        create the *.prj file
+        """
         outSpatialRef = self.spatialRefOut
         outSpatialRef.MorphToESRI()
         prj_fname = self.file_path[:-3] + 'prj'
@@ -105,11 +154,12 @@ class bps_shp_exporter(object):
         
     def write_shapefile(self, image_dir):
         """
-        Create a shapefile from a directory of tagged jpeg images.
+        Create a shapefile from an image_directory object (defined in 
+        photo_tagging.py).
         """
-        file_paths = [ os.path.join(image_dir,fp) for fp in os.listdir(image_dir) if fp.lower().endswith('.jpg') ]
-        for fp in file_paths:
-            imf = image_file( fp )
+        #file_paths = [ os.path.join(image_dir,fp) for fp in os.listdir(image_dir) if fp.lower().endswith('.jpg') ]
+        self.__create_fuzzy_hab_fields(image_dir)
+        for imf in image_dir.images:
             self.add_point_from_image( imf )
         self.write_prj()
         self.ds.Destroy() # This makes the driver actually write out the shapefile
