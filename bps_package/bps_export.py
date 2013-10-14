@@ -1,9 +1,9 @@
 from photo_tagging import *
+from preference_array import HabPrefArray
 import osr
 
-## Crap. Need to refactor to work with settings instead of CONF_BLAH.
-## should pass img_dir object in to exporter while I'm at it. Maybe hand in
-## QSettings obj.
+## Crap. Need to deal with hab color dict. Currently created in configuration.py
+# that won't work with qsettings stuff
 
 class bps_shp_exporter(object):
     def __init__(self, file_path, overwrite=True,lyr_name='bps_points',qsettings=None,epsg_in=CONF_INPUT_EPSG,epsg_out=CONF_OUTPUT_EPSG):
@@ -29,13 +29,12 @@ class bps_shp_exporter(object):
         """
         self.overwrite = overwrite
         self.file_path = self.__validate_fp(file_path)
+        self.settings = qsettings
         #-----Set up the shapefile-------------------------
         self.spatialRefIn = osr.SpatialReference()
-        if qsettings:
+        if self.settings:
             epsg_in = int( qsettings.value("inputEPSG",CONF_INPUT_EPSG) )
             epsg_out = int( qsettings.value("inputEPSG",CONF_OUTPUT_EPSG) )
-        print "epsg_in type: %s" % str(type(epsg_in))
-        print "epsg_in = %s" % epsg_in
         self.spatialRefIn.ImportFromEPSG(epsg_in)
         # if epsg_out is None, we want to output in the epsg_in spatial reference
         if epsg_out:
@@ -77,8 +76,8 @@ class bps_shp_exporter(object):
         fhd = imgdir.fuzzy_habitat_dict
         habs = fhd.keys()
         for hab in habs:
-            print "%s, type: %s" % (hab,str(type(hab)))
-            print "%s, type: %s" % (str(ogr.OFTReal),str(type(ogr.OFTReal)))
+#            print "%s, type: %s" % (hab,str(type(hab)))
+#            print "%s, type: %s" % (str(ogr.OFTReal),str(type(ogr.OFTReal)))
             new_field = ogr.FieldDefn(str(hab),ogr.OFTReal)
             self.lyr.CreateField(new_field)
         
@@ -106,8 +105,10 @@ class bps_shp_exporter(object):
         Take an image_file object (defined in photo_tagging.py) and make a 
         shapefile feature out of it.
         """
-        hcd = CONF_HAB_COLOR_DICT
-        hnd = CONF_HAB_NUM_DICT
+        hpa = HabPrefArray().loadFromSettings()
+        hcd = hpa.hab_color_dict
+        hnd = hpa.hab_number_dict
+        #print hcd
         if imf.position:
             feat = ogr.Feature(self.lyrDefn)
             geom = imf.position.ogr_point
@@ -129,14 +130,15 @@ class bps_shp_exporter(object):
                 feat.SetField( 'temp', imf.xmp_temperature )
             if imf.xmp_habitat:
                 feat.SetField( 'habitat', imf.xmp_habitat )
+                #print "Setting color for %s to %s." % (type(imf.xmp_habitat),type(hcd[imf.xmp_habitat]))
                 feat.SetField( 'hab_color', hcd[imf.xmp_habitat] )
                 feat.SetField( 'hab_num', hnd[imf.xmp_habitat] )
             if imf.xmp_substrate:
                 feat.SetField( 'subst', imf.xmp_substrate )
             # set fuzzy hab values
             if imf.xmp_fuzzy_hab_dict:
-                for hab,val in imf.xmp_fuzzy_hab_dict:
-                    feat.SetField( hab, val )
+                for hab,val in imf.xmp_fuzzy_hab_dict.items():
+                    feat.SetField( str(hab), val )
             self.lyr.CreateFeature(feat)
             feat.Destroy()
             self.feat_index += 1
