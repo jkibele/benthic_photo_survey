@@ -75,7 +75,8 @@ class bps_shp_exporter(object):
         """
         fhd = imgdir.fuzzy_habitat_dict
         habs = fhd.keys()
-        for hab in habs:
+        # stupid shapefile field names can only have 10 characters
+        for hab in [ h[0:10] for h in habs ]:
 #            print "%s, type: %s" % (hab,str(type(hab)))
 #            print "%s, type: %s" % (str(ogr.OFTReal),str(type(ogr.OFTReal)))
             new_field = ogr.FieldDefn(str(hab),ogr.OFTReal)
@@ -138,7 +139,9 @@ class bps_shp_exporter(object):
             # set fuzzy hab values
             if imf.xmp_fuzzy_hab_dict:
                 for hab,val in imf.xmp_fuzzy_hab_dict.items():
-                    feat.SetField( str(hab), val )
+                    # have to slice hab name to get only 10 characters
+                    # because of stupid 10 ch limit for shapefiles
+                    feat.SetField( str(hab[0:10]), val )
             self.lyr.CreateFeature(feat)
             feat.Destroy()
             self.feat_index += 1
@@ -159,7 +162,6 @@ class bps_shp_exporter(object):
         Create a shapefile from an image_directory object (defined in 
         photo_tagging.py).
         """
-        #file_paths = [ os.path.join(image_dir,fp) for fp in os.listdir(image_dir) if fp.lower().endswith('.jpg') ]
         self.__create_fuzzy_hab_fields(image_dir)
         for imf in image_dir.images:
             self.add_point_from_image( imf )

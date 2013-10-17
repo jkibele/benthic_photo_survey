@@ -16,7 +16,8 @@ except ImportError:
 from PyQt4 import QtCore
 from PyQt4.QtCore import QSettings
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
-    QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox
+    QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox, \
+    QInputDialog
 from preference_array import HabPrefArray, PrefRow
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
@@ -39,7 +40,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.habPrefArray.addToTableWidget()
         self.habTableWidget.setHorizontalHeaderLabels(["Code","Habitat","Color"])
         # setup general tab
-        self.db_path = self.__settings_extract("db_path",CONF_DB_PATH)
+        self.db_path = str(self.__settings_extract("db_path",CONF_DB_PATH))
         self.databaseLineEdit.setText( self.db_path )
         self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
         self.workingDirLineEdit.setText( self.working_dir )
@@ -79,7 +80,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             pass
         
     def generalSaveSettings(self):
-        self.db_path = self.databaseLineEdit.text()
+        self.db_path = str(self.databaseLineEdit.text())
         self.working_dir = self.workingDirLineEdit.text()
         self.inputEPSG = self.inputEPSGLineEdit.text()
         self.outputEPSG = self.outputEPSGLineEdit.text()
@@ -93,7 +94,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def generalChooseDB(self):
         new_db_path = QFileDialog.getSaveFileName(self,"Choose or Create Database File",self.db_path,filter="SQLite db(*.db)",options=QFileDialog.DontConfirmOverwrite)
         if new_db_path:
-            self.db_path = new_db_path         
+            self.db_path = str( new_db_path )
             self.databaseLineEdit.setText( self.db_path )
         else:
             return False
@@ -172,6 +173,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.imf = None 
         self.currentPhotoIndex = 0
         self.applySettings()
+        self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
+        
+    def __settings_extract(self,settings_tag,default,isList=False):
+        try:
+            if isList:
+                val = self.settings.value(settings_tag,default).toStringList()
+            else:
+                val = self.settings.value(settings_tag,default).toString()
+        except AttributeError:
+            val = self.settings.value(settings_tag,default)
+        return val    
         
     def resizeEvent( self, event ):
         super(MainWindow, self).resizeEvent( event )
@@ -283,7 +295,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupHabSelector()
         self.substrateListWidget.clear()
         self.substrateListWidget.addItems( self.getSubstSettings() )
-        self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
+        self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
+        self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
         
     def getHablistSettings(self):
         hpa = HabPrefArray()
@@ -362,7 +375,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.substrateListWidget.setCurrentItem( None )
 
     def loadPhotoDirectory(self):
-        default_dir = os.path.join( str(self.working_dir.toString()), "images" )
+        default_dir = os.path.join( str(self.working_dir), "images" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         photo_dir = str( QFileDialog.getExistingDirectory(self, 'Open Photo Directory', directory=default_dir) )
@@ -420,6 +433,40 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
         else:
             return True
+            
+    def actionTimeShiftPhotos(self):
+        """
+        This method will be triggered when a user chooses the "Time Shift Photos"
+        option from the action menu.
+        """
+        dialogtxt = "Warning: Only use this if you know what you're doing."
+        hours, ok = QInputDialog.getDouble(self,'Offset in Hours', dialogtxt,decimals=4)
+        if ok:
+            try:
+                tdelta = td(hours=float(hours))
+                conf_msg = "Are you sure you want to shift the timestamp on your \
+                            photos by %f hours?" % float(hours)
+                reply = QMessageBox.warning(None,"Confirm",conf_msg,QMessageBox.Yes,QMessageBox.No)
+                if reply==QMessageBox.Yes:
+                    self.timeShiftPhotos(tdelta)
+                    result_str = "Great Success: photos time shifted."
+                    self.statusBar().showMessage( result_str, 8000)
+                    return True
+                else:
+                    return False
+            except ValueError:
+                msg = QMessageBox()
+                msg.setText("You must enter a float or integer value. Try again.")
+                msg.setText("You lose")
+                msg._exec()
+                return False
+                
+    def timeShiftPhotos(self,tdelta):
+        """
+        Shift all the photos in the current photo directory by the time delta
+        tdelta.
+        """
+        self.imageDirectoryObj.__shift_datetimes__(tdelta)
         
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
@@ -445,7 +492,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def geoTag(self):
         if self.imf:
-            r = self.imf.geotag()
+            r = self.imf.geotag(self.db_path)
             if not r:
                 msg = QMessageBox( )
                 msg.setText('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.')
@@ -466,7 +513,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rg_cnt = 0
         if self.imageDirectoryObj and self.imageDirectoryObj.image_count > 0:
             for imf in self.imageDirectoryObj.images:
-                if imf.geotag():
+                if imf.geotag(self.db_path):
                     rg_cnt += 1
             if rg_cnt==self.imageDirectoryObj.image_count:
                 title_str = 'Great Success!'
@@ -485,7 +532,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     
     def depthTempTag(self):
         if self.imf:
-            r = self.imf.depth_temp_tag()
+            r = self.imf.depth_temp_tag(self.db_path)
             if not r:
                 msg = QMessageBox( )
                 msg.setText('I could not tag this image with depth and temp. Either I could not find a record with a close enough time code or perhaps something more horrible happened.')
@@ -506,7 +553,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         rg_cnt = 0
         if self.imageDirectoryObj.image_count > 0:
             for imf in self.imageDirectoryObj.images:
-                if imf.depth_temp_tag():
+                if imf.depth_temp_tag(self.db_path):
                     rg_cnt += 1
             if rg_cnt==self.imageDirectoryObj.image_count:
                 title_str = 'Great Success!'
@@ -524,10 +571,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mbox.exec_()
     
     def depthPlot(self):
-        self.imageDirectoryObj.depth_plot()
+        self.imageDirectoryObj.depth_plot(self.db_path)
     
     def exportShapefile(self):
-        default_dir = os.path.join( str(self.working_dir.toString()), "shapefiles" )
+        default_dir = os.path.join( str(self.working_dir), "shapefiles" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         shp_filepath = str( QFileDialog.getSaveFileName(self, 'Save Shapefile',
@@ -556,7 +603,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 
     
     def loadGpsLog(self):
-        default_dir = os.path.join( str(self.working_dir.toString()), "gps" )
+        default_dir = os.path.join( str(self.working_dir), "gps" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=default_dir, filter='GPS Files (*.gpx *.log)') )
@@ -564,7 +611,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             try:            
                 if log_filepath.lower().endswith('.gpx'):
                     gf = gpx_file( log_filepath )
-                    result_str = gf.read_to_db()
+                    result_str = gf.read_to_db(self.db_path)
                 else:
                     result_str = read_gps_log( log_filepath )
                 msg = "Great Success: %s" % result_str
@@ -584,13 +631,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             
         
     def loadDepthLog(self):
-        default_dir = os.path.join( str(self.working_dir.toString()), "sensus" )
+        default_dir = os.path.join( str(self.working_dir), "sensus" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=default_dir, filter='Sensus Log Files (*.csv)') )
         if log_filepath:
             try:        
-                result_str = read_depth_temp_log( log_filepath )
+                result_str = read_depth_temp_log( log_filepath,self.db_path )
                 msg = "Great Success: %s" % result_str
                 self.statusBar().showMessage( msg, 8000)
                 return True

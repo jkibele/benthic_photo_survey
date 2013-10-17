@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Wed Oct  9 13:47:01 2013
+# Created: Thu Oct 17 15:16:00 2013
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -358,6 +358,8 @@ class Ui_MainWindow(object):
         self.actionDepth_Temp_Tag_All.setObjectName(_fromUtf8("actionDepth_Temp_Tag_All"))
         self.actionPreferences = QtGui.QAction(MainWindow)
         self.actionPreferences.setObjectName(_fromUtf8("actionPreferences"))
+        self.actionTime_Shift_Photos = QtGui.QAction(MainWindow)
+        self.actionTime_Shift_Photos.setObjectName(_fromUtf8("actionTime_Shift_Photos"))
         self.menuFile.addAction(self.actionLoad_GPS_Log)
         self.menuFile.addAction(self.actionLoad_Depth_Log)
         self.menuFile.addAction(self.actionLoad_Photo_Directory)
@@ -369,6 +371,8 @@ class Ui_MainWindow(object):
         self.menuOutput.addAction(self.actionDepth_Plot)
         self.menuActions.addAction(self.actionGeo_Tag_All_Photos)
         self.menuActions.addAction(self.actionDepth_Temp_Tag_All)
+        self.menuActions.addSeparator()
+        self.menuActions.addAction(self.actionTime_Shift_Photos)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuActions.menuAction())
         self.menubar.addAction(self.menuOutput.menuAction())
@@ -390,6 +394,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.actionPreferences, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.preferenceDialog)
         QtCore.QObject.connect(self.habSaveButton, QtCore.SIGNAL(_fromUtf8("clicked()")), MainWindow.setHabitat)
         QtCore.QObject.connect(self.substrateListWidget, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), MainWindow.setSubstrate)
+        QtCore.QObject.connect(self.actionTime_Shift_Photos, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.actionTimeShiftPhotos)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -436,5 +441,6 @@ class Ui_MainWindow(object):
         self.actionGeo_Tag_All_Photos.setText(QtGui.QApplication.translate("MainWindow", "Geo Tag All Photos", None, QtGui.QApplication.UnicodeUTF8))
         self.actionDepth_Temp_Tag_All.setText(QtGui.QApplication.translate("MainWindow", "Depth/Temp Tag All", None, QtGui.QApplication.UnicodeUTF8))
         self.actionPreferences.setText(QtGui.QApplication.translate("MainWindow", "Preferences...", None, QtGui.QApplication.UnicodeUTF8))
+        self.actionTime_Shift_Photos.setText(QtGui.QApplication.translate("MainWindow", "Time Shift Photos", None, QtGui.QApplication.UnicodeUTF8))
 
 from PyKDE4.kdeui import KLed

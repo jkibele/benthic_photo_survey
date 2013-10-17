@@ -58,11 +58,11 @@ class image_directory(object):
                     d[hab] = 1
         return d
         
-    def depth_plot(self):
+    def depth_plot(self, db_path):
         """
         Create a plot of the depth profile with photo times and depths marked.
         """
-        drs = dive_record_set( min(self.local_datetimes), max(self.local_datetimes) )
+        drs = dive_record_set( min(self.local_datetimes), max(self.local_datetimes), db_path )
         y = -1 * drs.depth_time_array[:,0] # depths * -1 to make negative values
         x = drs.depth_time_array[:,1] # datetimes
             
@@ -95,12 +95,12 @@ class image_directory(object):
         plt.show()
         #print "after plt show"
         
-    def depth_temp_tag(self,verbose=False):
+    def depth_temp_tag(self,db_path,verbose=False):
         """
         Depth tag all the photos in the directory.
         """
         for img in self.images:
-            img.depth_temp_tag(verbose)
+            img.depth_temp_tag(db_path,verbose)
 
 class image_file(object):
     """
@@ -393,48 +393,46 @@ class image_file(object):
         self.md[pre+'fuzzy_hab_dict'] = habdict_json_str
         self.md.write()
         
-    @property
-    def logger_depth(self):
+    def logger_depth(self,db_path):
         """
         Get the logged depth out of the db that matches the photo's timestamp.
         """
         if self.utc_datetime:
-            depth = get_depth_for_time(self.utc_datetime,reject_threshold=30)
+            depth = get_depth_for_time(self.utc_datetime, db_path, reject_threshold=30)
             return depth
         else:
             return None
         
-    @property
-    def logger_temp(self):
+    def logger_temp(self, db_path):
         """
         Get the logged temperature out of the db that matches the photo's timestamp.
         """
         if self.utc_datetime:
-            temp = get_temp_for_time(self.utc_datetime,reject_threshold=30)
+            temp = get_temp_for_time(self.utc_datetime, db_path, reject_threshold=30)
             return temp
         else:
             return None
         
-    def depth_temp_tag(self,verbose=False):
+    def depth_temp_tag(self,db_path,verbose=False):
         """
         Get the depth and temp readings out of the db that match the photo's origination
         time (considering that the photo's time stamp is in the local timezone and the
         logs are in UTC) and write those values to the image's exif data.
         """
-        self.__set_exif_depth_temp(self.logger_depth,self.logger_temp,verbose=verbose)
-        self.__set_xmp_depth_temp(self.logger_depth,self.logger_temp)
+        self.__set_exif_depth_temp(self.logger_depth(db_path),self.logger_temp(db_path),verbose=verbose)
+        self.__set_xmp_depth_temp(self.logger_depth(db_path),self.logger_temp(db_path))
         if self.exif_depth_tag:
             return self.exif_depth_tag.value
         else:
             return None
         
-    def geotag(self,verbose=True):
+    def geotag(self,db_path,verbose=True):
         """
         Get a position that matches the time of creation for the image out
         of the database and set the exif data accordingly. We assume that 
         the photo timestamp is local and the gps position is utc.
         """
-        pos = get_position_for_time(self.utc_datetime,verbose=verbose)
+        pos = get_position_for_time(self.utc_datetime,db_path,verbose=verbose)
         if verbose and pos:
             print "-------------------GeoTagg--------------------------------"
             print "%s is going to get set to %s as %s, %s" % ( os.path.basename( self.file_path ), unicode( pos ), str(pos.lat.exif_coord), str(pos.lon.exif_coord) )
@@ -443,13 +441,13 @@ class image_file(object):
             self.__set_exif_position(pos,verbose)
         return self.position
         
-    def __compare_position__(self):
+    def __compare_position__(self,db_path):
         """
         This is just for testing. Check to see if the value stored in the db
         matches what we display after conversion. I want to make sure I'm not
         throwing away precision in coordinate conversions.
         """
-        pos = get_position_for_time(self.utc_datetime,verbose=True)
+        pos = get_position_for_time(self.utc_datetime,db_path,verbose=True)
         print "  db says: %s, %s \nexif says: %s, %s" % ( pos.lat.nmea_string, pos.lon.nmea_string, self.position.lat.nmea_string, self.position.lon.nmea_string )
         if pos.lat.nmea_string == self.position.lat.nmea_string:
             print "Latitudes match"
@@ -517,11 +515,11 @@ class image_file(object):
         self.remove_substratetagging()
         self.remove_habitattagging()
 
-def exif_tag_jpegs(photo_dir):
+def exif_tag_jpegs(photo_dir,db_path):
     for fname in os.listdir(photo_dir):
         if fname.lower().endswith('.jpg'):
             imf = image_file( os.path.join(photo_dir,fname) )
-            imf.depth_temp_tag()
+            imf.depth_temp_tag(db_path)
             imf.geotag()
             if imf.exif_depth_tag:
                 dstr = imf.exif_depth_tag.human_value
@@ -536,10 +534,11 @@ def exif_tag_jpegs(photo_dir):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tag a photos with position, depth, and temperature from a gps and a Sensus Ultra depth and temperature logger.')
     parser.add_argument('photo_dir', nargs='?', type=str, help='The directory that contains photos you would like tagged.')
+    parser.add_argument('db_path', nargs='?', type=str, help='The database that contains the depth and location information you want to tag the photos with.')
     
     args = parser.parse_args()
     
-    exif_tag_jpegs(args.photo_dir)
+    exif_tag_jpegs(args.photo_dir,db_path)
     
 
 

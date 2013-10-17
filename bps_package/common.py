@@ -4,10 +4,7 @@ from datetime import datetime as dt
 from dateutil import parser as dt_parser
 from configuration import *
 import matplotlib as mpl
-# I have to change the matplotlib backend to WXAgg so that the depth_plot
-# will play nice with the WXPython bps_gui. Leaving it as GTKAgg causes a
-# segmentation fault.
-#mpl.rcParams['backend'] = 'WXAgg'
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -26,7 +23,7 @@ def connection_and_cursor(path_to_db):
             plist = p.split(os.path.sep)
             for i in range(len(plist)):
                 dirpath = os.path.sep.join(plist[:i+1])
-                if not os.path.exists( dirpath ):
+                if dirpath and not os.path.exists( dirpath ):
                     os.mkdir(dirpath)
         
     conn = sqlite3.connect(path_to_db, detect_types=sqlite3.PARSE_DECLTYPES)

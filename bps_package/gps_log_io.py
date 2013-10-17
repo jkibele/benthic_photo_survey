@@ -348,7 +348,7 @@ def create_gpslog_table(cur):
     cur.execute("create table if not exists GPSLog ( validity text, utctime datetime, latitude real, lat_hemi text,\
                 longitude real, lon_hemi text, num_sats integer, UNIQUE (utctime) ON CONFLICT REPLACE)")
 
-def get_position_for_time(dt_obj,reject_threshold=30,return_pretty=False,verbose=False):
+def get_position_for_time(dt_obj,db_path,reject_threshold=30,return_pretty=False,verbose=False):
     """Given a datetime object, find the position for the nearest position
     fix. I may want to interpolate between positions at some point but I'll
     leave that for later."""

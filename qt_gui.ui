@@ -727,6 +727,8 @@
     </property>
     <addaction name="actionGeo_Tag_All_Photos"/>
     <addaction name="actionDepth_Temp_Tag_All"/>
+    <addaction name="separator"/>
+    <addaction name="actionTime_Shift_Photos"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuActions"/>
@@ -788,6 +790,11 @@
   <action name="actionPreferences">
    <property name="text">
     <string>Preferences...</string>
+   </property>
+  </action>
+  <action name="actionTime_Shift_Photos">
+   <property name="text">
+    <string>Time Shift Photos</string>
    </property>
   </action>
  </widget>
@@ -1040,6 +1047,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionTime_Shift_Photos</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionTimeShiftPhotos()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>459</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>nextPhoto()</slot>
@@ -1057,5 +1080,6 @@
   <slot>depthPlot()</slot>
   <slot>exportShapefile()</slot>
   <slot>preferenceDialog()</slot>
+  <slot>actionTimeShiftPhotos()</slot>
  </slots>
 </ui>

@@ -133,7 +133,7 @@ def seconds_since_arbitrary( dt_obj, arbitrary_ordinal=1 ):
     """
     return float( ( dt_obj - dt.fromordinal( arbitrary_ordinal ) ).seconds )
 
-def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
+def get_depth_for_time(dt_obj, db_path, verbose=False, reject_threshold=30):
     """For a given datetime object, return the depth from the raw_log db. Go through the 
     extra hassle of interpolating the depth if the time falls between two depth measurements.
     If a record is not found within the number of seconds specified by reject_threshold,
@@ -174,7 +174,7 @@ def get_depth_for_time(dt_obj, verbose=False, reject_threshold=30):
     else: # just return the closest depth if our given time is not between the two closest logged times
         return d1m
         
-def get_temp_for_time(dt_obj, reject_threshold=30):
+def get_temp_for_time(dt_obj, db_path, reject_threshold=30):
     """Get a temperature in Celsius for a given time if there is a record within the
     number of seconds specified by reject_threshold. If there's no record that close,
     return False. I'm not going to bother with interpolation here because I don't 
