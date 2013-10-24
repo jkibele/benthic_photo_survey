@@ -468,6 +468,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.imageDirectoryObj.__shift_datetimes__(tdelta)
         
+    def removeIncompatibleHabTags(self):
+        """
+        Inspect the habitat tags in each photo. If they are incompatible with
+        the habitats in settings, the tags will be removed.
+        """
+        habList = self.getHablistSettings()
+        for imf in self.imageDirectoryObj.images:
+            if imf.xmp_habitat not in habList:
+                imf.remove_habitattagging()
+        
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
             self.currentPhotoIndex += 1
