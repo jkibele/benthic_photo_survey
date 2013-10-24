@@ -506,6 +506,12 @@ class image_file(object):
         if self.md.__contains__(key):
             self.md.__delitem__(key)
             self.md.write()
+            
+    def remove_fuzzy_habitattagging(self):
+        key = 'Xmp.BenthicPhoto.fuzzy_hab_dict'
+        if self.md.__contains__(key):
+            self.md.__delitem__(key)
+            self.md.write()
                 
     def remove_all_tagging(self):
         """
@@ -516,6 +522,7 @@ class image_file(object):
         self.remove_temptagging()
         self.remove_substratetagging()
         self.remove_habitattagging()
+        self.remove_fuzzy_habitattagging()
 
 def exif_tag_jpegs(photo_dir):
     for fname in os.listdir(photo_dir):

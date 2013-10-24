@@ -514,6 +514,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.working_dir = self.settings.value("working_dir",CONF_WORKING_DIR)
         
     def getHablistSettings(self):
+        """
+        Check the QSettings object and return the list of habitats currently 
+        in the settings.
+        """
         hpa = HabPrefArray()
         hpa.loadFromSettings()
         return hpa.toHabList()
@@ -648,6 +652,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
         else:
             return True
+            
+    def removeIncompatibleHabTags(self):
+        """
+        Inspect the habitat tags in each photo. If they are incompatible with
+        the habitats in settings, the tags will be removed.
+        """
+        habList = self.getHablistSettings()
+        for imf in self.imageDirectoryObj.images:
+            if imf.xmp_habitat not in habList:
+                imf.remove_habitattagging()
         
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
