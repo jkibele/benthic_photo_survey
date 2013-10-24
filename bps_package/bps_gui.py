@@ -582,8 +582,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                                         filter='Shapefiles (*.shp)') )
         if shp_filepath:
             #try:
-            inputEPSG = int( self.settings.value("inputEPSG",CONF_INPUT_EPSG).toString() )
-            outputEPSG = int( self.settings.value("outputEPSG",CONF_OUTPUT_EPSG).toString() )
+            inputEPSG = int( self.__settings_extract("inputEPSG",CONF_INPUT_EPSG) )
+            outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
             bpse = bps_shp_exporter(shp_filepath,qsettings=None)
             returned_path = bpse.write_shapefile( self.imageDirectoryObj )
             result_str = "Great Success: Shapefile written to: %s" % returned_path
