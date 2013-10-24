@@ -594,7 +594,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             #try:
             inputEPSG = int( self.__settings_extract("inputEPSG",CONF_INPUT_EPSG) )
             outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
-            bpse = bps_shp_exporter(shp_filepath,qsettings=None)
+            bpse = bps_shp_exporter(shp_filepath,qsettings=self.settings,epsg_in=inputEPSG,epsg_out=outputEPSG)
             returned_path = bpse.write_shapefile( self.imageDirectoryObj )
             result_str = "Great Success: Shapefile written to: %s" % returned_path
             self.statusBar().showMessage( result_str, 8000)
