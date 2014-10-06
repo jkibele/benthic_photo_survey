@@ -249,7 +249,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         If the spin box exists, return it. If not make it and return it.
         """
         #print "looking for habname: %s" % habname
-        sbname = slugify(habname) + "SpinBox"
+        sbname = slugify( unicode(habname) ) + u"SpinBox"
         htw = self.habitatTableWidget
         try:
             sb = htw.findChild(QDoubleSpinBox,sbname)
