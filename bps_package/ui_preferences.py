@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Mon Oct  7 11:56:53 2013
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Mon Oct 20 17:26:09 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,7 +12,16 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_PrefDialog(object):
     def setupUi(self, PrefDialog):
@@ -77,12 +86,9 @@ class Ui_PrefDialog(object):
         self.label = QtGui.QLabel(self.timezoneTab)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout_3.addWidget(self.label, 0, 0, 1, 2)
-        self.ktimezonewidget = KTimeZoneWidget(self.timezoneTab)
-        self.ktimezonewidget.setObjectName(_fromUtf8("ktimezonewidget"))
-        self.ktimezonewidget.headerItem().setText(0, _fromUtf8("1"))
-        self.ktimezonewidget.headerItem().setText(1, _fromUtf8("2"))
-        self.ktimezonewidget.headerItem().setText(2, _fromUtf8("3"))
-        self.gridLayout_3.addWidget(self.ktimezonewidget, 1, 0, 1, 2)
+        self.timeZoneListWidget = QtGui.QListWidget(self.timezoneTab)
+        self.timeZoneListWidget.setObjectName(_fromUtf8("timeZoneListWidget"))
+        self.gridLayout_3.addWidget(self.timeZoneListWidget, 1, 0, 1, 2)
         self.tabWidget.addTab(self.timezoneTab, _fromUtf8(""))
         self.habitatTab = QtGui.QWidget()
         self.habitatTab.setObjectName(_fromUtf8("habitatTab"))
@@ -132,15 +138,15 @@ class Ui_PrefDialog(object):
         self.substratesTab.setObjectName(_fromUtf8("substratesTab"))
         self.gridLayout_4 = QtGui.QGridLayout(self.substratesTab)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
-        self.substkeditlistwidget = KEditListWidget(self.substratesTab)
-        self.substkeditlistwidget.setObjectName(_fromUtf8("substkeditlistwidget"))
-        self.gridLayout_4.addWidget(self.substkeditlistwidget, 0, 0, 1, 2)
         self.pushButton_3 = QtGui.QPushButton(self.substratesTab)
         self.pushButton_3.setMaximumSize(QtCore.QSize(85, 16777215))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
         self.gridLayout_4.addWidget(self.pushButton_3, 1, 0, 1, 1)
         spacerItem3 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_4.addItem(spacerItem3, 1, 1, 1, 1)
+        self.listWidget = QtGui.QListWidget(self.substratesTab)
+        self.listWidget.setObjectName(_fromUtf8("listWidget"))
+        self.gridLayout_4.addWidget(self.listWidget, 0, 0, 1, 2)
         self.tabWidget.addTab(self.substratesTab, _fromUtf8(""))
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.buttonBox = QtGui.QDialogButtonBox(PrefDialog)
@@ -150,7 +156,7 @@ class Ui_PrefDialog(object):
         self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(PrefDialog)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), PrefDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), PrefDialog.reject)
         QtCore.QObject.connect(self.habAddButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.addHabRow)
@@ -168,26 +174,25 @@ class Ui_PrefDialog(object):
         QtCore.QMetaObject.connectSlotsByName(PrefDialog)
 
     def retranslateUi(self, PrefDialog):
-        PrefDialog.setWindowTitle(QtGui.QApplication.translate("PrefDialog", "Preferences", None, QtGui.QApplication.UnicodeUTF8))
-        self.workingDirLabel.setText(QtGui.QApplication.translate("PrefDialog", "Working Directory", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("PrefDialog", "Help?", None, QtGui.QApplication.UnicodeUTF8))
-        self.inputEPSGLabel.setText(QtGui.QApplication.translate("PrefDialog", "Input EPSG", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton.setText(QtGui.QApplication.translate("PrefDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.toolButton_2.setText(QtGui.QApplication.translate("PrefDialog", "...", None, QtGui.QApplication.UnicodeUTF8))
-        self.databaseLabel.setText(QtGui.QApplication.translate("PrefDialog", "Database", None, QtGui.QApplication.UnicodeUTF8))
-        self.outputEPSGLabel.setText(QtGui.QApplication.translate("PrefDialog", "Output EPSG", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.generalTab), QtGui.QApplication.translate("PrefDialog", "General", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("PrefDialog", "Help?", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("PrefDialog", "Choose the time zone you are working in", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.timezoneTab), QtGui.QApplication.translate("PrefDialog", "Time Zone", None, QtGui.QApplication.UnicodeUTF8))
-        self.habAddButton.setText(QtGui.QApplication.translate("PrefDialog", "Add", None, QtGui.QApplication.UnicodeUTF8))
-        self.habRemoveButton.setText(QtGui.QApplication.translate("PrefDialog", "Remove", None, QtGui.QApplication.UnicodeUTF8))
-        self.habUpButton.setText(QtGui.QApplication.translate("PrefDialog", "Move Up", None, QtGui.QApplication.UnicodeUTF8))
-        self.habDownButton.setText(QtGui.QApplication.translate("PrefDialog", "Move Down", None, QtGui.QApplication.UnicodeUTF8))
-        self.habColorButton.setText(QtGui.QApplication.translate("PrefDialog", "Choose Color", None, QtGui.QApplication.UnicodeUTF8))
-        self.habHelpButton.setText(QtGui.QApplication.translate("PrefDialog", "Help?", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.habitatTab), QtGui.QApplication.translate("PrefDialog", "Habitats", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_3.setText(QtGui.QApplication.translate("PrefDialog", "Help?", None, QtGui.QApplication.UnicodeUTF8))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.substratesTab), QtGui.QApplication.translate("PrefDialog", "Substrates", None, QtGui.QApplication.UnicodeUTF8))
+        PrefDialog.setWindowTitle(_translate("PrefDialog", "Preferences", None))
+        self.workingDirLabel.setText(_translate("PrefDialog", "Working Directory", None))
+        self.pushButton.setText(_translate("PrefDialog", "Help?", None))
+        self.inputEPSGLabel.setText(_translate("PrefDialog", "Input EPSG", None))
+        self.toolButton.setText(_translate("PrefDialog", "...", None))
+        self.toolButton_2.setText(_translate("PrefDialog", "...", None))
+        self.databaseLabel.setText(_translate("PrefDialog", "Database", None))
+        self.outputEPSGLabel.setText(_translate("PrefDialog", "Output EPSG", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.generalTab), _translate("PrefDialog", "General", None))
+        self.pushButton_2.setText(_translate("PrefDialog", "Help?", None))
+        self.label.setText(_translate("PrefDialog", "Choose the time zone you are working in", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.timezoneTab), _translate("PrefDialog", "Time Zone", None))
+        self.habAddButton.setText(_translate("PrefDialog", "Add", None))
+        self.habRemoveButton.setText(_translate("PrefDialog", "Remove", None))
+        self.habUpButton.setText(_translate("PrefDialog", "Move Up", None))
+        self.habDownButton.setText(_translate("PrefDialog", "Move Down", None))
+        self.habColorButton.setText(_translate("PrefDialog", "Choose Color", None))
+        self.habHelpButton.setText(_translate("PrefDialog", "Help?", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.habitatTab), _translate("PrefDialog", "Habitats", None))
+        self.pushButton_3.setText(_translate("PrefDialog", "Help?", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.substratesTab), _translate("PrefDialog", "Substrates", None))
 
-from PyKDE4.kdeui import KTimeZoneWidget, KEditListWidget
