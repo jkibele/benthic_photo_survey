@@ -50,13 +50,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
         self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
         # setup time zone tab
-        self.timezone = self.__settings_extract("timezone",LOCAL_TIME_ZONE)
+        self.timezone = str( self.__settings_extract("timezone",LOCAL_TIME_ZONE) )
 #        self.ktimezonewidget.setSelected( self.timezone, True )
         # setup substrate tab
         self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
-        self.timeZoneListWidget.addItems( pytz.common_timezones )
-        tzitem = self.timeZoneListWidget.findItems( self.timezone, QtCore.Qt.MatchFixedString )[0]
-        self.timeZoneListWidget.setCurrentItem( tzitem )
+        self.timeZoneComboBox.addItems( pytz.common_timezones )
+        tzitem = self.timeZoneComboBox.findText( self.timezone, QtCore.Qt.MatchFixedString )
+        self.timeZoneComboBox.setCurrentIndex( tzitem )
 #        self.substkeditlistwidget.setItems( self.substList )
         
     def __settings_extract(self,settings_tag,default,isList=False):
@@ -75,7 +75,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if newpa.saveToSettings(): # ensure habitat settings don't bork
             # then save other settings
             self.generalSaveSettings()
-            self.timezone = self.timeZoneListWidget.selectedItems()[0]
+            self.timezone = str( self.timeZoneComboBox.currentText() )
 #            self.timezone = self.ktimezonewidget.selection()[0]
             self.settings.setValue( "timezone",self.timezone )
 #            self.substList = self.substkeditlistwidget.items()

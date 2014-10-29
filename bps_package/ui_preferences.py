@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Mon Oct 20 17:26:09 2014
+# Created: Wed Oct 29 17:03:01 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -79,16 +79,18 @@ class Ui_PrefDialog(object):
         self.gridLayout_3 = QtGui.QGridLayout(self.timezoneTab)
         self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
         spacerItem1 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_3.addItem(spacerItem1, 2, 1, 1, 1)
+        self.gridLayout_3.addItem(spacerItem1, 3, 1, 1, 1)
         self.pushButton_2 = QtGui.QPushButton(self.timezoneTab)
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.gridLayout_3.addWidget(self.pushButton_2, 2, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_2, 3, 0, 1, 1)
         self.label = QtGui.QLabel(self.timezoneTab)
         self.label.setObjectName(_fromUtf8("label"))
         self.gridLayout_3.addWidget(self.label, 0, 0, 1, 2)
-        self.timeZoneListWidget = QtGui.QListWidget(self.timezoneTab)
-        self.timeZoneListWidget.setObjectName(_fromUtf8("timeZoneListWidget"))
-        self.gridLayout_3.addWidget(self.timeZoneListWidget, 1, 0, 1, 2)
+        self.timeZoneComboBox = QtGui.QComboBox(self.timezoneTab)
+        self.timeZoneComboBox.setObjectName(_fromUtf8("timeZoneComboBox"))
+        self.gridLayout_3.addWidget(self.timeZoneComboBox, 1, 0, 1, 2)
+        spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout_3.addItem(spacerItem2, 2, 0, 1, 1)
         self.tabWidget.addTab(self.timezoneTab, _fromUtf8(""))
         self.habitatTab = QtGui.QWidget()
         self.habitatTab.setObjectName(_fromUtf8("habitatTab"))
@@ -128,8 +130,8 @@ class Ui_PrefDialog(object):
         self.habColorButton.setObjectName(_fromUtf8("habColorButton"))
         self.verticalLayout.addWidget(self.habColorButton)
         self.gridLayout.addLayout(self.verticalLayout, 0, 1, 1, 1)
-        spacerItem2 = QtGui.QSpacerItem(20, 142, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.gridLayout.addItem(spacerItem2, 1, 1, 1, 1)
+        spacerItem3 = QtGui.QSpacerItem(20, 142, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.gridLayout.addItem(spacerItem3, 1, 1, 1, 1)
         self.habHelpButton = QtGui.QPushButton(self.habitatTab)
         self.habHelpButton.setObjectName(_fromUtf8("habHelpButton"))
         self.gridLayout.addWidget(self.habHelpButton, 2, 1, 1, 1)
@@ -142,8 +144,8 @@ class Ui_PrefDialog(object):
         self.pushButton_3.setMaximumSize(QtCore.QSize(85, 16777215))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
         self.gridLayout_4.addWidget(self.pushButton_3, 1, 0, 1, 1)
-        spacerItem3 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_4.addItem(spacerItem3, 1, 1, 1, 1)
+        spacerItem4 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_4.addItem(spacerItem4, 1, 1, 1, 1)
         self.listWidget = QtGui.QListWidget(self.substratesTab)
         self.listWidget.setObjectName(_fromUtf8("listWidget"))
         self.gridLayout_4.addWidget(self.listWidget, 0, 0, 1, 2)
@@ -156,7 +158,7 @@ class Ui_PrefDialog(object):
         self.verticalLayout_2.addWidget(self.buttonBox)
 
         self.retranslateUi(PrefDialog)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("accepted()")), PrefDialog.accept)
         QtCore.QObject.connect(self.buttonBox, QtCore.SIGNAL(_fromUtf8("rejected()")), PrefDialog.reject)
         QtCore.QObject.connect(self.habAddButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.addHabRow)
