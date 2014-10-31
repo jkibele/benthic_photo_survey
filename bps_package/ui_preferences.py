@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Wed Oct 29 17:03:01 2014
+# Created: Fri Oct 31 18:26:24 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -146,9 +146,9 @@ class Ui_PrefDialog(object):
         self.gridLayout_4.addWidget(self.pushButton_3, 1, 0, 1, 1)
         spacerItem4 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_4.addItem(spacerItem4, 1, 1, 1, 1)
-        self.listWidget = QtGui.QListWidget(self.substratesTab)
-        self.listWidget.setObjectName(_fromUtf8("listWidget"))
-        self.gridLayout_4.addWidget(self.listWidget, 0, 0, 1, 2)
+        self.substrateListWidgetPref = QtGui.QListWidget(self.substratesTab)
+        self.substrateListWidgetPref.setObjectName(_fromUtf8("substrateListWidgetPref"))
+        self.gridLayout_4.addWidget(self.substrateListWidgetPref, 0, 0, 1, 2)
         self.tabWidget.addTab(self.substratesTab, _fromUtf8(""))
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.buttonBox = QtGui.QDialogButtonBox(PrefDialog)

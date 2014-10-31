@@ -299,7 +299,7 @@
         </spacer>
        </item>
        <item row="0" column="0" colspan="2">
-        <widget class="QListWidget" name="listWidget"/>
+        <widget class="QListWidget" name="substrateListWidgetPref"/>
        </item>
       </layout>
      </widget>

@@ -51,13 +51,12 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
         # setup time zone tab
         self.timezone = str( self.__settings_extract("timezone",LOCAL_TIME_ZONE) )
-#        self.ktimezonewidget.setSelected( self.timezone, True )
-        # setup substrate tab
-        self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
         self.timeZoneComboBox.addItems( pytz.common_timezones )
         tzitem = self.timeZoneComboBox.findText( self.timezone, QtCore.Qt.MatchFixedString )
         self.timeZoneComboBox.setCurrentIndex( tzitem )
-#        self.substkeditlistwidget.setItems( self.substList )
+        # setup substrate tab
+        self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
+        self.substrateListWidgetPref.addItems( self.substList )
         
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
