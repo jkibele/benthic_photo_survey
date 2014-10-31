@@ -4,6 +4,7 @@ from datetime import datetime as dt
 from dateutil import parser as dt_parser
 from configuration import *
 import matplotlib as mpl
+from PyQt4.QtCore import QSettings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -31,10 +32,12 @@ def connection_and_cursor(path_to_db):
     return conn,cur
 
 def make_aware_of_local_tz(unaware):
-    """Make an unaware time object aware of the local time zone. I'd like to 
-    introspect the system and get the TZ but I can't figure out how to do that
-    reliably so you'll have to se the LOCAL_TIME_ZONE parameter. Lame."""
-    local_zone = pytz.timezone(LOCAL_TIME_ZONE) # LOCAL_TIME_ZONE from configuration.py
+    """Make an unaware time object aware of the local time zone. This tries to 
+    get the timezone from settings."""
+    settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)
+    local_zone_str = str( settings.value('timezone',LOCAL_TIME_ZONE).toString() )
+    # LOCAL_TIME_ZONE is from configuration.py
+    local_zone = pytz.timezone(local_zone_str)
     return local_zone.localize(unaware)
 
 def utc_from_local(localtime):
