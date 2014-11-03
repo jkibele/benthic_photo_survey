@@ -272,20 +272,7 @@
        <string>Substrates</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="1" column="0">
-        <widget class="QPushButton" name="pushButton_3">
-         <property name="maximumSize">
-          <size>
-           <width>85</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Help?</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <spacer name="horizontalSpacer_2">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -298,8 +285,71 @@
          </property>
         </spacer>
        </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QListWidget" name="substrateListWidgetPref"/>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="maximumSize">
+          <size>
+           <width>85</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Help?</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QListWidget" name="substrateListWidget">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QPushButton" name="substAddButton">
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="substEditButton">
+               <property name="text">
+                <string>Edit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="substRemoveButton">
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -543,6 +593,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>substAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substAdd()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>450</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>502</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substEditButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>464</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substRemoveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substRemove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>473</x>
+     <y>132</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substrateListWidget</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>281</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addHabRow()</slot>
@@ -557,5 +671,8 @@
   <slot>substratesHelp()</slot>
   <slot>generalChooseDB()</slot>
   <slot>generalChooseWorkingDir()</slot>
+  <slot>substAdd()</slot>
+  <slot>substEdit()</slot>
+  <slot>substRemove()</slot>
  </slots>
 </ui>

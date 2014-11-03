@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Fri Oct 31 18:26:24 2014
+# Created: Tue Nov  4 11:33:14 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -140,15 +140,36 @@ class Ui_PrefDialog(object):
         self.substratesTab.setObjectName(_fromUtf8("substratesTab"))
         self.gridLayout_4 = QtGui.QGridLayout(self.substratesTab)
         self.gridLayout_4.setObjectName(_fromUtf8("gridLayout_4"))
+        spacerItem4 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.gridLayout_4.addItem(spacerItem4, 2, 1, 1, 1)
         self.pushButton_3 = QtGui.QPushButton(self.substratesTab)
         self.pushButton_3.setMaximumSize(QtCore.QSize(85, 16777215))
         self.pushButton_3.setObjectName(_fromUtf8("pushButton_3"))
-        self.gridLayout_4.addWidget(self.pushButton_3, 1, 0, 1, 1)
-        spacerItem4 = QtGui.QSpacerItem(370, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
-        self.gridLayout_4.addItem(spacerItem4, 1, 1, 1, 1)
-        self.substrateListWidgetPref = QtGui.QListWidget(self.substratesTab)
-        self.substrateListWidgetPref.setObjectName(_fromUtf8("substrateListWidgetPref"))
-        self.gridLayout_4.addWidget(self.substrateListWidgetPref, 0, 0, 1, 2)
+        self.gridLayout_4.addWidget(self.pushButton_3, 2, 0, 1, 1)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        self.substrateListWidget = QtGui.QListWidget(self.substratesTab)
+        self.substrateListWidget.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.substrateListWidget.setObjectName(_fromUtf8("substrateListWidget"))
+        self.horizontalLayout.addWidget(self.substrateListWidget)
+        self.verticalLayout_3 = QtGui.QVBoxLayout()
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.verticalLayout_4 = QtGui.QVBoxLayout()
+        self.verticalLayout_4.setObjectName(_fromUtf8("verticalLayout_4"))
+        self.substAddButton = QtGui.QPushButton(self.substratesTab)
+        self.substAddButton.setObjectName(_fromUtf8("substAddButton"))
+        self.verticalLayout_4.addWidget(self.substAddButton)
+        self.substEditButton = QtGui.QPushButton(self.substratesTab)
+        self.substEditButton.setObjectName(_fromUtf8("substEditButton"))
+        self.verticalLayout_4.addWidget(self.substEditButton)
+        self.substRemoveButton = QtGui.QPushButton(self.substratesTab)
+        self.substRemoveButton.setObjectName(_fromUtf8("substRemoveButton"))
+        self.verticalLayout_4.addWidget(self.substRemoveButton)
+        spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_4.addItem(spacerItem5)
+        self.verticalLayout_3.addLayout(self.verticalLayout_4)
+        self.horizontalLayout.addLayout(self.verticalLayout_3)
+        self.gridLayout_4.addLayout(self.horizontalLayout, 1, 0, 1, 2)
         self.tabWidget.addTab(self.substratesTab, _fromUtf8(""))
         self.verticalLayout_2.addWidget(self.tabWidget)
         self.buttonBox = QtGui.QDialogButtonBox(PrefDialog)
@@ -173,6 +194,10 @@ class Ui_PrefDialog(object):
         QtCore.QObject.connect(self.pushButton_3, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.substratesHelp)
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.generalChooseDB)
         QtCore.QObject.connect(self.toolButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.generalChooseWorkingDir)
+        QtCore.QObject.connect(self.substAddButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.substAdd)
+        QtCore.QObject.connect(self.substEditButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.substEdit)
+        QtCore.QObject.connect(self.substRemoveButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.substRemove)
+        QtCore.QObject.connect(self.substrateListWidget, QtCore.SIGNAL(_fromUtf8("itemDoubleClicked(QListWidgetItem*)")), PrefDialog.substEdit)
         QtCore.QMetaObject.connectSlotsByName(PrefDialog)
 
     def retranslateUi(self, PrefDialog):
@@ -196,5 +221,8 @@ class Ui_PrefDialog(object):
         self.habHelpButton.setText(_translate("PrefDialog", "Help?", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.habitatTab), _translate("PrefDialog", "Habitats", None))
         self.pushButton_3.setText(_translate("PrefDialog", "Help?", None))
+        self.substAddButton.setText(_translate("PrefDialog", "Add", None))
+        self.substEditButton.setText(_translate("PrefDialog", "Edit", None))
+        self.substRemoveButton.setText(_translate("PrefDialog", "Remove", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.substratesTab), _translate("PrefDialog", "Substrates", None))
 

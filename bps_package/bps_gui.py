@@ -14,7 +14,7 @@ except ImportError:
     from bps_export import *
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import QSettings
+from PyQt4.QtCore import QSettings, QMimeData
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
     QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox, \
     QInputDialog
@@ -56,7 +56,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.timeZoneComboBox.setCurrentIndex( tzitem )
         # setup substrate tab
         self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
-        self.substrateListWidgetPref.addItems( self.substList )
+        self.substrateListWidget.addItems( self.substList )
         
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
@@ -77,7 +77,10 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.timezone = str( self.timeZoneComboBox.currentText() )
 #            self.timezone = self.ktimezonewidget.selection()[0]
             self.settings.setValue( "timezone",self.timezone )
-#            self.substList = self.substkeditlistwidget.items()
+            sl = []
+            for ind in xrange(self.substrateListWidget.count()):
+                sl.append( self.substrateListWidget.item( ind ).text() )
+            self.substList = sl
             self.settings.setValue( "substList",self.substList )
             super(StartPrefs, self).accept()
         else:
@@ -114,8 +117,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def timezoneHelp(self):
         pass
     
-    def substratesHelp(self):
-        pass
+    ## Habitat tab
     
     def addHabRow(self):
         self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
@@ -166,6 +168,36 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if qwtItem.column()==2:
             self.changeHabColor()
     
+    ## Substrate tab
+    
+    def substratesHelp(self):
+        pass
+    
+    def substAdd(self):
+        text, ok = QInputDialog.getText(self,'Substrate','Enter Substrate:')
+        if ok:
+            self.substrateListWidget.addItem( text )
+        else:
+            return False
+        
+    def substEdit(self):
+        item = self.substrateListWidget.selectedItems()[0]
+        if item:
+            self.substrateListWidget.openPersistentEditor( item )
+#            text, ok = QInputDialog.getText(self,'Substrate','Edit Substrate:',text=item.text())
+#            if ok:
+#                self.substrateListWidget.addItem( text )
+#            else:
+#                return False
+        else:
+            pass
+        
+    def substRemove(self):
+        curr = self.substrateListWidget.currentRow()
+        if curr:
+            self.substrateListWidget.takeItem( curr )
+        else:
+            pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
