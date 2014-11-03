@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Thu Oct 17 15:16:00 2013
-#      by: PyQt4 UI code generator 4.9.1
+# Created: Wed Oct 29 16:32:33 2014
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -12,12 +12,21 @@ from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
-    _fromUtf8 = lambda s: s
+    def _fromUtf8(s):
+        return s
+
+try:
+    _encoding = QtGui.QApplication.UnicodeUTF8
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig, _encoding)
+except AttributeError:
+    def _translate(context, text, disambig):
+        return QtGui.QApplication.translate(context, text, disambig)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(919, 627)
+        MainWindow.resize(918, 627)
         MainWindow.setStyleSheet(_fromUtf8(""))
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -301,15 +310,6 @@ class Ui_MainWindow(object):
         self.gridLayout_3.addWidget(self.habSaveButton, 1, 0, 1, 1)
         spacerItem3 = QtGui.QSpacerItem(118, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem3, 1, 1, 1, 1)
-        self.habLED = KLed(self.habitatTab)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.habLED.sizePolicy().hasHeightForWidth())
-        self.habLED.setSizePolicy(sizePolicy)
-        self.habLED.setMinimumSize(QtCore.QSize(25, 25))
-        self.habLED.setObjectName(_fromUtf8("habLED"))
-        self.gridLayout_3.addWidget(self.habLED, 1, 2, 1, 1)
         self.habAndSubstTabWidget.addTab(self.habitatTab, _fromUtf8(""))
         self.substTab = QtGui.QWidget()
         self.substTab.setObjectName(_fromUtf8("substTab"))
@@ -328,7 +328,7 @@ class Ui_MainWindow(object):
         self.gridLayout_2.addWidget(self.habAndSubstTabWidget, 2, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 919, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 918, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -398,49 +398,47 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtGui.QApplication.translate("MainWindow", "Benthic Photo Survey", None, QtGui.QApplication.UnicodeUTF8))
-        self.photoInfoGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Photo Info", None, QtGui.QApplication.UnicodeUTF8))
-        self.photoCountValue.setText(QtGui.QApplication.translate("MainWindow", "0 of 0", None, QtGui.QApplication.UnicodeUTF8))
-        self.directoryLabel.setText(QtGui.QApplication.translate("MainWindow", "Directory:", None, QtGui.QApplication.UnicodeUTF8))
-        self.filenameLabel.setText(QtGui.QApplication.translate("MainWindow", "Filename:", None, QtGui.QApplication.UnicodeUTF8))
-        self.previousButton.setText(QtGui.QApplication.translate("MainWindow", "Previous", None, QtGui.QApplication.UnicodeUTF8))
-        self.previousButton.setShortcut(QtGui.QApplication.translate("MainWindow", "Left", None, QtGui.QApplication.UnicodeUTF8))
-        self.geotagButton.setText(QtGui.QApplication.translate("MainWindow", "Geo Tag", None, QtGui.QApplication.UnicodeUTF8))
-        self.depthTempTagButton.setText(QtGui.QApplication.translate("MainWindow", "Depth/Temp Tag", None, QtGui.QApplication.UnicodeUTF8))
-        self.nextButton.setText(QtGui.QApplication.translate("MainWindow", "Next", None, QtGui.QApplication.UnicodeUTF8))
-        self.nextButton.setShortcut(QtGui.QApplication.translate("MainWindow", "Right", None, QtGui.QApplication.UnicodeUTF8))
-        self.exifDataGroupBox.setTitle(QtGui.QApplication.translate("MainWindow", "Exif Data", None, QtGui.QApplication.UnicodeUTF8))
-        self.dateLabel.setText(QtGui.QApplication.translate("MainWindow", "Date", None, QtGui.QApplication.UnicodeUTF8))
-        self.latitudeLabel.setText(QtGui.QApplication.translate("MainWindow", "Latitude", None, QtGui.QApplication.UnicodeUTF8))
-        self.temperatureLabel.setText(QtGui.QApplication.translate("MainWindow", "Temperature", None, QtGui.QApplication.UnicodeUTF8))
-        self.depthLabel.setText(QtGui.QApplication.translate("MainWindow", "Depth", None, QtGui.QApplication.UnicodeUTF8))
-        self.longitudeLabel.setText(QtGui.QApplication.translate("MainWindow", "Longitude", None, QtGui.QApplication.UnicodeUTF8))
-        self.directionLabel.setText(QtGui.QApplication.translate("MainWindow", "Direction ", None, QtGui.QApplication.UnicodeUTF8))
-        self.habitatLabel.setText(QtGui.QApplication.translate("MainWindow", "Habitat", None, QtGui.QApplication.UnicodeUTF8))
-        self.substrateLabel.setText(QtGui.QApplication.translate("MainWindow", "Substrate", None, QtGui.QApplication.UnicodeUTF8))
-        self.timeLabel.setText(QtGui.QApplication.translate("MainWindow", "Time", None, QtGui.QApplication.UnicodeUTF8))
-        self.habitatTableWidget.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Hover and roll mouse wheel to set habitat proportions</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.habSaveButton.setText(QtGui.QApplication.translate("MainWindow", "Save", None, QtGui.QApplication.UnicodeUTF8))
-        self.habLED.setToolTip(QtGui.QApplication.translate("MainWindow", "<html><head/><body><p>Indicates that habitat types add to 1 and can be saved.</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
-        self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.habitatTab), QtGui.QApplication.translate("MainWindow", "Habitat", None, QtGui.QApplication.UnicodeUTF8))
-        self.substrateListWidget.setToolTip(QtGui.QApplication.translate("MainWindow", "Double Click to set Substrate", None, QtGui.QApplication.UnicodeUTF8))
-        self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.substTab), QtGui.QApplication.translate("MainWindow", "Substrate", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuFile.setTitle(QtGui.QApplication.translate("MainWindow", "&File", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuOutput.setTitle(QtGui.QApplication.translate("MainWindow", "&Output", None, QtGui.QApplication.UnicodeUTF8))
-        self.menuActions.setTitle(QtGui.QApplication.translate("MainWindow", "&Actions", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_GPS_Log.setText(QtGui.QApplication.translate("MainWindow", "Load &GPS Log", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_GPS_Log.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+G", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_Depth_Log.setText(QtGui.QApplication.translate("MainWindow", "Load &Depth Log", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_Depth_Log.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+D", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_Photo_Directory.setText(QtGui.QApplication.translate("MainWindow", "Load &Photos", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionLoad_Photo_Directory.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+P", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionQuit.setText(QtGui.QApplication.translate("MainWindow", "Quit", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionQuit.setShortcut(QtGui.QApplication.translate("MainWindow", "Ctrl+Q", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionExport_Shapefile.setText(QtGui.QApplication.translate("MainWindow", "Export &Shapefile", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionDepth_Plot.setText(QtGui.QApplication.translate("MainWindow", "Depth &Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionGeo_Tag_All_Photos.setText(QtGui.QApplication.translate("MainWindow", "Geo Tag All Photos", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionDepth_Temp_Tag_All.setText(QtGui.QApplication.translate("MainWindow", "Depth/Temp Tag All", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionPreferences.setText(QtGui.QApplication.translate("MainWindow", "Preferences...", None, QtGui.QApplication.UnicodeUTF8))
-        self.actionTime_Shift_Photos.setText(QtGui.QApplication.translate("MainWindow", "Time Shift Photos", None, QtGui.QApplication.UnicodeUTF8))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Benthic Photo Survey", None))
+        self.photoInfoGroupBox.setTitle(_translate("MainWindow", "Photo Info", None))
+        self.photoCountValue.setText(_translate("MainWindow", "0 of 0", None))
+        self.directoryLabel.setText(_translate("MainWindow", "Directory:", None))
+        self.filenameLabel.setText(_translate("MainWindow", "Filename:", None))
+        self.previousButton.setText(_translate("MainWindow", "Previous", None))
+        self.previousButton.setShortcut(_translate("MainWindow", "Left", None))
+        self.geotagButton.setText(_translate("MainWindow", "Geo Tag", None))
+        self.depthTempTagButton.setText(_translate("MainWindow", "Depth/Temp Tag", None))
+        self.nextButton.setText(_translate("MainWindow", "Next", None))
+        self.nextButton.setShortcut(_translate("MainWindow", "Right", None))
+        self.exifDataGroupBox.setTitle(_translate("MainWindow", "Exif Data", None))
+        self.dateLabel.setText(_translate("MainWindow", "Date", None))
+        self.latitudeLabel.setText(_translate("MainWindow", "Latitude", None))
+        self.temperatureLabel.setText(_translate("MainWindow", "Temperature", None))
+        self.depthLabel.setText(_translate("MainWindow", "Depth", None))
+        self.longitudeLabel.setText(_translate("MainWindow", "Longitude", None))
+        self.directionLabel.setText(_translate("MainWindow", "Direction ", None))
+        self.habitatLabel.setText(_translate("MainWindow", "Habitat", None))
+        self.substrateLabel.setText(_translate("MainWindow", "Substrate", None))
+        self.timeLabel.setText(_translate("MainWindow", "Time", None))
+        self.habitatTableWidget.setToolTip(_translate("MainWindow", "<html><head/><body><p>Hover and roll mouse wheel to set habitat proportions</p></body></html>", None))
+        self.habSaveButton.setText(_translate("MainWindow", "Save", None))
+        self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.habitatTab), _translate("MainWindow", "Habitat", None))
+        self.substrateListWidget.setToolTip(_translate("MainWindow", "Double Click to set Substrate", None))
+        self.habAndSubstTabWidget.setTabText(self.habAndSubstTabWidget.indexOf(self.substTab), _translate("MainWindow", "Substrate", None))
+        self.menuFile.setTitle(_translate("MainWindow", "&File", None))
+        self.menuOutput.setTitle(_translate("MainWindow", "&Output", None))
+        self.menuActions.setTitle(_translate("MainWindow", "&Actions", None))
+        self.actionLoad_GPS_Log.setText(_translate("MainWindow", "Load &GPS Log", None))
+        self.actionLoad_GPS_Log.setShortcut(_translate("MainWindow", "Ctrl+G", None))
+        self.actionLoad_Depth_Log.setText(_translate("MainWindow", "Load &Depth Log", None))
+        self.actionLoad_Depth_Log.setShortcut(_translate("MainWindow", "Ctrl+D", None))
+        self.actionLoad_Photo_Directory.setText(_translate("MainWindow", "Load &Photos", None))
+        self.actionLoad_Photo_Directory.setShortcut(_translate("MainWindow", "Ctrl+P", None))
+        self.actionQuit.setText(_translate("MainWindow", "Quit", None))
+        self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
+        self.actionExport_Shapefile.setText(_translate("MainWindow", "Export &Shapefile", None))
+        self.actionDepth_Plot.setText(_translate("MainWindow", "Depth &Plot", None))
+        self.actionGeo_Tag_All_Photos.setText(_translate("MainWindow", "Geo Tag All Photos", None))
+        self.actionDepth_Temp_Tag_All.setText(_translate("MainWindow", "Depth/Temp Tag All", None))
+        self.actionPreferences.setText(_translate("MainWindow", "Preferences...", None))
+        self.actionTime_Shift_Photos.setText(_translate("MainWindow", "Time Shift Photos", None))
 
-from PyKDE4.kdeui import KLed

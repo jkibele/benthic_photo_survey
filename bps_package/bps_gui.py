@@ -14,13 +14,14 @@ except ImportError:
     from bps_export import *
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import QSettings
+from PyQt4.QtCore import QSettings, QMimeData
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
     QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox, \
     QInputDialog
 from preference_array import HabPrefArray, PrefRow
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
+import pytz
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -49,11 +50,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
         self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
         # setup time zone tab
-        self.timezone = self.__settings_extract("timezone",LOCAL_TIME_ZONE)
-        self.ktimezonewidget.setSelected( self.timezone, True )
+        self.timezone = str( self.__settings_extract("timezone",LOCAL_TIME_ZONE) )
+        self.timeZoneComboBox.addItems( pytz.common_timezones )
+        tzitem = self.timeZoneComboBox.findText( self.timezone, QtCore.Qt.MatchFixedString )
+        self.timeZoneComboBox.setCurrentIndex( tzitem )
         # setup substrate tab
         self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
-        self.substkeditlistwidget.setItems( self.substList )
+        self.substrateListWidget.addItems( self.substList )
         
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
@@ -71,9 +74,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if newpa.saveToSettings(): # ensure habitat settings don't bork
             # then save other settings
             self.generalSaveSettings()
-            self.timezone = self.ktimezonewidget.selection()[0]
+            self.timezone = str( self.timeZoneComboBox.currentText() )
+#            self.timezone = self.ktimezonewidget.selection()[0]
             self.settings.setValue( "timezone",self.timezone )
-            self.substList = self.substkeditlistwidget.items()
+            sl = []
+            for ind in xrange(self.substrateListWidget.count()):
+                sl.append( self.substrateListWidget.item( ind ).text() )
+            self.substList = sl
             self.settings.setValue( "substList",self.substList )
             super(StartPrefs, self).accept()
         else:
@@ -110,8 +117,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     def timezoneHelp(self):
         pass
     
-    def substratesHelp(self):
-        pass
+    ## Habitat tab
     
     def addHabRow(self):
         self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
@@ -162,6 +168,36 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if qwtItem.column()==2:
             self.changeHabColor()
     
+    ## Substrate tab
+    
+    def substratesHelp(self):
+        pass
+    
+    def substAdd(self):
+        text, ok = QInputDialog.getText(self,'Substrate','Enter Substrate:')
+        if ok:
+            self.substrateListWidget.addItem( text )
+        else:
+            return False
+        
+    def substEdit(self):
+        item = self.substrateListWidget.selectedItems()[0]
+        if item:
+            self.substrateListWidget.openPersistentEditor( item )
+#            text, ok = QInputDialog.getText(self,'Substrate','Edit Substrate:',text=item.text())
+#            if ok:
+#                self.substrateListWidget.addItem( text )
+#            else:
+#                return False
+        else:
+            pass
+        
+    def substRemove(self):
+        curr = self.substrateListWidget.currentRow()
+        if curr:
+            self.substrateListWidget.takeItem( curr )
+        else:
+            pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -191,7 +227,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def setupHabSelector(self):
         habList = self.getHablistSettings()
-        self.habLED.off()
+#        self.habLED.off()
         htw = self.habitatTableWidget
         for sb in htw.findChildren(QDoubleSpinBox):
             # it turns out that this is crucial
@@ -223,16 +259,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def checkHabValues(self):
         tot = self.totalFromHabSelector
         if tot<1.0:
-            self.habLED.off()
-            self.habLED.setColor( QColor('green') )
+#            self.habLED.off()
+#            self.habLED.setColor( QColor('green') )
             self.habSaveButton.setDisabled(True)
         elif tot==1.0:
-            self.habLED.on()
-            self.habLED.setColor( QColor('green') )
+#            self.habLED.on()
+#            self.habLED.setColor( QColor('green') )
             self.habSaveButton.setDisabled(False)
         else:
-            self.habLED.off()
-            self.habLED.setColor( QColor('red') )
+#            self.habLED.off()
+#            self.habLED.setColor( QColor('red') )
             self.habSaveButton.setDisabled(True)
         
     @property
