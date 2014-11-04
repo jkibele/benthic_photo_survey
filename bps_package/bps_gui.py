@@ -49,6 +49,12 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.inputEPSGLineEdit.setText( str(self.inputEPSG) )
         self.outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
         self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
+        dfstr = str( self.__settings_extract("dodgyFeatures",False) )
+        self.dodgyFeatures = dfstr=='true'
+        if self.dodgyFeatures:
+            self.dodgyCheckBox.setChecked(True)
+        else:
+            self.dodgyCheckBox.setChecked(False)
         # setup time zone tab
         self.timezone = str( self.__settings_extract("timezone",LOCAL_TIME_ZONE) )
         self.timeZoneComboBox.addItems( pytz.common_timezones )
@@ -91,7 +97,11 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.working_dir = self.workingDirLineEdit.text()
         self.inputEPSG = self.inputEPSGLineEdit.text()
         self.outputEPSG = self.outputEPSGLineEdit.text()
-        set_list = ['db_path','working_dir','inputEPSG','outputEPSG']
+        if self.dodgyCheckBox.isChecked():
+            self.dodgyFeatures = True
+        else:
+            self.dodgyFeatures = False
+        set_list = ['db_path','working_dir','inputEPSG','outputEPSG','dodgyFeatures']
         for s in set_list:
             self.settings.setValue( s, self.__getattribute__(s) )
         
@@ -333,6 +343,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.substrateListWidget.addItems( self.getSubstSettings() )
         self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
         self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
+        self.dodgyFeatures = 'true'==str( self.__settings_extract("dodgyFeatures",False) )
         
     def getHablistSettings(self):
         hpa = HabPrefArray()
@@ -617,7 +628,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mbox.exec_()
     
     def depthPlot(self):
-        self.imageDirectoryObj.depth_plot(self.db_path)
+        if self.dodgyFeatures:
+            offsec, ok = QInputDialog.getInt(self, "Depth Plot", "Time Offset (seconds):", 0)
+            if ok:
+                self.imageDirectoryObj.depth_plot(self.db_path,offsec)
+            else:
+                return False
+        else:
+            self.imageDirectoryObj.depth_plot(self.db_path)
     
     def exportShapefile(self):
         default_dir = os.path.join( str(self.working_dir), "shapefiles" )
