@@ -710,6 +710,7 @@
     <addaction name="actionDepth_Temp_Tag_All"/>
     <addaction name="separator"/>
     <addaction name="actionTime_Shift_Photos"/>
+    <addaction name="actionTime_Shift_Depth"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuActions"/>
@@ -778,6 +779,11 @@
     <string>Time Shift Photos</string>
    </property>
   </action>
+  <action name="actionTime_Shift_Depth">
+   <property name="text">
+    <string>Time Shift Depth</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -804,7 +810,7 @@
    <slot>nextPhoto()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>661</x>
+     <x>660</x>
      <y>593</y>
     </hint>
     <hint type="destinationlabel">
@@ -852,7 +858,7 @@
    <slot>depthTempTag()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>487</x>
+     <x>486</x>
      <y>593</y>
     </hint>
     <hint type="destinationlabel">
@@ -1037,6 +1043,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionTime_Shift_Depth</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionTimeShiftDepth()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>nextPhoto()</slot>
@@ -1055,5 +1077,6 @@
   <slot>exportShapefile()</slot>
   <slot>preferenceDialog()</slot>
   <slot>actionTimeShiftPhotos()</slot>
+  <slot>actionTimeShiftDepth()</slot>
  </slots>
 </ui>

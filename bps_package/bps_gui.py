@@ -344,6 +344,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
         self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
         self.dodgyFeatures = 'true'==str( self.__settings_extract("dodgyFeatures",False) )
+        if self.dodgyFeatures:
+            self.actionTime_Shift_Photos.setEnabled(True)
+            self.actionTime_Shift_Depth.setEnabled(True)
+        else:
+            self.actionTime_Shift_Photos.setDisabled(True)
+            self.actionTime_Shift_Depth.setDisabled(True)
         
     def getHablistSettings(self):
         hpa = HabPrefArray()
@@ -514,6 +520,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         tdelta.
         """
         self.imageDirectoryObj.__shift_datetimes__(tdelta)
+        
+    def actionTimeShiftDepth(self):
+        dialogtxt = "Warning: Only use this if you know what you're doing."
+        seconds, ok = QInputDialog.getInt(self,'Offset in Seconds', dialogtxt)
+        if ok:
+            conf_msg = "Are you sure you want to shift the timestamp on your \
+                        depth records by %fi seconds?" % int(seconds)
+            reply = QMessageBox.warning(None,"Confirm",conf_msg,QMessageBox.Yes,QMessageBox.No)
+            if reply==QMessageBox.Yes:
+                self.imageDirectoryObj.dive_record_set( self.db_path ).shift_depth_records( int( seconds ) )
+                result_str = "Great Success: photos time shifted. ...I think..."
+                self.statusBar().showMessage( result_str, 8000)
+                return True
+            else:
+                return False
         
     def removeIncompatibleHabTags(self):
         """

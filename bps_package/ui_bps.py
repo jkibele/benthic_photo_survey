@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Tue Nov  4 17:41:14 2014
+# Created: Wed Nov  5 15:56:04 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -360,6 +360,8 @@ class Ui_MainWindow(object):
         self.actionPreferences.setObjectName(_fromUtf8("actionPreferences"))
         self.actionTime_Shift_Photos = QtGui.QAction(MainWindow)
         self.actionTime_Shift_Photos.setObjectName(_fromUtf8("actionTime_Shift_Photos"))
+        self.actionTime_Shift_Depth = QtGui.QAction(MainWindow)
+        self.actionTime_Shift_Depth.setObjectName(_fromUtf8("actionTime_Shift_Depth"))
         self.menuFile.addAction(self.actionLoad_GPS_Log)
         self.menuFile.addAction(self.actionLoad_Depth_Log)
         self.menuFile.addAction(self.actionLoad_Photo_Directory)
@@ -373,6 +375,7 @@ class Ui_MainWindow(object):
         self.menuActions.addAction(self.actionDepth_Temp_Tag_All)
         self.menuActions.addSeparator()
         self.menuActions.addAction(self.actionTime_Shift_Photos)
+        self.menuActions.addAction(self.actionTime_Shift_Depth)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuActions.menuAction())
         self.menubar.addAction(self.menuOutput.menuAction())
@@ -395,6 +398,7 @@ class Ui_MainWindow(object):
         QtCore.QObject.connect(self.habSaveButton, QtCore.SIGNAL(_fromUtf8("clicked()")), MainWindow.setHabitat)
         QtCore.QObject.connect(self.substrateListWidget, QtCore.SIGNAL(_fromUtf8("doubleClicked(QModelIndex)")), MainWindow.setSubstrate)
         QtCore.QObject.connect(self.actionTime_Shift_Photos, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.actionTimeShiftPhotos)
+        QtCore.QObject.connect(self.actionTime_Shift_Depth, QtCore.SIGNAL(_fromUtf8("triggered()")), MainWindow.actionTimeShiftDepth)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -441,4 +445,5 @@ class Ui_MainWindow(object):
         self.actionDepth_Temp_Tag_All.setText(_translate("MainWindow", "Depth/Temp Tag All", None))
         self.actionPreferences.setText(_translate("MainWindow", "Preferences...", None))
         self.actionTime_Shift_Photos.setText(_translate("MainWindow", "Time Shift Photos", None))
+        self.actionTime_Shift_Depth.setText(_translate("MainWindow", "Time Shift Depth", None))
 

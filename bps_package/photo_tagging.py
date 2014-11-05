@@ -58,6 +58,9 @@ class image_directory(object):
                     d[hab] = 1
         return d
         
+    def dive_record_set(self,db_path):
+        return dive_record_set( min(self.local_datetimes), max(self.local_datetimes), db_path )
+        
     def depth_plot(self, db_path, depth_time_offset=None):
         """
         Create a plot of the depth profile with photo times and depths marked.
@@ -68,7 +71,7 @@ class image_directory(object):
             changes the plot. It does not alter any of the values or change
             what gets exported to shapefile.
         """
-        drs = dive_record_set( min(self.local_datetimes), max(self.local_datetimes), db_path )
+        drs = self.dive_record_set(db_path)
         y = -1 * drs.depth_time_array[:,0] # depths * -1 to make negative values
         x = drs.depth_time_array[:,1] # datetimes
         if depth_time_offset:
