@@ -526,7 +526,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         seconds, ok = QInputDialog.getInt(self,'Offset in Seconds', dialogtxt)
         if ok:
             conf_msg = "Are you sure you want to shift the timestamp on your \
-                        depth records by %fi seconds?" % int(seconds)
+                        depth records by %i seconds?" % int(seconds)
             reply = QMessageBox.warning(None,"Confirm",conf_msg,QMessageBox.Yes,QMessageBox.No)
             if reply==QMessageBox.Yes:
                 self.imageDirectoryObj.dive_record_set( self.db_path ).shift_depth_records( int( seconds ) )

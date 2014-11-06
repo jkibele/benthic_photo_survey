@@ -12,7 +12,7 @@ exiv.xmp.register_namespace('http://svarchiteuthis.com/benthicphoto/', 'BenthicP
 class image_directory(object):
     def __init__(self, dir_path):
         if os.path.isdir(dir_path):
-            jpgs = [ os.path.join(dir_path,f) for f in os.listdir(dir_path) if f.lower().endswith('.jpg') ]
+            jpgs = [ os.path.join(dir_path,f) for f in os.listdir(dir_path) if f.lower().endswith('.jpg') and not f.startswith('.') ]
         else:
             raise ValueError("%s is not a directory." % dir_path)
         self.path = dir_path
