@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, operator, random
+import sys, os, operator, random, platform
 from slugify import slugify
 try:
     from bps_package.depth_temp_log_io import *
@@ -27,6 +27,17 @@ try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
+if platform.system()=='Windows':
+    # Windows needs this environment variable for gdal to work
+    #if not os.getenv('GDAL_DATA'):
+        # if it's not set, I'm going to assume that means we're
+        # running from a pyinstaller exe on a system without gdal
+        # installed and/or configured. In that case, we want to
+        # set GDAL_DATA to the relative directory that's installed
+        # with the exe.
+    os.environ['GDAL_DATA'] = os.path.abspath('gdal_data')
+    print "GDAL_DATA set to %s" % os.getenv('GDAL_DATA')
     
 class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
