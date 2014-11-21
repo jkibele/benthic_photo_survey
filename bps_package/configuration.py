@@ -1,20 +1,22 @@
+import os
+
 LOCAL_TIME_ZONE = 'Pacific/Auckland' # Find your local timezone name here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 
 # This is all changing. User's should manage their preferences through the 
 # preferences dialog in the file menu of BPS. This file will should only 
 # affect the default values that show up the first time the application is run.
-CONF_DB_PATH = 'bps_package/data/db/raw_log.db'
+CONF_DB_PATH = os.path.join('test_data','db','raw_log.db')
 
-CONF_WORKING_DIR = 'bps_package/data'
+CONF_WORKING_DIR = 'test_data'
 
 CONF_QSETTINGS_DEVELOPER = 'jkibele'
 CONF_QSETTINGS_APPLICATION = 'BenthicPhotoSurvey'
 
 # the following three items are for testing and shouldn't need to be
 # changed.
-dt_testlog = 'test_data/sensus/sensus_test.csv'
-gps_testlog = 'test_data/gps/GPS_20120722_194204.log'
-test_image = 'test_data/images/P1000361.JPG'
+dt_testlog = os.path.join('test_data','sensus','sensus_test.csv')
+gps_testlog = os.path.join('test_data','gps','GPS_20120722_194204.log')
+test_image = os.path.join('test_data','images','P1000361.JPG')
 
 #--------------bps_export------------------------------
 CONF_INPUT_EPSG = 4326 #This is the projection that your GPS is recording in.
