@@ -24,13 +24,55 @@ class dive_record_set(object):
         UTC so we'll make the start and end naive so we don't screw up the 
         comparison.
         """
-        stdt = self.start.astimezone(pytz.utc).replace(tzinfo=None)
-        endt = self.end.astimezone(pytz.utc).replace(tzinfo=None)
+#        stdt = self.start.astimezone(pytz.utc).replace(tzinfo=None)
+#        endt = self.end.astimezone(pytz.utc).replace(tzinfo=None)
         t = ( self.start.astimezone(pytz.utc), self.end.astimezone(pytz.utc), )
         conn,cur = connection_and_cursor(self.db_path)
         rows = cur.execute( "SELECT utctime, celsius, depthm FROM DepthTempLog WHERE utctime >= ? AND utctime <= ?", t ).fetchall()
         cur.close()
         return rows
+        
+    @property
+    def unique_db_files(self):
+        """
+        Get the file numbers of the depth logs that contain data associated
+        with the current set of photos. If we want to time shift a set of depth
+        records, we need this method to only shift the records associated with
+        the current photos. Otherwise, we'd shift all the depth records in the
+        db.
+        """
+        t = ( self.start.astimezone(pytz.utc), self.end.astimezone(pytz.utc), )
+        conn,cur = connection_and_cursor(self.db_path)
+        rows = cur.execute( "SELECT DISTINCT file FROM DepthTempLog WHERE utctime >= ? AND utctime <= ?", t ).fetchall()
+        cur.close()
+        filenums = [ int(r[0]) for r in rows ]
+        return tuple(filenums)
+        
+    @property
+    def file_device_pairs(self):
+        
+        q = "select distinct file, device from depthtemplog where file in " + \
+        "(select distinct file from depthtemplog where utctime >= ? and utctime <= ? );"
+        t = ( self.start.astimezone(pytz.utc), self.end.astimezone(pytz.utc), )
+        conn,cur = connection_and_cursor(self.db_path)
+        rows = cur.execute( q, t ).fetchall()
+        cur.close()
+        return rows
+        
+    def time_shift_array(self,t_secs):
+        tstr = str(t_secs) + " seconds"
+        fdps = np.array( self.file_device_pairs )
+        tarr = np.repeat( tstr, fdps.shape[0] )
+        #return tarr,fdps        
+        return np.hstack( (np.expand_dims(tarr,1),fdps) )
+        
+    def shift_depth_records(self,t_secs):
+        tsarr = self.time_shift_array(t_secs)
+        q = "update depthtemplog set utctime=datetime(utctime, +?) where file = ? and device = ?"
+        conn,cur = connection_and_cursor(self.db_path)
+        cur.executemany( q, tsarr ).fetchall()
+        conn.commit()
+        cur.close()
         
     @property
     def depth_time_list(self):
@@ -189,7 +231,7 @@ def get_temp_for_time(dt_obj, db_path, reject_threshold=30):
     else:
         return celsius
 
-def adjust_all_times(time_delta):
+def adjust_all_times(time_delta, db_path):
     """
     This will shift all the times of all the records. You probably don't wan to do
     this but I did want to once. I actually did it directly in the db so I have 
@@ -197,7 +239,7 @@ def adjust_all_times(time_delta):
     """
     conn,cur = connection_and_cursor(db_path)
     t = (time_delta.total_seconds(),)
-    cur.execute("update DepthTempLog set utctime=datetime(utctime,'+?')", t)
+    cur.execute("update DepthTempLog set utctime=datetime(utctime,+?)", t)
     conn.commit()
     cur.close()
 
