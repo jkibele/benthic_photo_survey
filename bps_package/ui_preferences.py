@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'preferences.ui'
 #
-# Created: Tue Nov  4 17:41:15 2014
+# Created: Wed Nov 26 18:50:18 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -54,10 +54,10 @@ class Ui_PrefDialog(object):
         self.databaseLineEdit.setReadOnly(True)
         self.databaseLineEdit.setObjectName(_fromUtf8("databaseLineEdit"))
         self.gridLayout_2.addWidget(self.databaseLineEdit, 0, 2, 1, 1)
-        self.pushButton = QtGui.QPushButton(self.generalTab)
-        self.pushButton.setMaximumSize(QtCore.QSize(85, 16777215))
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.gridLayout_2.addWidget(self.pushButton, 6, 0, 1, 1)
+        self.generalHelpButton = QtGui.QPushButton(self.generalTab)
+        self.generalHelpButton.setMaximumSize(QtCore.QSize(85, 16777215))
+        self.generalHelpButton.setObjectName(_fromUtf8("generalHelpButton"))
+        self.gridLayout_2.addWidget(self.generalHelpButton, 6, 0, 1, 1)
         self.toolButton_2 = QtGui.QToolButton(self.generalTab)
         self.toolButton_2.setObjectName(_fromUtf8("toolButton_2"))
         self.gridLayout_2.addWidget(self.toolButton_2, 1, 3, 1, 1)
@@ -195,7 +195,7 @@ class Ui_PrefDialog(object):
         QtCore.QObject.connect(self.habColorButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.changeHabColor)
         QtCore.QObject.connect(self.habHelpButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.habHelp)
         QtCore.QObject.connect(self.habTableWidget, QtCore.SIGNAL(_fromUtf8("itemDoubleClicked(QTableWidgetItem*)")), PrefDialog.habItemDoubleClicked)
-        QtCore.QObject.connect(self.pushButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.generalHelp)
+        QtCore.QObject.connect(self.generalHelpButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.generalHelp)
         QtCore.QObject.connect(self.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.timezoneHelp)
         QtCore.QObject.connect(self.pushButton_3, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.substratesHelp)
         QtCore.QObject.connect(self.toolButton, QtCore.SIGNAL(_fromUtf8("clicked()")), PrefDialog.generalChooseDB)
@@ -212,7 +212,7 @@ class Ui_PrefDialog(object):
         self.workingDirLabel.setText(_translate("PrefDialog", "Working Directory", None))
         self.toolButton.setText(_translate("PrefDialog", "...", None))
         self.label_2.setText(_translate("PrefDialog", "Dodgy Features", None))
-        self.pushButton.setText(_translate("PrefDialog", "Help?", None))
+        self.generalHelpButton.setText(_translate("PrefDialog", "Help?", None))
         self.toolButton_2.setText(_translate("PrefDialog", "...", None))
         self.outputEPSGLabel.setText(_translate("PrefDialog", "Output EPSG", None))
         self.inputEPSGLabel.setText(_translate("PrefDialog", "Input EPSG", None))
