@@ -136,7 +136,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the general tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsGeneral.html'
+        rf = os.path.join('docs','helpButtons','prefsGeneral.html')
         self.showHelpFile( rf )
     
     def generalChooseDB(self):
@@ -159,7 +159,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the time zone tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsTimezone.html'
+        rf = os.path.join('docs','helpButtons','prefsTimezone.html')
         self.showHelpFile( rf )
     
     ## Habitat tab
@@ -204,7 +204,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the habitat tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsHabitat.html'
+        rf = os.path.join('docs','helpButtons','prefsHabitat.html')
         self.showHelpFile( rf )
         
         
@@ -218,7 +218,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the substrate tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsSubstrate.html'
+        rf = os.path.join('docs','helpButtons','prefsSubstrate.html')
         self.showHelpFile( rf )
     
     def substAdd(self):
