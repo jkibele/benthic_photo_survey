@@ -1,14 +1,20 @@
-all : ui_bps ui_preferences ui_pref_help resources
-.PHONY : all
+all : gui button_help
+gui : bps_package/ui_bps.py bps_package/ui_preferences.py  bps_package/ui_pref_help.py bps_package/qt_resources_rc.py
+.PHONY : all gui
 
-ui_bps : qt_gui.ui
+bps_package/ui_bps.py : qt_gui.ui
 	pyuic4 -o bps_package/ui_bps.py qt_gui.ui
 
-ui_preferences : preferences.ui
+bps_package/ui_preferences.py : preferences.ui
 	pyuic4 -o bps_package/ui_preferences.py preferences.ui
 	
-ui_pref_help : pref_help.ui
+bps_package/ui_pref_help.py : pref_help.ui
 	pyuic4 -o bps_package/ui_pref_help.py pref_help.ui
 
-resources : qt_resources.qrc
+bps_package/qt_resources_rc.py : qt_resources.qrc
 	pyrcc4 -o bps_package/qt_resources_rc.py qt_resources.qrc
+
+#bhdir := bps_package/docs/helpButtons/
+
+button_help : bps_package/docs/helpButtons/*.md
+	cd bps_package/docs/helpButtons && (make)

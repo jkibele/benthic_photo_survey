@@ -23,7 +23,6 @@ from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
 from ui_pref_help import Ui_PrefHelpDialog
 import pytz
-import markdown as md
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -130,14 +129,14 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         dlg = PrefHelp(parent=self)
         with open(file_path) as f:
-            dlg.textBrowser.setHtml( md.markdown( f.read() ))
+            dlg.textBrowser.setHtml( f.read() )
         dlg.exec_()
     
     def generalHelp(self):
         """
         Display help for the general tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsGeneral.md'
+        rf = 'docs/helpButtons/prefsGeneral.html'
         self.showHelpFile( rf )
     
     def generalChooseDB(self):
@@ -160,7 +159,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the time zone tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsTimezone.md'
+        rf = 'docs/helpButtons/prefsTimezone.html'
         self.showHelpFile( rf )
     
     ## Habitat tab
@@ -205,7 +204,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the habitat tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsHabitat.md'
+        rf = 'docs/helpButtons/prefsHabitat.html'
         self.showHelpFile( rf )
         
         
@@ -219,7 +218,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         """
         Display help for the substrate tab of the preferences dialog.
         """
-        rf = 'docs/helpButtons/prefsSubstrate.md'
+        rf = 'docs/helpButtons/prefsSubstrate.html'
         self.showHelpFile( rf )
     
     def substAdd(self):
