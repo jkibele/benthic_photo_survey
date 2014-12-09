@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'qt_gui.ui'
 #
-# Created: Wed Nov  5 15:56:04 2014
+# Created: Tue Dec  9 18:20:51 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -27,6 +27,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.resize(918, 627)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icons/BPS.ico")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet(_fromUtf8(""))
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -447,3 +450,4 @@ class Ui_MainWindow(object):
         self.actionTime_Shift_Photos.setText(_translate("MainWindow", "Time Shift Photos", None))
         self.actionTime_Shift_Depth.setText(_translate("MainWindow", "Time Shift Depth", None))
 
+import qt_resources_rc

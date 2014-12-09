@@ -14,6 +14,10 @@
   <property name="windowTitle">
    <string>Benthic Photo Survey</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="qt_resources.qrc">
+    <normaloff>:/icons/BPS.ico</normaloff>:/icons/BPS.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
@@ -785,7 +789,9 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="qt_resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionQuit</sender>
