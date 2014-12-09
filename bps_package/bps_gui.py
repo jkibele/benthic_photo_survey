@@ -30,6 +30,9 @@ except AttributeError:
     _fromUtf8 = lambda s: s
 
 if platform.system()=='Windows':
+    import ctypes
+    myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     # Windows needs this environment variable for gdal to work
     #if not os.getenv('GDAL_DATA'):
         # if it's not set, I'm going to assume that means we're
