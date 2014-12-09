@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="images">
-    <file>test_data/images/P6251541.jpg</file>
+  <qresource prefix="icons">
+    <file>BPS.ico</file>
   </qresource>
 </RCC>

@@ -21,6 +21,7 @@ from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
 from preference_array import HabPrefArray, PrefRow
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
+from ui_pref_help import Ui_PrefHelpDialog
 import pytz
 
 try:
@@ -38,6 +39,11 @@ if platform.system()=='Windows':
         # with the exe.
     os.environ['GDAL_DATA'] = os.path.abspath('gdal_data')
     print "GDAL_DATA set to %s" % os.getenv('GDAL_DATA')
+    
+class PrefHelp(QDialog, Ui_PrefHelpDialog):
+    def __init__(self,parent=None):
+        QDialog.__init__(self,parent)
+        self.setupUi(self)
     
 class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
@@ -116,8 +122,22 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         for s in set_list:
             self.settings.setValue( s, self.__getattribute__(s) )
         
+    def showHelpFile(self, file_path):
+        """
+        Create a dialog, read a markdown file, convert it to html, and display
+        that html in the dialog.
+        """
+        dlg = PrefHelp(parent=self)
+        with open(file_path) as f:
+            dlg.textBrowser.setHtml( f.read() )
+        dlg.exec_()
+    
     def generalHelp(self):
-        pass
+        """
+        Display help for the general tab of the preferences dialog.
+        """
+        rf = 'docs/helpButtons/prefsGeneral.html'
+        self.showHelpFile( rf )
     
     def generalChooseDB(self):
         new_db_path = QFileDialog.getSaveFileName(self,"Choose or Create Database File",self.db_path,filter="SQLite db(*.db)",options=QFileDialog.DontConfirmOverwrite)
@@ -136,7 +156,11 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             return False
     
     def timezoneHelp(self):
-        pass
+        """
+        Display help for the time zone tab of the preferences dialog.
+        """
+        rf = 'docs/helpButtons/prefsTimezone.html'
+        self.showHelpFile( rf )
     
     ## Habitat tab
     
@@ -177,13 +201,12 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.habTableWidget.setItem(currRow,2,color_item)
     
     def habHelp(self):
-        widg = self.habTableWidget
-        currRow = widg.currentRow()
-        pr = PrefRow()
-        pr.code = widg.item(currRow,0).text()
-        pr.name = widg.item(currRow,1).text()
-        pr.color = widg.item(currRow,2).text()
-        #print pr
+        """
+        Display help for the habitat tab of the preferences dialog.
+        """
+        rf = 'docs/helpButtons/prefsHabitat.html'
+        self.showHelpFile( rf )
+        
         
     def habItemDoubleClicked(self,qwtItem):
         if qwtItem.column()==2:
@@ -192,7 +215,11 @@ class StartPrefs(QDialog, Ui_PrefDialog):
     ## Substrate tab
     
     def substratesHelp(self):
-        pass
+        """
+        Display help for the substrate tab of the preferences dialog.
+        """
+        rf = 'docs/helpButtons/prefsSubstrate.html'
+        self.showHelpFile( rf )
     
     def substAdd(self):
         text, ok = QInputDialog.getText(self,'Substrate','Enter Substrate:')
