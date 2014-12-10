@@ -1,6 +1,12 @@
+IMPORTANT NOTE:
+===============
+
+Most of this information is out of date. Go to the `GitHub Repository`_ or `BPS page`_ for up to date information. I will update these docs but haven't had time yet.
+
+
 Installation
 ============
-Bethic Photo Survey (BPS) runs on Linux, Mac, and Windows operating systems. There are a few different ways to install BPS. You can `download the code`_ from the `bitbucket`_, you can install with the python `pip`_ installer, or you can `git`_ to clone the code from the `bitbucket`_ repository. More details are provided below along with information about software requirements and details specific to installing on different platforms.
+Bethic Photo Survey (BPS) can run on Linux, Mac, and Windows operating systems. There are a few different ways to install BPS.
 
 Requirements
 ------------
@@ -11,7 +17,7 @@ The following items need to be installed in order for BPS to work. Make sure you
 3. `Matplotlib`_ 1.1.1 or greater, can be installed as part of `SciPy`_ or with `PythonXY`_ (see end of this section).
 4. `PyQt4`_
 5. `pynmea`_ can be installed with `pip`_ by typing ``pip install pynmea`` at the command prompt (or ``sudo pip install pynmea`` if you're on Linux or Mac and need root privileges to install).
-6. `pyexiv2`_ has actually been deprecated now. I will eventually rewrite the code to use GExiv2 but, for now, pyexiv2 is required.
+6. `pyexiv2`_ has actually been deprecated now. I will eventually rewrite the code to use a different library but, for now, pyexiv2 is required.
 
 That's kind of a lot of stuff to have to install. Fortunately, items 1 - 4 can be taken care of with the `PythonXY`_ installer. `PythonXY`_ is a set of free scientific software tools all bundeled together for easy installation. You can download the `PythonXY`_ installer, run it, make sure that items 1 - 4 are selected, and it will take care of all those steps for you. If you decide later that you want some of the other items to be installed as well, you just run the installer again and check more boxes. It makes things much easier, especially on Windows.
 
@@ -116,3 +122,5 @@ I will describe how to run the automated tests and how to use the test data that
 .. _command prompt: http://www.computerhope.com/issues/chdos.htm
 .. _python-distribute: https://pypi.python.org/pypi/distribute
 .. _python-distribute installers: http://www.lfd.uci.edu/~gohlke/pythonlibs/#distribute
+.. _GitHub Repository: https://github.com/jkibele/benthic_photo_survey
+.. _BPS page: http://jkibele.github.io/benthic_photo_survey/
