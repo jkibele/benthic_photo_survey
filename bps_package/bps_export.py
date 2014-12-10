@@ -34,7 +34,7 @@ class bps_shp_exporter(object):
         self.spatialRefIn = osr.SpatialReference()
         if self.settings:
             epsg_in, ok_in = qsettings.value("inputEPSG",CONF_INPUT_EPSG).toInt()
-            epsg_out, ok_out = qsettings.value("inputEPSG",CONF_OUTPUT_EPSG).toInt()
+            epsg_out, ok_out = qsettings.value("outputEPSG",CONF_OUTPUT_EPSG).toInt()
         self.spatialRefIn.ImportFromEPSG(epsg_in)
         # if epsg_out is None, we want to output in the epsg_in spatial reference
         if epsg_out:

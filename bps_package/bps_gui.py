@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, operator, random
+import sys, os, operator, random, platform
 from slugify import slugify
 try:
     from bps_package.depth_temp_log_io import *
@@ -14,18 +14,39 @@ except ImportError:
     from bps_export import *
 
 from PyQt4 import QtCore
-from PyQt4.QtCore import QSettings
+from PyQt4.QtCore import QSettings, QMimeData
 from PyQt4.QtGui import QApplication, QMainWindow, QFileDialog, QPixmap, \
     QMessageBox, QDialog, QColor, QColorDialog, QTableWidgetItem, QDoubleSpinBox, \
     QInputDialog
 from preference_array import HabPrefArray, PrefRow
 from ui_bps import Ui_MainWindow
 from ui_preferences import Ui_PrefDialog
+from ui_pref_help import Ui_PrefHelpDialog
+import pytz
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
     _fromUtf8 = lambda s: s
+
+if platform.system()=='Windows':
+    import ctypes
+    myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+    # Windows needs this environment variable for gdal to work
+    #if not os.getenv('GDAL_DATA'):
+        # if it's not set, I'm going to assume that means we're
+        # running from a pyinstaller exe on a system without gdal
+        # installed and/or configured. In that case, we want to
+        # set GDAL_DATA to the relative directory that's installed
+        # with the exe.
+    os.environ['GDAL_DATA'] = os.path.abspath('gdal_data')
+    print "GDAL_DATA set to %s" % os.getenv('GDAL_DATA')
+    
+class PrefHelp(QDialog, Ui_PrefHelpDialog):
+    def __init__(self,parent=None):
+        QDialog.__init__(self,parent)
+        self.setupUi(self)
     
 class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
@@ -48,12 +69,20 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.inputEPSGLineEdit.setText( str(self.inputEPSG) )
         self.outputEPSG = int( self.__settings_extract("outputEPSG",CONF_OUTPUT_EPSG) )
         self.outputEPSGLineEdit.setText( str(self.outputEPSG) )
+        dfstr = str( self.__settings_extract("dodgyFeatures",False) )
+        self.dodgyFeatures = dfstr=='true'
+        if self.dodgyFeatures:
+            self.dodgyCheckBox.setChecked(True)
+        else:
+            self.dodgyCheckBox.setChecked(False)
         # setup time zone tab
-        self.timezone = self.__settings_extract("timezone",LOCAL_TIME_ZONE)
-        self.ktimezonewidget.setSelected( self.timezone, True )
+        self.timezone = str( self.__settings_extract("timezone",LOCAL_TIME_ZONE) )
+        self.timeZoneComboBox.addItems( pytz.common_timezones )
+        tzitem = self.timeZoneComboBox.findText( self.timezone, QtCore.Qt.MatchFixedString )
+        self.timeZoneComboBox.setCurrentIndex( tzitem )
         # setup substrate tab
         self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
-        self.substkeditlistwidget.setItems( self.substList )
+        self.substrateListWidget.addItems( self.substList )
         
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
@@ -71,9 +100,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         if newpa.saveToSettings(): # ensure habitat settings don't bork
             # then save other settings
             self.generalSaveSettings()
-            self.timezone = self.ktimezonewidget.selection()[0]
+            self.timezone = str( self.timeZoneComboBox.currentText() )
+#            self.timezone = self.ktimezonewidget.selection()[0]
             self.settings.setValue( "timezone",self.timezone )
-            self.substList = self.substkeditlistwidget.items()
+            sl = []
+            for ind in xrange(self.substrateListWidget.count()):
+                sl.append( self.substrateListWidget.item( ind ).text() )
+            self.substList = sl
             self.settings.setValue( "substList",self.substList )
             super(StartPrefs, self).accept()
         else:
@@ -84,12 +117,30 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         self.working_dir = self.workingDirLineEdit.text()
         self.inputEPSG = self.inputEPSGLineEdit.text()
         self.outputEPSG = self.outputEPSGLineEdit.text()
-        set_list = ['db_path','working_dir','inputEPSG','outputEPSG']
+        if self.dodgyCheckBox.isChecked():
+            self.dodgyFeatures = True
+        else:
+            self.dodgyFeatures = False
+        set_list = ['db_path','working_dir','inputEPSG','outputEPSG','dodgyFeatures']
         for s in set_list:
             self.settings.setValue( s, self.__getattribute__(s) )
         
+    def showHelpFile(self, file_path):
+        """
+        Create a dialog, read a markdown file, convert it to html, and display
+        that html in the dialog.
+        """
+        dlg = PrefHelp(parent=self)
+        with open(file_path) as f:
+            dlg.textBrowser.setHtml( f.read() )
+        dlg.exec_()
+    
     def generalHelp(self):
-        pass
+        """
+        Display help for the general tab of the preferences dialog.
+        """
+        rf = os.path.join('docs','helpButtons','prefsGeneral.html')
+        self.showHelpFile( rf )
     
     def generalChooseDB(self):
         new_db_path = QFileDialog.getSaveFileName(self,"Choose or Create Database File",self.db_path,filter="SQLite db(*.db)",options=QFileDialog.DontConfirmOverwrite)
@@ -108,10 +159,13 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             return False
     
     def timezoneHelp(self):
-        pass
+        """
+        Display help for the time zone tab of the preferences dialog.
+        """
+        rf = os.path.join('docs','helpButtons','prefsTimezone.html')
+        self.showHelpFile( rf )
     
-    def substratesHelp(self):
-        pass
+    ## Habitat tab
     
     def addHabRow(self):
         self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
@@ -150,18 +204,51 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.habTableWidget.setItem(currRow,2,color_item)
     
     def habHelp(self):
-        widg = self.habTableWidget
-        currRow = widg.currentRow()
-        pr = PrefRow()
-        pr.code = widg.item(currRow,0).text()
-        pr.name = widg.item(currRow,1).text()
-        pr.color = widg.item(currRow,2).text()
-        #print pr
+        """
+        Display help for the habitat tab of the preferences dialog.
+        """
+        rf = os.path.join('docs','helpButtons','prefsHabitat.html')
+        self.showHelpFile( rf )
+        
         
     def habItemDoubleClicked(self,qwtItem):
         if qwtItem.column()==2:
             self.changeHabColor()
     
+    ## Substrate tab
+    
+    def substratesHelp(self):
+        """
+        Display help for the substrate tab of the preferences dialog.
+        """
+        rf = os.path.join('docs','helpButtons','prefsSubstrate.html')
+        self.showHelpFile( rf )
+    
+    def substAdd(self):
+        text, ok = QInputDialog.getText(self,'Substrate','Enter Substrate:')
+        if ok:
+            self.substrateListWidget.addItem( text )
+        else:
+            return False
+        
+    def substEdit(self):
+        item = self.substrateListWidget.selectedItems()[0]
+        if item:
+            self.substrateListWidget.openPersistentEditor( item )
+#            text, ok = QInputDialog.getText(self,'Substrate','Edit Substrate:',text=item.text())
+#            if ok:
+#                self.substrateListWidget.addItem( text )
+#            else:
+#                return False
+        else:
+            pass
+        
+    def substRemove(self):
+        curr = self.substrateListWidget.currentRow()
+        if curr:
+            self.substrateListWidget.takeItem( curr )
+        else:
+            pass
 
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -191,7 +278,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         
     def setupHabSelector(self):
         habList = self.getHablistSettings()
-        self.habLED.off()
+#        self.habLED.off()
         htw = self.habitatTableWidget
         for sb in htw.findChildren(QDoubleSpinBox):
             # it turns out that this is crucial
@@ -223,16 +310,16 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def checkHabValues(self):
         tot = self.totalFromHabSelector
         if tot<1.0:
-            self.habLED.off()
-            self.habLED.setColor( QColor('green') )
+#            self.habLED.off()
+#            self.habLED.setColor( QColor('green') )
             self.habSaveButton.setDisabled(True)
         elif tot==1.0:
-            self.habLED.on()
-            self.habLED.setColor( QColor('green') )
+#            self.habLED.on()
+#            self.habLED.setColor( QColor('green') )
             self.habSaveButton.setDisabled(False)
         else:
-            self.habLED.off()
-            self.habLED.setColor( QColor('red') )
+#            self.habLED.off()
+#            self.habLED.setColor( QColor('red') )
             self.habSaveButton.setDisabled(True)
         
     @property
@@ -297,6 +384,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.substrateListWidget.addItems( self.getSubstSettings() )
         self.working_dir = self.__settings_extract("working_dir",CONF_WORKING_DIR)
         self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
+        self.dodgyFeatures = 'true'==str( self.__settings_extract("dodgyFeatures",False) )
+        if self.dodgyFeatures:
+            self.actionTime_Shift_Photos.setEnabled(True)
+            self.actionTime_Shift_Depth.setEnabled(True)
+        else:
+            self.actionTime_Shift_Photos.setDisabled(True)
+            self.actionTime_Shift_Depth.setDisabled(True)
         
     def getHablistSettings(self):
         hpa = HabPrefArray()
@@ -468,6 +562,21 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         """
         self.imageDirectoryObj.__shift_datetimes__(tdelta)
         
+    def actionTimeShiftDepth(self):
+        dialogtxt = "Warning: Only use this if you know what you're doing."
+        seconds, ok = QInputDialog.getInt(self,'Offset in Seconds', dialogtxt)
+        if ok:
+            conf_msg = "Are you sure you want to shift the timestamp on your \
+                        depth records by %i seconds?" % int(seconds)
+            reply = QMessageBox.warning(None,"Confirm",conf_msg,QMessageBox.Yes,QMessageBox.No)
+            if reply==QMessageBox.Yes:
+                self.imageDirectoryObj.dive_record_set( self.db_path ).shift_depth_records( int( seconds ) )
+                result_str = "Great Success: photos time shifted. ...I think..."
+                self.statusBar().showMessage( result_str, 8000)
+                return True
+            else:
+                return False
+        
     def removeIncompatibleHabTags(self):
         """
         Inspect the habitat tags in each photo. If they are incompatible with
@@ -581,7 +690,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mbox.exec_()
     
     def depthPlot(self):
-        self.imageDirectoryObj.depth_plot(self.db_path)
+        if self.dodgyFeatures:
+            offsec, ok = QInputDialog.getInt(self, "Depth Plot", "Time Offset (seconds):", 0)
+            if ok:
+                self.imageDirectoryObj.depth_plot(self.db_path,offsec)
+            else:
+                return False
+        else:
+            self.imageDirectoryObj.depth_plot(self.db_path)
     
     def exportShapefile(self):
         default_dir = os.path.join( str(self.working_dir), "shapefiles" )

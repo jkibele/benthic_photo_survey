@@ -24,6 +24,16 @@
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
+       <item row="3" column="2">
+        <widget class="QLineEdit" name="outputEPSGLineEdit"/>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="databaseLabel">
+         <property name="text">
+          <string>Database</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QLabel" name="workingDirLabel">
          <property name="text">
@@ -31,10 +41,58 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="outputEPSGLineEdit"/>
+       <item row="0" column="3">
+        <widget class="QToolButton" name="toolButton">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
        </item>
        <item row="4" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Dodgy Features</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="databaseLineEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QPushButton" name="generalHelpButton">
+         <property name="maximumSize">
+          <size>
+           <width>85</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Help?</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QToolButton" name="toolButton_2">
+         <property name="text">
+          <string>...</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="outputEPSGLabel">
+         <property name="text">
+          <string>Output EPSG</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLineEdit" name="inputEPSGLineEdit"/>
+       </item>
+       <item row="5" column="0">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -47,19 +105,6 @@
          </property>
         </spacer>
        </item>
-       <item row="5" column="0">
-        <widget class="QPushButton" name="pushButton">
-         <property name="maximumSize">
-          <size>
-           <width>85</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Help?</string>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="inputEPSGLabel">
          <property name="text">
@@ -67,48 +112,17 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QToolButton" name="toolButton">
-         <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
+       <item row="1" column="2">
         <widget class="QLineEdit" name="workingDirLineEdit">
          <property name="readOnly">
           <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="inputEPSGLineEdit"/>
-       </item>
-       <item row="1" column="2">
-        <widget class="QToolButton" name="toolButton_2">
+       <item row="4" column="2">
+        <widget class="QCheckBox" name="dodgyCheckBox">
          <property name="text">
-          <string>...</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="databaseLabel">
-         <property name="text">
-          <string>Database</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="outputEPSGLabel">
-         <property name="text">
-          <string>Output EPSG</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="databaseLineEdit">
-         <property name="readOnly">
-          <bool>true</bool>
+          <string>Enable sketchy advanced features</string>
          </property>
         </widget>
        </item>
@@ -119,7 +133,7 @@
        <string>Time Zone</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="2" column="1">
+       <item row="3" column="1">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -132,7 +146,7 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QPushButton" name="pushButton_2">
          <property name="text">
           <string>Help?</string>
@@ -147,23 +161,20 @@
         </widget>
        </item>
        <item row="1" column="0" colspan="2">
-        <widget class="KTimeZoneWidget" name="ktimezonewidget">
-         <column>
-          <property name="text">
-           <string notr="true">1</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string notr="true">2</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string notr="true">3</string>
-          </property>
-         </column>
-        </widget>
+        <widget class="QComboBox" name="timeZoneComboBox"/>
+       </item>
+       <item row="2" column="0">
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -275,10 +286,20 @@
        <string>Substrates</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="0" column="0" colspan="2">
-        <widget class="KEditListWidget" name="substkeditlistwidget"/>
+       <item row="2" column="1">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>370</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QPushButton" name="pushButton_3">
          <property name="maximumSize">
           <size>
@@ -291,18 +312,58 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>370</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
+       <item row="1" column="0" colspan="2">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QListWidget" name="substrateListWidget">
+           <property name="dragDropMode">
+            <enum>QAbstractItemView::InternalMove</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_3">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QPushButton" name="substAddButton">
+               <property name="text">
+                <string>Add</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="substEditButton">
+               <property name="text">
+                <string>Edit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="substRemoveButton">
+               <property name="text">
+                <string>Remove</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="verticalSpacer_4">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -320,18 +381,6 @@
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KEditListWidget</class>
-   <extends>QWidget</extends>
-   <header>keditlistwidget.h</header>
-  </customwidget>
-  <customwidget>
-   <class>KTimeZoneWidget</class>
-   <extends>QTreeWidget</extends>
-   <header>ktimezonewidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections>
   <connection>
@@ -373,8 +422,8 @@
    <slot>addHabRow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>76</y>
+     <x>163</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -389,8 +438,8 @@
    <slot>removeHabRow()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>109</y>
+     <x>163</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -405,8 +454,8 @@
    <slot>moveHabUp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>142</y>
+     <x>163</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -421,8 +470,8 @@
    <slot>moveHabDown()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>175</y>
+     <x>163</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -437,8 +486,8 @@
    <slot>changeHabColor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>482</x>
-     <y>208</y>
+     <x>163</x>
+     <y>78</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -453,8 +502,8 @@
    <slot>habHelp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>483</x>
-     <y>370</y>
+     <x>101</x>
+     <y>60</y>
     </hint>
     <hint type="destinationlabel">
      <x>503</x>
@@ -469,8 +518,8 @@
    <slot>habItemDoubleClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>94</x>
-     <y>144</y>
+     <x>105</x>
+     <y>60</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
@@ -479,7 +528,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
+   <sender>generalHelpButton</sender>
    <signal>clicked()</signal>
    <receiver>PrefDialog</receiver>
    <slot>generalHelp()</slot>
@@ -501,8 +550,8 @@
    <slot>timezoneHelp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>75</x>
-     <y>359</y>
+     <x>57</x>
+     <y>63</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -517,8 +566,8 @@
    <slot>substratesHelp()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>88</x>
-     <y>354</y>
+     <x>57</x>
+     <y>60</y>
     </hint>
     <hint type="destinationlabel">
      <x>2</x>
@@ -558,6 +607,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>substAddButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substAdd()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>502</x>
+     <y>341</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substEditButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>281</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substRemoveButton</sender>
+   <signal>clicked()</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substRemove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>496</x>
+     <y>197</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>substrateListWidget</sender>
+   <signal>itemDoubleClicked(QListWidgetItem*)</signal>
+   <receiver>PrefDialog</receiver>
+   <slot>substEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>119</x>
+     <y>78</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>497</x>
+     <y>157</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>addHabRow()</slot>
@@ -572,5 +685,8 @@
   <slot>substratesHelp()</slot>
   <slot>generalChooseDB()</slot>
   <slot>generalChooseWorkingDir()</slot>
+  <slot>substAdd()</slot>
+  <slot>substEdit()</slot>
+  <slot>substRemove()</slot>
  </slots>
 </ui>

@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -8,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Installation &mdash; Benthic Photo Survey 0.3.18 documentation</title>
+    <title>IMPORTANT NOTE: &mdash; Benthic Photo Survey 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
-        VERSION:     '0.3.18',
+        URL_ROOT:    './',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -26,7 +24,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="Benthic Photo Survey 0.3.18 documentation" href="index.html" />
+    <link rel="top" title="Benthic Photo Survey 1.0.0 documentation" href="index.html" />
     <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Introduction" href="introduction.html" /> 
   </head>
@@ -46,7 +44,7 @@
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">Benthic Photo Survey 0.3.18 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Benthic Photo Survey 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -55,9 +53,13 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="installation">
+  <div class="section" id="important-note">
+<h1>IMPORTANT NOTE:<a class="headerlink" href="#important-note" title="Permalink to this headline">¶</a></h1>
+<p>Most of this information is out of date. Go to the <a class="reference external" href="https://github.com/jkibele/benthic_photo_survey">GitHub Repository</a> or <a class="reference external" href="http://jkibele.github.io/benthic_photo_survey/">BPS page</a> for up to date information. I will update these docs but haven&#8217;t had time yet.</p>
+</div>
+<div class="section" id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<p>Bethic Photo Survey (BPS) runs on Linux, Mac, and Windows operating systems. There are a few different ways to install BPS. You can <a class="reference external" href="https://bitbucket.org/jkibele/benthic_photo_survey/downloads">download the code</a> from the <a class="reference external" href="https://bitbucket.org/jkibele/benthic_photo_survey">bitbucket</a>, you can install with the python <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> installer, or you can <a class="reference external" href="http://git-scm.com/">git</a> to clone the code from the <a class="reference external" href="https://bitbucket.org/jkibele/benthic_photo_survey">bitbucket</a> repository. More details are provided below along with information about software requirements and details specific to installing on different platforms.</p>
+<p>Bethic Photo Survey (BPS) can run on Linux, Mac, and Windows operating systems. There are a few different ways to install BPS.</p>
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <p>The following items need to be installed in order for BPS to work. Make sure you read at least to the end of this section before you start installing this stuff. There may be an easier way than installing all these things individually. Then check the section below for your operating system. There may be seperate quirks to the installation process for Windows, Linux, and Mac. I will try to give step-by-step instructions for each operating system below.</p>
@@ -67,7 +69,7 @@
 <li><a class="reference external" href="http://matplotlib.org/">Matplotlib</a> 1.1.1 or greater, can be installed as part of <a class="reference external" href="http://scipy.org/">SciPy</a> or with <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> (see end of this section).</li>
 <li><a class="reference external" href="http://www.riverbankcomputing.com/software/pyqt/download">PyQt4</a></li>
 <li><a class="reference external" href="http://code.google.com/p/pynmea/">pynmea</a> can be installed with <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> by typing <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pynmea</span></tt> at the command prompt (or <tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pynmea</span></tt> if you&#8217;re on Linux or Mac and need root privileges to install).</li>
-<li><a class="reference external" href="http://tilloy.net/dev/pyexiv2/">pyexiv2</a> has actually been deprecated now. I will eventually rewrite the code to use GExiv2 but, for now, pyexiv2 is required.</li>
+<li><a class="reference external" href="http://tilloy.net/dev/pyexiv2/">pyexiv2</a> has actually been deprecated now. I will eventually rewrite the code to use a different library but, for now, pyexiv2 is required.</li>
 </ol>
 <p>That&#8217;s kind of a lot of stuff to have to install. Fortunately, items 1 - 4 can be taken care of with the <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> installer. <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> is a set of free scientific software tools all bundeled together for easy installation. You can download the <a class="reference external" href="http://code.google.com/p/pythonxy/">PythonXY</a> installer, run it, make sure that items 1 - 4 are selected, and it will take care of all those steps for you. If you decide later that you want some of the other items to be installed as well, you just run the installer again and check more boxes. It makes things much easier, especially on Windows.</p>
 </div>
@@ -79,16 +81,18 @@
 <p>Go to the command line and type <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">BenthicPhotoSurvey</span></tt>. Depending on your OS, you may need to type <tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">BenthicPhotoSurvey</span></tt> instead and enter your root password.</p>
 <p>In order to run BPS, you have to figure out where <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> installed the code and that can vary according to OS and configuration. If you have version of pip &gt;= 1.2.1.post1, you can figure it out by typing <tt class="docutils literal"><span class="pre">pip</span> <span class="pre">show</span> <span class="pre">BenthicPhotoSurvey</span></tt> on your command line. The response should contain the location of the <tt class="docutils literal"><span class="pre">benthic_photo_survey</span></tt> directory. To run BPS, navigate to that directory and start BPS by typing <tt class="docutils literal"><span class="pre">python</span> <span class="pre">benthic_photo_survey.py</span></tt> (on Windows, you&#8217;ll leave off the <tt class="docutils literal"><span class="pre">python</span></tt> and just type <tt class="docutils literal"><span class="pre">benthic_photo_survey.py</span></tt>).</p>
 <p>On my computer it looks somthing like this:</p>
-<div class="highlight-python"><pre>blah@blahbidyblah:~$ pip show BenthicPhotoSurvey
+<div class="highlight-python"><div class="highlight"><pre>blah@blahbidyblah:~$ pip show BenthicPhotoSurvey
 ---
 Name: BenthicPhotoSurvey
 Version: 0.1
 Location: /usr/local/lib/python2.7/dist-packages
-Requires:</pre>
+Requires:
+</pre></div>
 </div>
 <p>So, to launch, I type:</p>
-<div class="highlight-python"><pre>blah@blahbidyblah:~$ cd /usr/local/lib/python2.7/dist-packages/benthic_photo_survey
-blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ python benthic_photo_survey.py</pre>
+<div class="highlight-python"><div class="highlight"><pre>blah@blahbidyblah:~$ cd /usr/local/lib/python2.7/dist-packages/benthic_photo_survey
+blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ python benthic_photo_survey.py
+</pre></div>
 </div>
 <p>...and the program should run and you can move on to the <a class="reference internal" href="tutorial.html"><em>Tutorial</em></a>. I will, hopefully, get around to packaging BPS a little better so it&#8217;s easier to launch after installing but this will have to do for now.</p>
 </div>
@@ -181,7 +185,8 @@ blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ p
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#">IMPORTANT NOTE:</a></li>
+<li><a class="reference internal" href="#installation">Installation</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
 <li><a class="reference internal" href="#ways-to-get-bps">Ways to Get BPS</a><ul>
 <li><a class="reference internal" href="#installing-the-latest-release-with-pip">Installing the Latest Release with pip</a></li>
@@ -240,12 +245,12 @@ blah@blahbidyblah:/usr/local/lib/python2.7/dist-packages/benthic_photo_survey$ p
         <li class="right" >
           <a href="introduction.html" title="Introduction"
              >previous</a> |</li>
-        <li><a href="index.html">Benthic Photo Survey 0.3.18 documentation</a> &raquo;</li> 
+        <li><a href="index.html">Benthic Photo Survey 1.0.0 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2013, Jared Kibele.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+        &copy; Copyright 2014, Jared Kibele.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>

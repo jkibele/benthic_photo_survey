@@ -7,12 +7,16 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>919</width>
+    <width>918</width>
     <height>627</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Benthic Photo Survey</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qt_resources.qrc">
+    <normaloff>:/icons/BPS.ico</normaloff>:/icons/BPS.ico</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -642,25 +646,6 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="2">
-         <widget class="KLed" name="habLED">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>25</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Indicates that habitat types add to 1 and can be saved.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="substTab">
@@ -698,7 +683,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>919</width>
+     <width>918</width>
      <height>25</height>
     </rect>
    </property>
@@ -729,6 +714,7 @@
     <addaction name="actionDepth_Temp_Tag_All"/>
     <addaction name="separator"/>
     <addaction name="actionTime_Shift_Photos"/>
+    <addaction name="actionTime_Shift_Depth"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuActions"/>
@@ -797,15 +783,15 @@
     <string>Time Shift Photos</string>
    </property>
   </action>
+  <action name="actionTime_Shift_Depth">
+   <property name="text">
+    <string>Time Shift Depth</string>
+   </property>
+  </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KLed</class>
-   <extends>QWidget</extends>
-   <header>kled.h</header>
-  </customwidget>
- </customwidgets>
- <resources/>
+ <resources>
+  <include location="qt_resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionQuit</sender>
@@ -830,7 +816,7 @@
    <slot>nextPhoto()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>661</x>
+     <x>660</x>
      <y>593</y>
     </hint>
     <hint type="destinationlabel">
@@ -878,7 +864,7 @@
    <slot>depthTempTag()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>487</x>
+     <x>486</x>
      <y>593</y>
     </hint>
     <hint type="destinationlabel">
@@ -1063,6 +1049,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionTime_Shift_Depth</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>actionTimeShiftDepth()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>458</x>
+     <y>313</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>nextPhoto()</slot>
@@ -1081,5 +1083,6 @@
   <slot>exportShapefile()</slot>
   <slot>preferenceDialog()</slot>
   <slot>actionTimeShiftPhotos()</slot>
+  <slot>actionTimeShiftDepth()</slot>
  </slots>
 </ui>
