@@ -1,0 +1,14 @@
+# Site settings
+title: Benthic Photo Survey
+email: jkibele@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  Benthic Photo Survey is an open source software tool for efficiently processing photo transect data. 
+baseurl: /benthic_photo_survey # the subpath of your site, e.g. /blog/
+url: "http://jkibele.github.io" # the base hostname & protocol for your site
+# twitter_username: jekyllrb
+github_username:  jkibele
+timezone: Pacific/Auckland
+
+# Build settings
+markdown: kramdown
+include: [images]
