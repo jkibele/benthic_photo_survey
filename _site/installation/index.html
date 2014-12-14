@@ -81,16 +81,24 @@
 <p>Installing BPS on Windows is simply a matter of downloading a zip file, uncompressing it, and double clicking the <code>bps_gui.exe</code> executable file. The only caveat is that <code>bps_gui.exe</code> must not be moved from its directory. Here are the necessary steps in excruciating detail:</p>
 
 <ol>
-  <li>Direct your web browser to <a href="https://github.com/jkibele/benthic_photo_survey/releases/latest">the latest BPS release</a> and download <code>bps_windows.zip</code>.</li>
-  <li>Unzip the <code>bps_gui</code> directory onto your hard drive. You can put it wherever you’d like but these instructions will assume it’s going to <code>C:\bps_gui</code>. 
+  <li>
+    <p>Direct your web browser to <a href="https://github.com/jkibele/benthic_photo_survey/releases/latest">the latest BPS release</a> and download <code>bps_windows.zip</code>.</p>
+  </li>
+  <li>
+    <p>Unzip the <code>bps_gui</code> directory onto your hard drive. You can put it wherever you’d like but these instructions will assume it’s going to <code>C:\bps_gui</code>. </p>
+
     <ul>
       <li>Double click the <code>bps_windows.zip</code> file that you downloaded</li>
       <li>Right click the <code>bps_gui</code> folder and choose copy</li>
-      <li>Navigate to <code>C:\</code> (or wherever you want) and paste the <code>bps_gui</code> folder</li>
+      <li>Navigate to <code>C:\</code> (or wherever you want) and paste the <code>bps_gui</code> folder <br /><br /></li>
     </ul>
   </li>
-  <li>Navigate to the <code>C:\bps_gui</code> and double click <code>bps_gui.exe</code> (this may show up as <code>bps_gui</code> if Windows is configured to hide extensions). A command prompt will open followed by the BPS application. The command prompt window will stay open in the background and display some extra information that you are free to completely ignore.</li>
-  <li>That’s it! Just remember to always run BPS from within the <code>bps_gui</code> folder. It needs all those other files in the same directory in order to function. Check out the Tutorial section of the <a href="/docs">Documentation</a> to learn how to set your preferences and start using BPS.</li>
+  <li>
+    <p>Navigate to the <code>C:\bps_gui</code> and double click <code>bps_gui.exe</code> (this may show up as <code>bps_gui</code> if Windows is configured to hide extensions). A command prompt will open followed by the BPS application. The command prompt window will stay open in the background and display some extra information that you are free to completely ignore.</p>
+  </li>
+  <li>
+    <p>That’s it! Just remember to always run BPS from within the <code>bps_gui</code> folder. It needs all those other files in the same directory in order to function. Check out the Tutorial section of the <a href="/docs">Documentation</a> to learn how to set your preferences and start using BPS.</p>
+  </li>
 </ol>
 
 <h3 id="linux-installation">Linux Installation</h3>
@@ -98,20 +106,26 @@
 <p>BPS was developed on <a href="http://www.ubuntu.com/">Ubuntu</a>. The following installation steps were tested on 64-bit Ubuntu 14.04:</p>
 
 <ol>
-  <li>Satisfy the prerequisites for BPS by entering the following commands in the terminal:</li>
+  <li>
+    <p>Satisfy the prerequisites for BPS by entering the following commands in the terminal (you may need to use <code>sudo</code> to get the necessary permissions):</p>
+
+    <pre><code> apt-get update
+ apt-get install python-scipy python-matplotlib python-qt4 python-gdal python-pip git python-pyexiv2
+ pip install pynmea slugify
+</code></pre>
+  </li>
+  <li>
+    <p>Direct your web browser to <a href="https://github.com/jkibele/benthic_photo_survey/releases/latest">the latest BPS release</a> and download and extract the source code. I felt compelled to detail how to extract an archive for the Windows users but you’re using Ubuntu so I’m going to assume you can take care of it.</p>
+  </li>
+  <li>
+    <p>Go to the <code>bps_package</code> directory and run <code>python bps_gui.py</code>.</p>
+  </li>
+  <li>
+    <p>That should start BPS. Check out the Tutorial section of the <a href="/docs">Documentation</a> to learn how to set your preferences and start using BPS.</p>
+  </li>
 </ol>
 
-<blockquote>
-  <p>sudo apt-get update <br />
-sudo apt-get install python-scipy python-matplotlib python-qt4 python-gdal python-pip git python-pyexiv2 <br />
-sudo pip install pynmea slugify <br /></p>
-</blockquote>
-
-<p><code>
-sudo apt-get update
-sudo apt-get install python-scipy python-matplotlib python-qt4 python-gdal python-pip git python-pyexiv2
-sudo pip install pynmea slugify
-</code></p>
+<p>If you want the very latest version, you can just do step 1 and then go to the <a href="https://github.com/jkibele/benthic_photo_survey">BPS Repository</a> and clone it. If you do that, there’s no guarantee that BPS will work with out crashing. …actually, there are no guarantees of any kind with any version of BPS but the development version is likely to be less stable than the release version.</p>
 
 
   </article>
