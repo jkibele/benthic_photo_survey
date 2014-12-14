@@ -1,9 +1,8 @@
 ---
-layout: page
+layout: sphinx_docs
 title: Docs
 permalink: /docs/
 ---
 
-## Documentation
+<iframe src="http://pythonhosted.org/BenthicPhotoSurvey" width="100%" height="800"></iframe> 
 
-I have to figure out how to make the shpinx docs show up here. ...and I have to update them.

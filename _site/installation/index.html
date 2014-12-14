@@ -74,7 +74,45 @@
   </header>
 
   <article class="post-content">
-    <p>This page will have information about installing BPS</p>
+    <p>If you want to use BPS on Windows, just take a look at the Windows Installation section below. BPS can run on Linux and Mac too. Installation on Mac can be tricky and if you want to go that route, you’ll have to go it alone using the Linux Installation section below as a guide.</p>
+
+<h3 id="windows-installation">Windows Installation</h3>
+
+<p>Installing BPS on Windows is simply a matter of downloading a zip file, uncompressing it, and double clicking the <code>bps_gui.exe</code> executable file. The only caveat is that <code>bps_gui.exe</code> must not be moved from its directory. Here are the necessary steps in excruciating detail:</p>
+
+<ol>
+  <li>Direct your web browser to <a href="https://github.com/jkibele/benthic_photo_survey/releases/latest">the latest BPS release</a> and download <code>bps_windows.zip</code>.</li>
+  <li>Unzip the <code>bps_gui</code> directory onto your hard drive. You can put it wherever you’d like but these instructions will assume it’s going to <code>C:\bps_gui</code>. 
+    <ul>
+      <li>Double click the <code>bps_windows.zip</code> file that you downloaded</li>
+      <li>Right click the <code>bps_gui</code> folder and choose copy</li>
+      <li>Navigate to <code>C:\</code> (or wherever you want) and paste the <code>bps_gui</code> folder</li>
+    </ul>
+  </li>
+  <li>Navigate to the <code>C:\bps_gui</code> and double click <code>bps_gui.exe</code> (this may show up as <code>bps_gui</code> if Windows is configured to hide extensions). A command prompt will open followed by the BPS application. The command prompt window will stay open in the background and display some extra information that you are free to completely ignore.</li>
+  <li>That’s it! Just remember to always run BPS from within the <code>bps_gui</code> folder. It needs all those other files in the same directory in order to function. Check out the Tutorial section of the <a href="/docs">Documentation</a> to learn how to set your preferences and start using BPS.</li>
+</ol>
+
+<h3 id="linux-installation">Linux Installation</h3>
+
+<p>BPS was developed on <a href="http://www.ubuntu.com/">Ubuntu</a>. The following installation steps were tested on 64-bit Ubuntu 14.04:</p>
+
+<ol>
+  <li>Satisfy the prerequisites for BPS by entering the following commands in the terminal:</li>
+</ol>
+
+<blockquote>
+  <p>sudo apt-get update <br />
+sudo apt-get install python-scipy python-matplotlib python-qt4 python-gdal python-pip git python-pyexiv2 <br />
+sudo pip install pynmea slugify <br /></p>
+</blockquote>
+
+<p><code>
+sudo apt-get update
+sudo apt-get install python-scipy python-matplotlib python-qt4 python-gdal python-pip git python-pyexiv2
+sudo pip install pynmea slugify
+</code></p>
+
 
   </article>
 
