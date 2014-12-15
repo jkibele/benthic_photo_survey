@@ -33,7 +33,15 @@ Once you have fully attributed your photos with BPS, you an export a point shape
 ![attributes]({{ site.baseurl }}/images/attributes.png)
 <br /><br />
 
-#### References
+## Who Built BPS?
+
+BPS was developed by Jared Kibele at the [University of Auckland](https://www.auckland.ac.nz/en.html)'s [Leigh Marine Laboratory](http://www.marine.auckland.ac.nz/en/about/our-institute/leigh-marine-laboratory.html) as part of his [PhD project](http://www.marine.auckland.ac.nz/en/about/our-people/phd-and-msc-students/jared-kibele.html) (funded by [Auckland Council](http://www.aucklandcouncil.govt.nz/EN/Pages/default.aspx)). Please [contact Jared](mailto:jkibele@gmail.com) if you have any questions or comments about BPS. He spent a lot of time on BPS and would be thrilled to know that someone (outside Leigh Marine Lab) is using it. He felt really awkward writing about himself in the third person and was glad to be done with this section.
+
+<br /><br />
+
+---
+
+## References
 
 [^1]: Roelfsema, C., Phinn, S., 2010. Integrating field data with high spatial resolution multispectral satellite imagery for calibration and validation of coral reef benthic community maps. J. Appl. Remote Sens 4, 043527–043527. doi:10.1117/1.3430107
 

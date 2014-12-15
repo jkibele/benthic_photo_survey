@@ -1,8 +1,8 @@
 ---
-layout: sphinx_docs
+layout: page
 title: Docs
 permalink: /docs/
 ---
 
-<iframe src="http://pythonhosted.org/BenthicPhotoSurvey" width="100%" height="800"></iframe> 
+<iframe src="http://benthic-photo-survey.readthedocs.org" width="100%" height="800"></iframe> 
 

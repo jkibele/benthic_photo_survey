@@ -5,6 +5,9 @@ permalink: /installation/
 ---
 
 If you want to use BPS on Windows, just take a look at the Windows Installation section below. BPS can run on Linux and Mac too. Installation on Mac can be tricky and if you want to go that route, you'll have to go it alone using the Linux Installation section below as a guide.
+<br /><br />
+
+---
 
 ### Windows Installation
 
@@ -21,6 +24,9 @@ Installing BPS on Windows is simply a matter of downloading a zip file, uncompre
 3. Navigate to the `C:\bps_gui` and double click `bps_gui.exe` (this may show up as `bps_gui` if Windows is configured to hide extensions). A command prompt will open followed by the BPS application. The command prompt window will stay open in the background and display some extra information that you are free to completely ignore.
 
 4. That's it! Just remember to always run BPS from within the `bps_gui` folder. It needs all those other files in the same directory in order to function. Check out the Tutorial section of the [Documentation]({{ site.baseurl }}/docs) to learn how to set your preferences and start using BPS.
+<br /><br />
+
+---
 
 ### Linux Installation
 
