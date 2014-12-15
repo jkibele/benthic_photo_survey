@@ -1,10 +1,28 @@
 Tutorial
 ========
 
-This document may need to be fleshed out a bit better but this should serve as an outline.
+This document will, hopefully, teach you what you need to know to collect photo transect data and process it with BPS. It will cover:
+
+1. Learning how to run BPS using the included test data.
+
+2. Setting up for and conducting field work.
+
+3. Getting your data into BPS.
+
+4. Using BPS and exporting the results.
+
+WARNING!
+--------
+
+Please make sure you back up all your data (photos, GPS, and Depth logs) before using it in BPS. I haven't seen it happen yet but it is entirely possible that BPS could ruin your files. This is not a commercial product and it does not come with any guarantees.
+
+Field Work
+----------
+
+This section will discuss how to prepare for and conduct field work. This text assumes that you are breath-hold diving or using SCUBA. BPS can be used with a drop camera as well. If you're going to use it that way, just use your imagination to adapt these instructions.
 
 Initial Setup
--------------
+_____________
 
 1. You should make sure you have BPS installed, running, and tested as described in :doc:`installation`.
 
@@ -19,17 +37,17 @@ Initial Setup
 5. Attach depth sensor to something. I generally attach it to the camera housing. I may need to compensate for the fact that the camera is usually a meter or so above the bottom when I take the photos but that seems preferable to getting the logger full of sediment.
 
 Clock Synchronization
----------------------
+_____________________
 
 Since BPS will use time codes to find positions and/or depths for each photo it is essential that relevant clocks are all in sync. Before getting in the water, make sure your camera's clock is set to the correct local time. It's easiest to use the time display on your GPS for this purpose. The Panasonic Lumix DMC-TS4 that I use has a built in GPS that is supposed to be able to set the camera's clock to GPS time. If you use this feature make sure to double check it. There camera clock should match the GPS clock within about a second. The depth logger actually sets the time codes when the log is downloaded from the logger. Therefore, the computer that you use to download the depth log needs to have its clock synced to GPS time when the file is downloaded. If your computer's clock is set by the internet, this is usually good enough (in my experience) but you should double check.
 
 While in the Water
-------------------
+__________________
 
 Regardless of whether you are on SCUBA or free diving, you should pause for a few seconds before taking a photo and pull down lightly on the rope you have attached to your GPS float. To get the best possible accuracy, you need the float to be directly over you. Pausing at the bottom will also minimize the effect of any clock synchronization problems for both depth and position. Also, don't drown. That's bad for data collection.
 
 Back on the Surface
--------------------
+___________________
 
 If you're using a Garmin GPS60 like I am, **do not** save the active track. Saving the track and then downloading the saved track gets rid of the timestamp on each position rendering it useless as far as BPS is concerned. Instead, you want to download the active track. I use `GPSbabel`_ to download the track and convert it to a GPX file. Many newer GPS models output GPX files without the need for conversion. You just need to make sure you're getting a GPX file that has a timestamp for each point within the track.
 

@@ -26,7 +26,7 @@
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="Benthic Photo Survey 1.0.0 documentation" href="index.html" />
     <link rel="next" title="Code Documentation" href="code.html" />
-    <link rel="prev" title="IMPORTANT NOTE:" href="installation.html" /> 
+    <link rel="prev" title="Installation" href="installation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -42,7 +42,7 @@
           <a href="code.html" title="Code Documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="IMPORTANT NOTE:"
+          <a href="installation.html" title="Installation"
              accesskey="P">previous</a> |</li>
         <li><a href="index.html">Benthic Photo Survey 1.0.0 documentation</a> &raquo;</li> 
       </ul>
@@ -55,11 +55,24 @@
             
   <div class="section" id="tutorial">
 <h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-<p>This document may need to be fleshed out a bit better but this should serve as an outline.</p>
-<div class="section" id="initial-setup">
-<h2>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h2>
+<p>This document will, hopefully, teach you what you need to know to collect photo transect data and process it with BPS. It will cover:</p>
 <ol class="arabic simple">
-<li>You should make sure you have BPS installed, running, and tested as described in <a class="reference internal" href="installation.html"><em>IMPORTANT NOTE:</em></a>.</li>
+<li>Learning how to run BPS using the included test data.</li>
+<li>Setting up for and conducting field work.</li>
+<li>Getting your data into BPS.</li>
+<li>Using BPS and exporting the results.</li>
+</ol>
+<div class="section" id="warning">
+<h2>WARNING!<a class="headerlink" href="#warning" title="Permalink to this headline">¶</a></h2>
+<p>Please make sure you back up all your data (photos, GPS, and Depth logs) before using it in BPS. I haven&#8217;t seen it happen yet but it is entirely possible that BPS could ruin your files. This is not a commercial product and it does not come with any guarantees.</p>
+</div>
+<div class="section" id="field-work">
+<h2>Field Work<a class="headerlink" href="#field-work" title="Permalink to this headline">¶</a></h2>
+<p>This section will discuss how to prepare for and conduct field work. This text assumes that you are breath-hold diving or using SCUBA. BPS can be used with a drop camera as well. If you&#8217;re going to use it that way, just use your imagination to adapt these instructions.</p>
+<div class="section" id="initial-setup">
+<h3>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>You should make sure you have BPS installed, running, and tested as described in <a class="reference internal" href="installation.html"><em>Installation</em></a>.</li>
 <li>As mentioned in the <a class="reference internal" href="introduction.html"><em>Introduction</em></a>, you will need a float on which you can tow your GPS.</li>
 <li>Set your GPS tracking on and make sure the interval is short. I set mine to log position once every 4 seconds.</li>
 <li>Make sure your GPS datum is set to WGS84. That tends to be the default setting but you should make sure. You can use a different datum but you should make sure that the configuration file is set to match. See <a class="reference internal" href="#configuring-bps">Configuring BPS</a>.</li>
@@ -70,18 +83,19 @@
 </ol>
 </div>
 <div class="section" id="clock-synchronization">
-<h2>Clock Synchronization<a class="headerlink" href="#clock-synchronization" title="Permalink to this headline">¶</a></h2>
+<h3>Clock Synchronization<a class="headerlink" href="#clock-synchronization" title="Permalink to this headline">¶</a></h3>
 <p>Since BPS will use time codes to find positions and/or depths for each photo it is essential that relevant clocks are all in sync. Before getting in the water, make sure your camera&#8217;s clock is set to the correct local time. It&#8217;s easiest to use the time display on your GPS for this purpose. The Panasonic Lumix DMC-TS4 that I use has a built in GPS that is supposed to be able to set the camera&#8217;s clock to GPS time. If you use this feature make sure to double check it. There camera clock should match the GPS clock within about a second. The depth logger actually sets the time codes when the log is downloaded from the logger. Therefore, the computer that you use to download the depth log needs to have its clock synced to GPS time when the file is downloaded. If your computer&#8217;s clock is set by the internet, this is usually good enough (in my experience) but you should double check.</p>
 </div>
 <div class="section" id="while-in-the-water">
-<h2>While in the Water<a class="headerlink" href="#while-in-the-water" title="Permalink to this headline">¶</a></h2>
+<h3>While in the Water<a class="headerlink" href="#while-in-the-water" title="Permalink to this headline">¶</a></h3>
 <p>Regardless of whether you are on SCUBA or free diving, you should pause for a few seconds before taking a photo and pull down lightly on the rope you have attached to your GPS float. To get the best possible accuracy, you need the float to be directly over you. Pausing at the bottom will also minimize the effect of any clock synchronization problems for both depth and position. Also, don&#8217;t drown. That&#8217;s bad for data collection.</p>
 </div>
 <div class="section" id="back-on-the-surface">
-<h2>Back on the Surface<a class="headerlink" href="#back-on-the-surface" title="Permalink to this headline">¶</a></h2>
+<h3>Back on the Surface<a class="headerlink" href="#back-on-the-surface" title="Permalink to this headline">¶</a></h3>
 <p>If you&#8217;re using a Garmin GPS60 like I am, <strong>do not</strong> save the active track. Saving the track and then downloading the saved track gets rid of the timestamp on each position rendering it useless as far as BPS is concerned. Instead, you want to download the active track. I use <a class="reference external" href="http://www.gpsbabel.org/">GPSbabel</a> to download the track and convert it to a GPX file. Many newer GPS models output GPX files without the need for conversion. You just need to make sure you&#8217;re getting a GPX file that has a timestamp for each point within the track.</p>
 <p>You should make backups of your photos before letting BPS operate on them. I&#8217;ve never had a problem but, since BPS is writing to part of the jpeg file, there is a possibility that it could corrupt the photo so you should have a backup.</p>
 <p>For convenience, I keep my BPS GPS logs in benthic_photo_survey/data/GPS and my depth logs in benthic_photo_survey/data/sensus. For photos, I create a directory for each set of photos within benthic_photo_survey/data/images. BPS is set up to operate on a directory of photos as a unit. For instance, when creating a shapefile all photos within the currently loaded directory will become a point in the shapefile.</p>
+</div>
 </div>
 <div class="section" id="configuring-bps">
 <h2>Configuring BPS<a class="headerlink" href="#configuring-bps" title="Permalink to this headline">¶</a></h2>
@@ -115,10 +129,14 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#warning">WARNING!</a></li>
+<li><a class="reference internal" href="#field-work">Field Work</a><ul>
 <li><a class="reference internal" href="#initial-setup">Initial Setup</a></li>
 <li><a class="reference internal" href="#clock-synchronization">Clock Synchronization</a></li>
 <li><a class="reference internal" href="#while-in-the-water">While in the Water</a></li>
 <li><a class="reference internal" href="#back-on-the-surface">Back on the Surface</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#configuring-bps">Configuring BPS</a></li>
 <li><a class="reference internal" href="#using-bps">Using BPS</a></li>
 </ul>
@@ -127,7 +145,7 @@
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="installation.html"
-                        title="previous chapter">IMPORTANT NOTE:</a></p>
+                        title="previous chapter">Installation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="code.html"
                         title="next chapter">Code Documentation</a></p>
@@ -166,7 +184,7 @@
           <a href="code.html" title="Code Documentation"
              >next</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="IMPORTANT NOTE:"
+          <a href="installation.html" title="Installation"
              >previous</a> |</li>
         <li><a href="index.html">Benthic Photo Survey 1.0.0 documentation</a> &raquo;</li> 
       </ul>
