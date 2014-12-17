@@ -1,0 +1,10 @@
+---
+layout: post
+title:  "BPS v1.0.1 Release"
+date:   2014-12-17 11:42:11
+categories: BPS Version
+---
+
+BPS v1.0.1 is ready for use. See the installation section of this site for how to get started. Then check out the docs, either on this site or on [ReadTheDocs.org](http://benthic_photo_survey.rtfd.org).
+
+Future "News" items will (hopefully) include BPS use cases and publications.
