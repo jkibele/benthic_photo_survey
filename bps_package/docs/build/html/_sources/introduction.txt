@@ -14,7 +14,7 @@ Benthic Photo Survey is designed to work with inexpensive and relatively easy to
 
 3. A depth logger is optional but if you're going to spend the time and money to go in the field, it seems worthwhile. BPS is set up to import log files from the `Sensus Ultra`_ depth and temperature logger. It should be fairly easy to adapt it to deal with a different logger but that would require a bit of coding.
 
-4. A computer to run BPS. BPS was developed on Ubuntu but should work on Windows and Mac as well.
+4. A computer to run BPS. BPS was developed on Ubuntu but is also available for Windows. In theory it will run on Mac as well but has almost no testing there.
 
 
 What BPS Actually Does
@@ -24,9 +24,9 @@ There are 4 steps to what BPS does.
 
 1. It imports your GPS and/or depth and temperature logs into a database. 
 
-2. It writes data from those logs to the exif portion of each of your jpeg photos based on the time stamp on each photo and the time stamps in the respective logs. 
+2. It writes data from those logs to the Exif portion of each of your jpeg photos based on the time stamp on each photo and the time stamps in the respective logs. 
 
-3. You use BPS to tag each photo with a habitat and/or depth and temperature.
+3. You use BPS to tag each photo with habitat and/or substrate information. This is also written to the Exif portion of each photo.
 
 4. BPS can export a point shapefile with a point at each location where a photo was taken. Each point is attributed with the habitat, substrate, depth, temperature, direction, and file path to the photo.
 
@@ -41,7 +41,7 @@ There are 4 steps to what BPS does.
 .. _Sensus Ultra: 
     http://reefnet.ca/products/sensus/
 
-.. rubric:: Citations
+.. rubric:: References
 
 .. [RP2010] Roelfsema, C., Phinn, S., 2010. Integrating field data with high spatial resolution 
     multispectral satellite imagery for calibration and validation of coral reef benthic community 
