@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Tutorial &mdash; Benthic Photo Survey 1.0.0 documentation</title>
+    <title>Learning BPS &mdash; Benthic Photo Survey 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -53,11 +53,11 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="learning-bps">
+<h1>Learning BPS<a class="headerlink" href="#learning-bps" title="Permalink to this headline">¶</a></h1>
 <p>This document will, hopefully, teach you what you need to know to collect photo transect data and process it with BPS. It will cover:</p>
 <ol class="arabic simple">
-<li>Learning how to run BPS using the included test data.</li>
+<li>A step by step tutorial on how to run BPS using the included test data.</li>
 <li>Setting up for and conducting field work.</li>
 <li>Getting your data into BPS.</li>
 <li>Using BPS and exporting the results.</li>
@@ -66,25 +66,93 @@
 <h2>WARNING!<a class="headerlink" href="#warning" title="Permalink to this headline">¶</a></h2>
 <p>Please make sure you back up all your data (photos, GPS, and Depth logs) before using it in BPS. I haven&#8217;t seen it happen yet but it is entirely possible that BPS could ruin your files. This is not a commercial product and it does not come with any guarantees.</p>
 </div>
+<div class="section" id="tutorial">
+<h2>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h2>
+<p>The following instructions will assume that you have followed the Windows Installation instruction on the <a class="reference external" href="http://jkibele.github.io/benthic_photo_survey/installation/">BPS Installation Page</a> unless otherwise noted. Only the paths will change for the Linux installation. The other instructions will be the same.</p>
+<p>These steps will lead you through the process of producing a shapefile from data. We will use a few photos, depths, and positions collected off the coast of Great Barrier Island in New Zealand&#8217;s Hauraki Gulf. These data are included with the BPS installation so, if you&#8217;ve installed BPS, you already have them. The data consist of a GPS log in gpx format, a csv depth log, and 9 photos.</p>
+<ol class="arabic">
+<li><p class="first">Start BPS by navigating to the <cite>bps_gui</cite> folder and double clicking <cite>bps_gui.exe</cite>. If you are using a Linux installation, you&#8217;ll navigate to <cite>bps_package</cite> and run <cite>python bps_gui.py</cite> in the terminal. When BPS opens, you&#8217;ll see something like this:</p>
+<blockquote>
+<div><div class="figure">
+<a class="reference internal image-reference" href="_images/bps_just_opened.png"><img alt="BPS GUI" src="_images/bps_just_opened.png" style="width: 467.0px; height: 332.5px;" /></a>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">Set the general preferences for BPS. Go to the file menu in BPS and select &#8220;Preferences&#8221;. You&#8217;ll see a window with 4 tabs. Each tab will have a help button. Click the help button for information about the options presented in each tab.</p>
+<blockquote>
+<div><div class="figure">
+<a class="reference internal image-reference" href="_images/bps_prefs.png"><img alt="BPS Preferences" src="_images/bps_prefs.png" style="width: 260.0px; height: 231.0px;" /></a>
+</div>
+<ol class="loweralpha simple">
+<li>Set the working directory. Click the <cite>...</cite> button. If you followed the Windows Installation instructions on the <a class="reference external" href="http://jkibele.github.io/benthic_photo_survey/installation/">BPS Installation Page</a>, you should set the working directory to <cite>C:bps_guitest_data</cite>. If you&#8217;re using the Linux install, the <cite>test_data</cite> directory will be in the <cite>bps_package</cite> directory and you should set your working directory there.</li>
+<li>Set the database path. Use the <cite>...</cite> button next to the Database field and set it to use a file called <cite>raw_log.db</cite> within your working directory. It&#8217;s fine if the file you specify doesn&#8217;t currently exist. BPS will create it for you.</li>
+<li>We&#8217;ll come back to the Preferences in a minute but, for now, click the &#8220;OK&#8221; button to save the changes.</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p class="first">Load the GPS log. Go to the file menu and select &#8220;Load GPS Log&#8221;. If the working directory was set correctly, this should open up a file dialog with the <cite>test_datagps</cite> directory. Select the file called <cite>gb_island_19092012.gpx</cite> and click &#8220;Open&#8221;. A message will be displayed (briefly) in the status bar at the bottom left of the BPS window telling you how many records were written into the database. During this step positions and time codes are read out of the GPS log and written to the database file specified in the preferences.</p>
+</li>
+<li><p class="first">Load the depth / temperature log. Select &#8220;Load Depth Log&#8221; from the file menu. Assuming the working directory was set correctly, this should open the <cite>test_datasensus</cite> directory. Select the file called <cite>gb_island_19092012.csv</cite>. Another message will be displayed in the status bar and the depths, temperatures, and time stamps will be written to the database.</p>
+</li>
+<li><p class="first">Load the photos. Select &#8220;Load Photos&#8221; from the file menu. Navigate into the <cite>test_dataimages</cite> directory (this should be the directory that opens by default) and click &#8220;Select Folder&#8221;. On Windows, the actual image files will (annoyingly) be invisible in this dialog but you&#8217;re selecting the folder rather than the individual images so that&#8217;s okay. Once the images have been loaded, you&#8217;ll see something like this:</p>
+<blockquote>
+<div><div class="figure">
+<a class="reference internal image-reference" href="_images/bps_loaded.png"><img alt="BPS Loaded" src="_images/bps_loaded.png" style="width: 467.0px; height: 332.5px;" /></a>
+</div>
+<ul class="simple">
+<li>You can use the arrow keys or the &#8220;Next&#8221; and &#8220;Previous&#8221; buttons to step through the photos.</li>
+<li>Notice that most of the fields in the &#8220;Exif Data&#8221; area are initially empty.</li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+<div class="sidebar">
+<p class="first sidebar-title">Photo Tagging</p>
+<p class="last">During step 6, BPS is looking in the database to find the position, depth, and temperature records that most closely match the time the photo was taken. BPS then pulls the values from these records and assigns them to the photo. This information is written into the Exif portion of the jpeg file. All the information that BPS writes to the Exif (position, depth, habitat, substrate, etc.) becomes a permanent part of the image file.</p>
+</div>
+<ol class="arabic" start="6">
+<li><p class="first">Tag the images with location and depth. Click the &#8220;Geo Tag&#8221; button on the bottom of the BPS window. Notice that the Latitude and Longitude fields of the Exif Data now have values. Click the &#8220;Depth/Temp Tag&#8221; button and see that the Depth and Temperature fields get filled in. You can tag all the images at once by using the &#8220;Actions&#8221; menu. In fact, that&#8217;s probably the better way to do it.</p>
+</li>
+<li><p class="first">Check the depth plot. Select &#8220;Depth Plot&#8221; from the &#8220;Output&#8221; menu. This will display a plot with time along the x axis and depth along the y. The stars represent when and and what depth the photos were taken. This can be very useful for making sure the photo and depth log time codes are lining up correctly. In the case of this test data, they were captured while breath hold diving. You can see that all of the photos were taken at the lowest part of the dive. That suggests that the photo capture times lined up well with the depth log. You can zoom and pan the plot using the controls in the plot window.</p>
+<blockquote>
+<div><div class="figure">
+<a class="reference internal image-reference" href="_images/bps_depth_plot.png"><img alt="BPS Depth Plot" src="_images/bps_depth_plot.png" style="width: 378.0px; height: 230.0px;" /></a>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">Set up habitat and substrate categories. Open the preferences dialog again via the file menu. Click the &#8220;Habitats&#8221; tab. Add a couple of habitats. Click the Help button in the Habitat preferences if you need more instructions on how to add a habitat. For this example you should end up with categories of Kelp, Turf, and Sand. Click the &#8220;Substrates&#8221; tab. The default substrate categories should be fine for this tutorial but, if you&#8217;d like to change them, this is where to do it. Again, there&#8217;s a Help button on this tab that can provide more information. Click &#8220;OK&#8221; to save your preference changes and notice that the &#8220;Habitat&#8221; and &#8220;Substrate&#8221; categories on the bottom right side of the BPS window now match your specifications.</p>
+</li>
+<li><p class="first">Assign Habitats and Substrates to the photos. Step through the photos (using the arrow keys or the &#8220;Next&#8221; and &#8220;Previous&#8221; buttons) and assign habitat and substrate values:</p>
+<blockquote>
+<div><ul class="simple">
+<li>For habitats, you assign the proportion of each habitat visible in the photo. If, for instance, you&#8217;re looking at a photo that is about 30% sand and 70% kelp, you would assign 0.3 to the sand category and 0.7 to the kelp category. To do this, position your cursor over the kelp roll box and turn your mouse wheel until the value is 0.7. Alternatively, you can type a value into the box or click the up and down arrows. The &#8220;Save&#8221; button will be disabled until the sum of your categories is 1.0. Once your values add to 1.0 and you click the &#8220;Save&#8221; button, the habitat values will be written to the Exif portion of the image. You will then see the dominant habitat type displayed in the &#8220;Exif Data&#8221; area. The dominant habitat value is the category with the largest proportion. In the event of a tie, one of the categories with the highest value is randomly chosen as dominant. The dominant habitat is just for convenience of display. All proportions are saved and will be part of the final shapefile output.</li>
+<li>To assign a substrate to your photo, simply click the &#8220;Substrate&#8221; tab in the bottom right corner and then double click on the substrate category of your choice. Substrate categorization does not support proportional tagging. It&#8217;s a one substrate per photo kind of thing.</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p class="first">Export a shapefile. This is the final product that BPS was built to deliver. Choose &#8220;Export Shapefile&#8221; from the Output menu. Navigate to where you&#8217;d like to save your shapefile and enter a file name that ends with &#8221;.shp&#8221;. I need to change the code a little bit so that it&#8217;s more tolerant but, at the moment, a file name without &#8221;.shp&#8221; on the end will not work.</p>
+</li>
+</ol>
+<p>Now that you&#8217;ve gone through all that, you should use a GIS program to take a look at your shapefile. If you&#8217;re not familiar with GIS, a good place to start is the <a class="reference external" href="http://www.qgis.org/">QGIS</a> website (where you can download QGIS) and the <a class="reference external" href="http://qgis.org/en/docs/index.html">QGIS Documentation</a> page.</p>
+</div>
 <div class="section" id="field-work">
 <h2>Field Work<a class="headerlink" href="#field-work" title="Permalink to this headline">¶</a></h2>
 <p>This section will discuss how to prepare for and conduct field work. This text assumes that you are breath-hold diving or using SCUBA. BPS can be used with a drop camera as well. If you&#8217;re going to use it that way, just use your imagination to adapt these instructions.</p>
 <div class="section" id="initial-setup">
 <h3>Initial Setup<a class="headerlink" href="#initial-setup" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
-<li>You should make sure you have BPS installed, running, and tested as described in <a class="reference internal" href="installation.html"><em>Installation</em></a>.</li>
-<li>As mentioned in the <a class="reference internal" href="introduction.html"><em>Introduction</em></a>, you will need a float on which you can tow your GPS.</li>
+<li>You should make sure you have BPS installed, running, and tested as described in <a class="reference internal" href="installation.html"><em>Installation</em></a>. It&#8217;s also probably a good idea to work through the long winded Tutorial section above to make sure you know what will happen with your data once they&#8217;ve been collected.</li>
+<li>As mentioned in the <a class="reference internal" href="introduction.html"><em>Introduction</em></a>, you will need a float on which you can tow your GPS. For more information on making a float (and lots of other useful stuff) see the <a class="reference external" href="http://ww2.gpem.uq.edu.au/CRSSIS/publications/GPS_Photo_Transects_for_Benthic_Cover_Manual.pdf">Photo Transect Manual</a> <a class="reference internal" href="#rp2009" id="id1">[RP2009]</a>.</li>
 <li>Set your GPS tracking on and make sure the interval is short. I set mine to log position once every 4 seconds.</li>
 <li>Make sure your GPS datum is set to WGS84. That tends to be the default setting but you should make sure. You can use a different datum but you should make sure that the configuration file is set to match. See <a class="reference internal" href="#configuring-bps">Configuring BPS</a>.</li>
-</ol>
-<ol class="arabic simple" start="4">
-<li>Set the logging interval on your depth sensor. It needs to be particularly short if you are free diving. I set mine to log every 2 seconds.</li>
+<li>Set the logging interval on your depth sensor. It needs to be particularly short if you are free diving (or doing anything that involve fast or frequent changes in depth). I set mine to log every 2 seconds.</li>
 <li>Attach depth sensor to something. I generally attach it to the camera housing. I may need to compensate for the fact that the camera is usually a meter or so above the bottom when I take the photos but that seems preferable to getting the logger full of sediment.</li>
 </ol>
 </div>
 <div class="section" id="clock-synchronization">
 <h3>Clock Synchronization<a class="headerlink" href="#clock-synchronization" title="Permalink to this headline">¶</a></h3>
 <p>Since BPS will use time codes to find positions and/or depths for each photo it is essential that relevant clocks are all in sync. Before getting in the water, make sure your camera&#8217;s clock is set to the correct local time. It&#8217;s easiest to use the time display on your GPS for this purpose. The Panasonic Lumix DMC-TS4 that I use has a built in GPS that is supposed to be able to set the camera&#8217;s clock to GPS time. If you use this feature make sure to double check it. There camera clock should match the GPS clock within about a second. The depth logger actually sets the time codes when the log is downloaded from the logger. Therefore, the computer that you use to download the depth log needs to have its clock synced to GPS time when the file is downloaded. If your computer&#8217;s clock is set by the internet, this is usually good enough (in my experience) but you should double check.</p>
+<p>NOTE: I&#8217;ve had some problems with time codes on the Sensus Ultra depth tag if I&#8217;m downloading records off it that are more than a day or two old. I think there&#8217;s a bit of drift due to the way time codes are calculated. The bottom line is that it seems to be a good idea to download the data from the depth logger as soon as possible after the field work. If you figure out that there is a time offset problem, you can enable the &#8220;Dodgy Features&#8221; in the preferences. This will allow you to time shift the depth records and to view depth plots with a time offset. Using these features, you may be able to sync your photos and depth records back up.</p>
 </div>
 <div class="section" id="while-in-the-water">
 <h3>While in the Water<a class="headerlink" href="#while-in-the-water" title="Permalink to this headline">¶</a></h3>
@@ -94,29 +162,20 @@
 <h3>Back on the Surface<a class="headerlink" href="#back-on-the-surface" title="Permalink to this headline">¶</a></h3>
 <p>If you&#8217;re using a Garmin GPS60 like I am, <strong>do not</strong> save the active track. Saving the track and then downloading the saved track gets rid of the timestamp on each position rendering it useless as far as BPS is concerned. Instead, you want to download the active track. I use <a class="reference external" href="http://www.gpsbabel.org/">GPSbabel</a> to download the track and convert it to a GPX file. Many newer GPS models output GPX files without the need for conversion. You just need to make sure you&#8217;re getting a GPX file that has a timestamp for each point within the track.</p>
 <p>You should make backups of your photos before letting BPS operate on them. I&#8217;ve never had a problem but, since BPS is writing to part of the jpeg file, there is a possibility that it could corrupt the photo so you should have a backup.</p>
-<p>For convenience, I keep my BPS GPS logs in benthic_photo_survey/data/GPS and my depth logs in benthic_photo_survey/data/sensus. For photos, I create a directory for each set of photos within benthic_photo_survey/data/images. BPS is set up to operate on a directory of photos as a unit. For instance, when creating a shapefile all photos within the currently loaded directory will become a point in the shapefile.</p>
+<p>For convenience, I keep my BPS GPS logs in working_directory/GPS and my depth logs in working_directory/sensus. For photos, I create a directory for each set of photos within working_directory/images. BPS is set up to operate on a directory of photos as a unit. For instance, when creating a shapefile all photos within the currently loaded directory will become a point in the shapefile.</p>
 </div>
 </div>
 <div class="section" id="configuring-bps">
 <h2>Configuring BPS<a class="headerlink" href="#configuring-bps" title="Permalink to this headline">¶</a></h2>
-<p>At some point I&#8217;d like to add a graphical interface for configuring BPS but, for now, you&#8217;ll have to edit configuration.py in a text editor. There are explanatory comments in the file and it should be fairly straight forward.</p>
-<p>You&#8217;ll want to set LOCAL_TIME_ZONE to the time zone you&#8217;re collecting data in. You&#8217;ll probably also want to change the list of habitats and the list of substrates. Just read the comments in the code.</p>
-<p>If you are deploying more than one camera / gps / depth logger set up at a time, you will need to take precautions to avoid confusion. You will need to change the db_path in configuration.py and keep the logs from the two setups separate. For the sake of this tutorial, let&#8217;s assume you&#8217;re only using one setup at a time.</p>
-</div>
-<div class="section" id="using-bps">
-<h2>Using BPS<a class="headerlink" href="#using-bps" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic simple">
-<li>Launch BPS by navigating to the <tt class="docutils literal"><span class="pre">bps_package</span></tt> directory and typing: <tt class="docutils literal"><span class="pre">python</span> <span class="pre">bps_gui.py</span></tt> in the command line. Some windows installations will require that you just type <tt class="docutils literal"><span class="pre">bps_gui.py</span></tt>. If you installed bps with git, <tt class="docutils literal"><span class="pre">bps_package</span></tt> directory will be <tt class="docutils literal"><span class="pre">benthic_photo_survey/bps_package</span></tt> relative to wherever you put it.</li>
-<li>Load your GPS file. Select &#8216;Load GPS Log&#8217; from the file menu, select your GPX file and click &#8216;Open&#8217;. This will load the positions and time stamps into a database specified in configuration.py.</li>
-<li>Load your depth log. Select &#8216;Load Depth Log&#8217; from the file menu. This step is optional but it will load depths and temperature readings from the depth log into the database specified in configuration.py.</li>
-<li>Load your photos. Select &#8216;Load Photos&#8217; from the file menu and chose the directory that contains the photos you would like to tag and use to create a shapefile.</li>
-<li>You can now use the &#8216;Next&#8217; and &#8216;Previous&#8217; buttons (or the arrow keys on your keyboard) to scroll through your photos. You can tag the photos one at a time with Depth and Temperature or location using the buttons at the bottom of the application or you can use the items in the &#8216;Actions&#8217; menu to tag all the loaded photos with location or depth and temperature. Either way, you&#8217;ll see the assigned attributes in the &#8216;Exif Data&#8217; area on the right side of the application window.</li>
-<li>You can choose &#8216;Depth Plot&#8217; from the &#8216;Output&#8217; menu. This will use Matplotlib to render a graph of the depth log for the loaded photos with stars that represent where each photo was taken. This plot is particularly useful for data that has been collected while free diving. You can verify that the clocks were adequately synced by making sure that the photos were taken at the deepest parts of the dives.</li>
-</ol>
-<img alt="_images/depth_graph.png" src="_images/depth_graph.png" />
-<ol class="arabic simple" start="7">
-<li>Export a shapefile using the &#8216;Output&#8217; menu. This shapefile can be viewed using most GIS software. I generally use <a class="reference external" href="http://www.qgis.org/">QGIS</a>.</li>
-</ol>
+<p>Configuration is handled through the &#8220;Preferences&#8221; dialog (found in the BPS file menu). For specific details about the options, click the &#8220;Help&#8221; buttons found on each tab of the Preferences dialog.</p>
+<p>If you are deploying more than one camera / gps / depth logger set up at a time, you will need to take precautions to avoid confusion. You will need to change the db_path in the preferences and keep the logs from the two setups separate.</p>
+<p class="rubric">References</p>
+<table class="docutils citation" frame="void" id="rp2009" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id1">[RP2009]</a></td><td>Roelfsema, C., Phinn, S.R., 2009. A Manual for Conducting Georeferenced Photo Transects Surveys to Assess the Benthos of Coral Reef and Seagrass Habitats version 3.0.</td></tr>
+</tbody>
+</table>
 </div>
 </div>
 
@@ -128,8 +187,9 @@
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#">Learning BPS</a><ul>
 <li><a class="reference internal" href="#warning">WARNING!</a></li>
+<li><a class="reference internal" href="#tutorial">Tutorial</a></li>
 <li><a class="reference internal" href="#field-work">Field Work</a><ul>
 <li><a class="reference internal" href="#initial-setup">Initial Setup</a></li>
 <li><a class="reference internal" href="#clock-synchronization">Clock Synchronization</a></li>
@@ -138,7 +198,6 @@
 </ul>
 </li>
 <li><a class="reference internal" href="#configuring-bps">Configuring BPS</a></li>
-<li><a class="reference internal" href="#using-bps">Using BPS</a></li>
 </ul>
 </li>
 </ul>
