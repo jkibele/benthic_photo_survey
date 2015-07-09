@@ -507,7 +507,7 @@ class image_file(object):
             self.md.__delitem__(key)
             self.md.write()
                 
-    def remove_habitattagging(self):
+    def remove_habitattag(self):
         """
         You probably won't need to do this but I did a few times during testing.
         """
@@ -515,7 +515,23 @@ class image_file(object):
         if self.md.__contains__(key):
             self.md.__delitem__(key)
             self.md.write()
-                
+            
+    def remove_fuzzyhabitats(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        key = 'Xmp.BenthicPhoto.fuzzy_hab_dict'
+        if self.md.__contains__(key):
+            self.md.__delitem__(key)
+            self.md.write()
+    
+    def remove_habitattagging(self):
+        """
+        You probably won't need to do this but I did a few times during testing.
+        """
+        self.remove_habitattag()
+        self.remove_fuzzyhabitats()
+            
     def remove_all_tagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
