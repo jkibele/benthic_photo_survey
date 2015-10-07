@@ -1,10 +1,11 @@
 # -*- mode: python -*-
 
 # I'm manually copying the gdal_data, docs, and test_data dirs
-# after running pyinstaller. In theory, I could modify this 
+# after running pyinstaller. !NOTE!: must be 'gdal_data', not
+# 'gdal-data'.   In theory, I could modify this 
 # spec file to make that happen but it's easier this way for now.
 
-# $ pyinstaller -D bps_gui.py bps_gui.spec
+# $ pyinstaller bps_gui.spec
 
 a = Analysis(['bps_gui.py'],
              pathex=['C:\\Users\\jkibele\\benthic_photo_survey\\bps_package'],
