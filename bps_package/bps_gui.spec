@@ -1,7 +1,8 @@
 # -*- mode: python -*-
 
 # I'm manually copying the gdal_data, docs, and test_data dirs
-# after running pyinstaller. In theory, I could modify this 
+# after running pyinstaller. !NOTE!: must be 'gdal_data', not
+# 'gdal-data'.   In theory, I could modify this 
 # spec file to make that happen but it's easier this way for now.
 
 # $ pyinstaller bps_gui.spec
