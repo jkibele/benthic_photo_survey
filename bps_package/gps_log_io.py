@@ -89,7 +89,7 @@ class coord(object):
         """
         Return coordinates in a nmea style string.
         """
-        return str(abs(self.degrees)) + str(self.minutes)
+        return str(abs(self.degrees)) + "{:011.8f}".format( self.minutes )
     
     @property
     def exif_coord(self):
