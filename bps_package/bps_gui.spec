@@ -1,12 +1,7 @@
 # -*- mode: python -*-
-
-# I'm manually copying the gdal_data, docs, and test_data dirs
-# after running pyinstaller. In theory, I could modify this 
-# spec file to make that happen but it's easier this way for now.
-
-a = Analysis(['bps_gui.py'],
+a = Analysis(['bps_gui.py', 'bps_gui.spec'],
              pathex=['C:\\Users\\jkibele\\benthic_photo_survey\\bps_package'],
-             hiddenimports=['scipy.special._ufuncs_cxx'],
+             hiddenimports=[],
              hookspath=None,
              runtime_hooks=None)
 pyz = PYZ(a.pure)
