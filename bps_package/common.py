@@ -35,7 +35,10 @@ def make_aware_of_local_tz(unaware):
     """Make an unaware time object aware of the local time zone. This tries to 
     get the timezone from settings."""
     settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)
-    local_zone_str = str( settings.value('timezone',LOCAL_TIME_ZONE).toString() )
+    try:
+        local_zone_str = str( settings.value('timezone',LOCAL_TIME_ZONE).toString() )
+    except AttributeError:
+        local_zone_str = str( settings.value('timezone',LOCAL_TIME_ZONE) )
     # LOCAL_TIME_ZONE is from configuration.py
     local_zone = pytz.timezone(local_zone_str)
     return local_zone.localize(unaware)
