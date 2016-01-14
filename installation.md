@@ -4,7 +4,7 @@ title: Installation
 permalink: /installation/
 ---
 
-If you want to use BPS on Windows, just take a look at the Windows Installation section below. BPS can run on Linux and Mac too. Installation on Mac can be tricky and if you want to go that route, you'll have to go it alone using the Linux Installation section below as a guide.
+If you want to use BPS on Windows, just take a look at the Windows Installation section below. BPS can run on Linux and Mac too. Installation on Mac can be tricky and if you want to go that route, you'll have to go it alone using the Linux Installation section below as a guide. If you have questions, please email the author using the link at the bottom of this page. Bugs and feature requests can be posted to the [BPS issue tracker](https://github.com/jkibele/benthic_photo_survey/issues).
 <br /><br />
 
 ---
