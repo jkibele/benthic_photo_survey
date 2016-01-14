@@ -2,4 +2,4 @@ Benthic Photo Survey (BPS) is a software tool (written in Python) that is intend
 
 For installation instructions and other information, please check out the [Benthic Photo Survey github page](http://jkibele.github.io/benthic_photo_survey/).
 
-For help with BPS please open an issue on [the BPS issue tracke]r(https://github.com/jkibele/benthic_photo_survey/issues) and/or email me: jkibele@gmail.com.
+For help with BPS please open an issue on [the BPS issue tracker](https://github.com/jkibele/benthic_photo_survey/issues) and/or email me: jkibele@gmail.com.
