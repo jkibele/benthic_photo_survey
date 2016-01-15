@@ -1,3 +1,33 @@
+"""
+Copyright (c) 2014, Jared Kibele
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Benthic Photo Survey nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from scipy import interpolate
 from common import *
 import csv
@@ -12,16 +42,16 @@ class dive_record_set(object):
         if start_dt.tzinfo == None:
             start_dt = make_aware_of_local_tz(start_dt)
         if end_dt.tzinfo == None:
-            end_dt = make_aware_of_local_tz(end_dt)        
+            end_dt = make_aware_of_local_tz(end_dt)
         self.start = start_dt
         self.end = end_dt
         self.db_path = path_to_db
-        
+
     @property
     def db_rows(self):
         """
         utctime field in db does not store time zone but should always be in
-        UTC so we'll make the start and end naive so we don't screw up the 
+        UTC so we'll make the start and end naive so we don't screw up the
         comparison.
         """
 #        stdt = self.start.astimezone(pytz.utc).replace(tzinfo=None)
@@ -31,7 +61,7 @@ class dive_record_set(object):
         rows = cur.execute( "SELECT utctime, celsius, depthm FROM DepthTempLog WHERE utctime >= ? AND utctime <= ?", t ).fetchall()
         cur.close()
         return rows
-        
+
     @property
     def unique_db_files(self):
         """
@@ -47,10 +77,10 @@ class dive_record_set(object):
         cur.close()
         filenums = [ int(r[0]) for r in rows ]
         return tuple(filenums)
-        
+
     @property
     def file_device_pairs(self):
-        
+
         q = "select distinct file, device from depthtemplog where file in " + \
         "(select distinct file from depthtemplog where utctime >= ? and utctime <= ? );"
         t = ( self.start.astimezone(pytz.utc), self.end.astimezone(pytz.utc), )
@@ -58,14 +88,14 @@ class dive_record_set(object):
         rows = cur.execute( q, t ).fetchall()
         cur.close()
         return rows
-        
+
     def time_shift_array(self,t_secs):
         tstr = str(t_secs) + " seconds"
         fdps = np.array( self.file_device_pairs )
         tarr = np.repeat( tstr, fdps.shape[0] )
-        #return tarr,fdps        
+        #return tarr,fdps
         return np.hstack( (np.expand_dims(tarr,1),fdps) )
-        
+
     def shift_depth_records(self,t_secs):
         tsarr = self.time_shift_array(t_secs)
         q = "update depthtemplog set utctime=datetime(utctime, +?) where file = ? and device = ?"
@@ -73,52 +103,52 @@ class dive_record_set(object):
         cur.executemany( q, tsarr ).fetchall()
         conn.commit()
         cur.close()
-        
+
     @property
     def depth_time_list(self):
         """
         datetimes come out of the db in UTC. Convert to local tz before returning.
         """
         return [ ( float(r[2]), local_from_utc( dt_parser.parse(r[0]) ) ) for r in self.db_rows]
-        
+
     @property
     def depth_time_array(self):
         return np.array(self.depth_time_list)
-        
+
     def plot_depth_time(self):
         y = -1 * self.depth_time_array[:,0] # depths * -1 to make negative values
         x = self.depth_time_array[:,1] # datetimes
         plt.plot_date(x,y,linestyle='-')
         plt.show()
-        
+
     @property
     def temperature_time_list(self):
         """
         datetimes come out of the db in UTC. Convert to local tz before returning.
         """
         return [ ( float(r[1]), local_from_utc( dt_parser.parse(r[0]) ) ) for r in self.db_rows]
-        
+
     @property
     def temperature_time_array(self):
         return np.array(self.temperature_time_list)
-        
+
     @property
     def time_delta(self):
         return self.end - self.start
-        
+
 
 def depth_from_pressure(mbars):
     """Return a depth (in meters) from a pressure in millibars. Calculated using
     1 atm = 1013.25 millibar and assuming 1 atm for every 9.9908 meters of sea
     water. I'm also assuming that we're diving at sea level and that the ambient
     presure is 1atm. """
-    return (mbars - 1013.25) / 101.41830484045322 
+    return (mbars - 1013.25) / 101.41830484045322
 
 def read_depth_temp_log(filepath,path_to_db,verbose=False):
-    """Read in a single depth / temp csv file  into a sqlite db for persistence 
+    """Read in a single depth / temp csv file  into a sqlite db for persistence
     and easy searching. Records must have a unique combination of device identifier,
     file number, and datetime stamp. If a conflict is found, the old record will be
-    overwritten by the new one. This should insure that duplicates will not be 
+    overwritten by the new one. This should insure that duplicates will not be
     created if a csv file is loaded in multiple times."""
     # Connect to the db
     conn,cur = connection_and_cursor(path_to_db)
@@ -136,11 +166,11 @@ def read_depth_temp_log(filepath,path_to_db,verbose=False):
         start_time = dt(int(row[3]),int(row[4]),int(row[5]),int(row[6]),int(row[7]),int(row[8]))
         # The time comes in as local time. I don't want conflicts with gps utc
         # time so I will store everything as utc time. This is annoying in sqlite
-        # it would be better to use Postgresql but I want to keep this small 
+        # it would be better to use Postgresql but I want to keep this small
         # and reduce the difficulty of installation.
         time_offset = td(seconds=float(row[9]))
         record_time = make_aware_of_local_tz( start_time + time_offset )
-        # If I store this as timezone aware, then I have trouble parsing the 
+        # If I store this as timezone aware, then I have trouble parsing the
         # times I pull out of the db. So I will store unaware by taking out tzinfo.
         utc_time = utc_from_local(record_time).replace(tzinfo=None)
         mbar = int(row[10])
@@ -148,7 +178,7 @@ def read_depth_temp_log(filepath,path_to_db,verbose=False):
         celsius = kelvin - 273.15
         depthm = depth_from_pressure(mbar)
         t = (device,file_id,utc_time,kelvin,celsius,mbar,depthm)
-        
+
         if verbose:
             print "--- Just read row %i, putting it in db now." % rec_count
         # stick it in the table
@@ -168,7 +198,7 @@ def interpolate_depth(t_secs,t1_secs,t2_secs,d1m,d2m):
     y = np.array([ d[min(d.keys())], d[max(d.keys())] ])
     f = interpolate.interp1d(x,y)
     return float( f( float(t_secs) ) )
-    
+
 def seconds_since_arbitrary( dt_obj, arbitrary_ordinal=1 ):
     """
     Return seconds since an arbitrary date.
@@ -176,7 +206,7 @@ def seconds_since_arbitrary( dt_obj, arbitrary_ordinal=1 ):
     return float( ( dt_obj - dt.fromordinal( arbitrary_ordinal ) ).seconds )
 
 def get_depth_for_time(dt_obj, db_path, verbose=False, reject_threshold=30):
-    """For a given datetime object, return the depth from the raw_log db. Go through the 
+    """For a given datetime object, return the depth from the raw_log db. Go through the
     extra hassle of interpolating the depth if the time falls between two depth measurements.
     If a record is not found within the number of seconds specified by reject_threshold,
     just return False."""
@@ -185,7 +215,7 @@ def get_depth_for_time(dt_obj, db_path, verbose=False, reject_threshold=30):
     # For some reason TZ awareness screws up DST
     dt_obj = dt_obj.replace(tzinfo=None)
     # make a tuple with the time handed in so we can pass it to the query
-    t = ( dt_obj, ) 
+    t = ( dt_obj, )
     rows = cur.execute("select utctime, depthm from DepthTempLog order by abs( strftime('%s',?) - strftime('%s',utctime) ) LIMIT 2", t).fetchall()
     t1 = dt.strptime(rows[0][0],'%Y-%m-%d %H:%M:%S')
     t1_secs = seconds_since_arbitrary( t1 )
@@ -196,13 +226,13 @@ def get_depth_for_time(dt_obj, db_path, verbose=False, reject_threshold=30):
     # Clean up
     cur.close()
     conn.close()
-    
+
     # It is possible that the two closest time stamps do not sandwich our given
     # time (dt_obj). They could both be before or after. By putting the times in
     # an array, we can easily get the min and max time so we can check.
     times = np.array( [t1_secs,t2_secs] )
     dt_obj_secs = seconds_since_arbitrary( dt_obj ) + dt_obj.microsecond * 1E-6
-    
+
     # if the closest available time stamp is further away than our threshold
     # then we will return False
     if verbose:
@@ -215,11 +245,11 @@ def get_depth_for_time(dt_obj, db_path, verbose=False, reject_threshold=30):
         return interpolate_depth( dt_obj_secs, t1_secs, t2_secs, d1m, d2m )
     else: # just return the closest depth if our given time is not between the two closest logged times
         return d1m
-        
+
 def get_temp_for_time(dt_obj, db_path, reject_threshold=30):
     """Get a temperature in Celsius for a given time if there is a record within the
     number of seconds specified by reject_threshold. If there's no record that close,
-    return False. I'm not going to bother with interpolation here because I don't 
+    return False. I'm not going to bother with interpolation here because I don't
     expect temperature to change that quickly relative to the sampling interval."""
     conn,cur = connection_and_cursor(db_path)
     t = ( dt_obj,dt_obj )
@@ -234,7 +264,7 @@ def get_temp_for_time(dt_obj, db_path, reject_threshold=30):
 def adjust_all_times(time_delta, db_path):
     """
     This will shift all the times of all the records. You probably don't wan to do
-    this but I did want to once. I actually did it directly in the db so I have 
+    this but I did want to once. I actually did it directly in the db so I have
     never tested this method but I figured I might want it some day.
     """
     conn,cur = connection_and_cursor(db_path)
@@ -248,11 +278,9 @@ if __name__ == '__main__':
     parser.add_argument('input_path', type=str, help='The directory of csv files or the individual file that you want to import.')
     parser.add_argument('output_db', nargs='?', type=str, help='The database you would like to read the log into. If left blank, the db specified in configuration.py will be used.', default=db_path)
     args = parser.parse_args()
-    
+
     if os.path.isdir(args.input_path): # this means a directory has been handed in
         for fname in os.listdir(args.input_path):
             read_depth_temp_log(os.path.join(args.input_path,fname),args.output_db)
     else:
         read_depth_temp_log(args.input_path,args.output_db)
-    
-

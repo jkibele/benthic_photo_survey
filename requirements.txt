@@ -1,0 +1,9 @@
+scipy>=0.14
+matplotlib>=1.4
+gdal>=1.11
+pynmea>=0.6
+slugify>=0.0.1
+# There are no PyPI packages for these. See http://jkibele.github.io/benthic_photo_survey/installation/
+# for install instructions or look the packages up.
+# PyQt>=4.0
+# pyexiv2>=0.3

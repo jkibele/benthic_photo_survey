@@ -1,3 +1,33 @@
+"""
+Copyright (c) 2014, Jared Kibele
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Benthic Photo Survey nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from pynmea.streamer import NMEAStream
 from fractions import Fraction
 from itertools import groupby
@@ -7,10 +37,10 @@ try:
     import ogr
 except ImportError:
     from osgeo import ogr
-    
+
 def fraction_to_rational(fra):
     """
-    Take a fraction and return a stupid Rational to make stupid damned 
+    Take a fraction and return a stupid Rational to make stupid damned
     pyexiv2 happy. If it's not a fraction, just hand it back and hope
     for the best.
     """
@@ -18,7 +48,7 @@ def fraction_to_rational(fra):
     if fra.__class__.__name__=='Fraction':
         return Rational(fra.limit_denominator().numerator,fra.limit_denominator().denominator)
     else:
-        return fra    
+        return fra
 
 class coord(object):
     """
@@ -27,7 +57,7 @@ class coord(object):
     that will provide methods specific to those types of coordinates.
     """
     def __init__(self,degrees,minutes):
-        # Apparently all my type checking is bad form for python. Maybe 
+        # Apparently all my type checking is bad form for python. Maybe
         # I will take it out at some point but probably not
         if degrees == None:
             self.degrees = None
@@ -37,14 +67,14 @@ class coord(object):
             raise ValueError( "Degrees can not exceed 180." )
         else:
             self.degrees = int(degrees)
-        
+
         if minutes == None:
             self.minutes = None
         elif not 0 <= float(minutes) < 60:
             raise ValueError( "Minutes must be between 0 and 60." )
         else:
             self.minutes = float(minutes)
-            
+
     def __setattr__(self,name,value):
         if name=='degrees':
             if int(value) <> value:
@@ -58,16 +88,16 @@ class coord(object):
                 raise ValueError( "Minutes must be between 0 and 60." )
             else:
                 super(coord,self).__setattr__(name,value)
-                
+
     def __repr__(self):
         return "%i %g" % (self.degrees,self.minutes)
-        
+
     def __unicode__(self):
         return u'%i\u00B0 %g\'' % (self.degrees,self.minutes)
-        
+
     def __str__(self):
         return unicode(self).encode('utf-8')
-        
+
     @property
     def dms(self):
         """
@@ -75,7 +105,7 @@ class coord(object):
         """
         seconds = 60 * modf( self.minutes )[0]
         return (self.degrees,int(self.minutes),seconds)
-        
+
     @property
     def decimal_degrees(self):
         """
@@ -83,14 +113,14 @@ class coord(object):
         """
         from math import copysign as cps
         return self.degrees + cps(self.minutes,self.degrees) / 60.0
-        
+
     @property
     def nmea_string(self):
         """
         Return coordinates in a nmea style string.
         """
         return str(abs(self.degrees)) + "{:011.8f}".format( self.minutes )
-    
+
     @property
     def exif_coord(self):
         """
@@ -100,7 +130,7 @@ class coord(object):
         from pyexiv2.utils import Rational
         (d,m,s) = self.dms
         return ( Rational(abs(d),1),Rational(m,1),Rational(s * 1e7,1e7) )
-        
+
     def __adjust_sign(self,hemi):
         """
         If given 'N' or 'E' for the hemisphere, set the sign of the degrees to positive.
@@ -116,7 +146,7 @@ class coord(object):
                 self.degrees = abs(self.degrees)
             else:
                 raise ValueError( "Hemisphere should be N, S, E, or W. Why are you giving me %s?" % (hemi,) )
-        
+
     @staticmethod
     def from_dms( d,m,s,hemi=None ):
         """
@@ -127,7 +157,7 @@ class coord(object):
         c = coord( d, minutes )
         c.__adjust_sign(hemi)
         return c
-        
+
     @staticmethod
     def from_dd( dec_deg, hemi=None ):
         """
@@ -139,7 +169,7 @@ class coord(object):
         c = coord(d,m)
         c.__adjust_sign(hemi)
         return c
-        
+
     @staticmethod
     def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
         """
@@ -153,12 +183,12 @@ class coord(object):
         c = coord.from_dms( d, fracmin.to_float(), fracsec.to_float() )
         c.__adjust_sign(hemi)
         return c
-        
+
     @staticmethod
     def from_nmea_string(nstr,hemi=None):
         """
         Take a coordinate in the format given in NMEA log files and return a
-        coord object. Hemi is optional. If supplied, we will determine the 
+        coord object. Hemi is optional. If supplied, we will determine the
         sign of the degrees value based on the value of hemi regardless of
         original sign handed in.
         """
@@ -168,19 +198,19 @@ class coord(object):
         c = coord(deg,minute)
         c.__adjust_sign(hemi)
         return c
-        
+
 class latitude(coord):
     def __init__(self,degrees,minutes):
         if degrees <> None and abs(degrees) > 90:
             raise ValueError( "Latitude degrees can not exceed 90" )
         coord.__init__(self,degrees,minutes)
-        
+
     def __setattr__(self,name,value):
         if name=='degrees' and abs(value) > 90:
             raise ValueError( "Degrees of latitude can not exceed 90." )
         else:
             super(coord,self).__setattr__(name,value)
-            
+
     @staticmethod
     def from_dms( d,m,s,hemi=None ):
         """
@@ -189,7 +219,7 @@ class latitude(coord):
         """
         c = coord.from_dms( d,m,s,hemi )
         return latitude(c.degrees,c.minutes)
-        
+
     @staticmethod
     def from_dd( dec_deg, hemi=None ):
         """
@@ -198,7 +228,7 @@ class latitude(coord):
         """
         c = coord.from_dd( dec_deg, hemi )
         return latitude(c.degrees,c.minutes)
-        
+
     @staticmethod
     def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
         """
@@ -207,23 +237,23 @@ class latitude(coord):
         """
         c = coord.from_exif_coord( (fracdeg,fracmin,fracsec), hemi )
         return latitude(c.degrees,c.minutes)
-    
+
     @staticmethod
     def from_nmea_string(nstr,hemi=None):
         c = coord.from_nmea_string(nstr,hemi)
         return latitude(c.degrees,c.minutes)
-        
+
     @property
     def hemisphere(self):
         if self.degrees < 0:
             return 'S'
         else:
             return 'N'
-        
+
 class longitude(coord):
     def __init__(self,degrees,minutes):
         coord.__init__(self,degrees,minutes)
-        
+
     @staticmethod
     def from_dms( d,m,s,hemi=None ):
         """
@@ -232,7 +262,7 @@ class longitude(coord):
         """
         c = coord.from_dms( d,m,s,hemi )
         return longitude(c.degrees,c.minutes)
-        
+
     @staticmethod
     def from_dd( dec_deg, hemi=None ):
         """
@@ -241,7 +271,7 @@ class longitude(coord):
         """
         c = coord.from_dd( dec_deg, hemi )
         return longitude(c.degrees,c.minutes)
-        
+
     @staticmethod
     def from_exif_coord( (fracdeg,fracmin,fracsec), hemi=None ):
         """
@@ -250,33 +280,33 @@ class longitude(coord):
         """
         c = coord.from_exif_coord( (fracdeg,fracmin,fracsec), hemi )
         return longitude(c.degrees,c.minutes)
-    
+
     @staticmethod
     def from_nmea_string(nstr,hemi=None):
         c = coord.from_nmea_string(nstr,hemi)
         return longitude(c.degrees,c.minutes)
-        
+
     @property
     def hemisphere(self):
         if self.degrees < 0:
             return 'W'
         else:
             return 'E'
-            
+
 class position(object):
     def __init__(self,lat,lon):
         self.lat = lat
         self.lon = lon
-        
+
     def __repr__(self):
         return "%s, %s" % (repr(self.lat),repr(self.lon))
-        
+
     def __unicode__(self):
         return u'%s, %s' % (self.lat,self.lon)
-        
+
     def __str__(self):
         return "%s, %s" % (self.lat,self.lon)
-        
+
     @property
     def ogr_point(self):
         """
@@ -292,25 +322,25 @@ class gpx_file(object):
 
     def __repr__(self):
         return "GPX file: %s" % (self.file_path,)
-        
+
     @property
     def ogr_ds(self):
         gpx_driver = ogr.GetDriverByName('GPX')
         return gpx_driver.Open(self.file_path)
-        
+
     @property
     def layer_names(self):
         ds = self.ogr_ds
         return [ds.GetLayerByIndex(x).GetName() for x in range(ds.GetLayerCount())]
-    
-    @property    
+
+    @property
     def track_points(self):
         ds = self.ogr_ds
         try:
             lyr = ds.GetLayerByName('track_points')
         except AttributeError:
             return None
-            
+
         result = []
         for feat in lyr:
             lon = longitude.from_dd( feat.geometry().GetX() )
@@ -321,7 +351,7 @@ class gpx_file(object):
             except AttributeError:
                 pass # If we get here it's because there is a track point with no timestamp so we don't want it
         return result
-        
+
     def read_to_db(self, dbp):
         if not self.track_points:
             print "The file %s has no track points." % (self.file_path,)
@@ -384,7 +414,7 @@ def extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',)):
                     data.append(nd)
             next_data = streamer.get_objects()
     return data
-    
+
 def group_nmea_sentences_by_timestamp(obj_list):
     """Take a list of nmea sentence objects parsed by pynmea and group them
     together by timestamp value. A list of lists will be returned each sub
@@ -406,9 +436,9 @@ def read_gps_log(filepath,path_to_db):
     conn,cur = connection_and_cursor(path_to_db)
     # Make sure the table is there
     create_gpslog_table(cur)
-    
+
     data = extract_gps_data(filepath,these_sentences=('GPRMC','GPGGA',))
-    
+
     grouped = group_nmea_sentences_by_timestamp(data)
     rec_count = 0
     for timegroup in grouped:
@@ -427,17 +457,17 @@ def read_gps_log(filepath,path_to_db):
                     lon_hemi = sentence.lon_dir
                 elif sentence.sen_type=='GPGGA':
                     num_sats = int(sentence.num_sats)
-            
+
             t = ( validity, utctime, latitude, lat_hemi, longitude, lon_hemi, num_sats )
             cur.execute("INSERT INTO GPSLog VALUES (?,?,?,?,?,?,?)", t)
             rec_count += 1
-    
+
     conn.commit()
     cur.close()
     return "Read %i records from %s to %s." % (rec_count,os.path.basename(filepath),os.path.basename(path_to_db))
-    
+
 def batch_read_gps_logs(directory):
-    """Iteratively use read_gps_log on all files in a directory. Restrict to a 
+    """Iteratively use read_gps_log on all files in a directory. Restrict to a
     range of dates?"""
     pass
 
@@ -459,8 +489,3 @@ if __name__ == '__main__':
         elif args.input_path.lower().endswith('.gpx'):
             gf = gpx_file(args.input_path)
             gf.read_to_db(args.output_db)
-
-
-
-
-

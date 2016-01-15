@@ -3,13 +3,13 @@
 from distutils.core import setup
 
 setup(name='BenthicPhotoSurvey',
-      version='1.0.1',
+      version='1.0.6',
       description='Benthic Photo Survey',
       author='Jared Kibele',
       author_email='jkibele@gmail.com',
-      url='https://bitbucket.org/jkibele/benthic_photo_survey',
+      url='https://github.com/jkibele/benthic_photo_survey',
       packages=['bps_package'],
-      package_data={'bps_package': 
+      package_data={'bps_package':
                                  ['test_data/gps/gb*.gpx',
                                   'test_data/sensus/gb*.csv',
                                   'test_data/images/*.JPG'
@@ -23,6 +23,5 @@ setup(name='BenthicPhotoSurvey',
                                   'data/gps/*.py',
                                   'data/sensus/*.py']},
       scripts=['scripts/benthic_photo_survey.py'],
-      
-     )
 
+     )

@@ -1,3 +1,33 @@
+"""
+Copyright (c) 2014, Jared Kibele
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Benthic Photo Survey nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 from photo_tagging import *
 from preference_array import HabPrefArray
 import osr
@@ -10,21 +40,21 @@ class bps_shp_exporter(object):
         """
         An object with the necessary attributes and methods to turn a directory
         of tagged images into a shapefile.
-        
+
         Attributes:
-            file_path: The path to write out the shapefile to. This must be a 
+            file_path: The path to write out the shapefile to. This must be a
                 valid file path that ends with .shp. String type.
             overwrite: A boolean indicating whether the file_path should be
                 overwritten if it already exists.
-            lyr_name: A string that will be used to name the feature layer in 
+            lyr_name: A string that will be used to name the feature layer in
                 the shapefile.
             qsettings: A PyQt4 QSettings object that will be inspected to get
-                EPSG values for input and output. If supplied, the qsettings 
-                EPSG values will be used and the those supplied directly will 
+                EPSG values for input and output. If supplied, the qsettings
+                EPSG values will be used and the those supplied directly will
                 be ignored.
-            epsg_in: An int value representing the input EPSG value. This will 
+            epsg_in: An int value representing the input EPSG value. This will
                 be ignored if specified in qsettings.
-            epsg_out: An int value representing the output EPSG value. This will 
+            epsg_out: An int value representing the output EPSG value. This will
                 be ignored if specified in qsettings.
         """
         self.overwrite = overwrite
@@ -64,10 +94,10 @@ class bps_shp_exporter(object):
             if k == 'img_path':
                 new_field.SetWidth(180)
             self.lyr.CreateField(new_field)
-        
+
         self.lyrDefn = self.lyr.GetLayerDefn()
         self.feat_index = 0
-        
+
     def __create_fuzzy_hab_fields(self,imgdir):
         """
         Create fields in the output shapefile to hold the fuzzy habitat
@@ -81,8 +111,8 @@ class bps_shp_exporter(object):
 #            print "%s, type: %s" % (str(ogr.OFTReal),str(type(ogr.OFTReal)))
             new_field = ogr.FieldDefn(str(hab),ogr.OFTReal)
             self.lyr.CreateField(new_field)
-        
-        
+
+
     def __validate_fp(self, file_path):
         """
         Validate a file path.
@@ -100,10 +130,10 @@ class bps_shp_exporter(object):
         else:
             raise ValueError('That is not a shapefile.')
             return None
-    
+
     def add_point_from_image(self, imf):
         """
-        Take an image_file object (defined in photo_tagging.py) and make a 
+        Take an image_file object (defined in photo_tagging.py) and make a
         shapefile feature out of it.
         """
         hpa = HabPrefArray().loadFromSettings()
@@ -145,7 +175,7 @@ class bps_shp_exporter(object):
             self.lyr.CreateFeature(feat)
             feat.Destroy()
             self.feat_index += 1
-            
+
     def write_prj(self):
         """
         create the *.prj file
@@ -156,10 +186,10 @@ class bps_shp_exporter(object):
         f = open(prj_fname, 'w')
         f.write(outSpatialRef.ExportToWkt())
         f.close()
-        
+
     def write_shapefile(self, image_dir):
         """
-        Create a shapefile from an image_directory object (defined in 
+        Create a shapefile from an image_directory object (defined in
         photo_tagging.py).
         """
         self.__create_fuzzy_hab_fields(image_dir)
@@ -168,7 +198,3 @@ class bps_shp_exporter(object):
         self.write_prj()
         self.ds.Destroy() # This makes the driver actually write out the shapefile
         return self.file_path
-    
-    
-    
-    

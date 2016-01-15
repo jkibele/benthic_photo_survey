@@ -1,3 +1,33 @@
+"""
+Copyright (c) 2014, Jared Kibele
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Benthic Photo Survey nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 import pyexiv2 as exiv # see note about pyexiv2 in notes.txt
 import json
 from ast import literal_eval
@@ -19,7 +49,7 @@ class image_directory(object):
         self.images = [ image_file(img) for img in jpgs ]
         self.images.sort(key=lambda i: i.datetime) # sort the images by datetime of the image
         self.image_count = len( self.images )
-        
+
     def __shift_datetimes__(self, time_delta_obj, verbose=True):
         """
         Shift the 'date original' values of all photos in the directory. See the
@@ -28,15 +58,15 @@ class image_directory(object):
         """
         for img in self.images:
             new_dt = img.__shift_datetime__( time_delta_obj, verbose=verbose )
-        
+
     @property
     def local_datetimes(self):
         return [ x.datetime for x in self.images ]
-    
+
     @property
     def utc_datetimes(self):
         return [ x.utc_datetime for x in self.images ]
-        
+
     @property
     def exif_depths(self):
         d_list = []
@@ -46,7 +76,7 @@ class image_directory(object):
             else:
                 d_list.append(0.0)
         return np.array(d_list)
-        
+
     @property
     def fuzzy_habitat_dict(self):
         d = {}
@@ -57,16 +87,16 @@ class image_directory(object):
                 except KeyError:
                     d[hab] = 1
         return d
-        
+
     def dive_record_set(self,db_path):
         return dive_record_set( min(self.local_datetimes), max(self.local_datetimes), db_path )
-        
+
     def depth_plot(self, db_path, depth_time_offset=None):
         """
         Create a plot of the depth profile with photo times and depths marked.
-        
+
         db_path: A string of the path to the sqlite database.
-        
+
         depth_time_offset: An int in seconds to offset x values by. This only
             changes the plot. It does not alter any of the values or change
             what gets exported to shapefile.
@@ -76,7 +106,7 @@ class image_directory(object):
         x = drs.depth_time_array[:,1] # datetimes
         if depth_time_offset:
             x = x + td(seconds=depth_time_offset)
-            
+
         fig = plt.figure() # imported from matplotlib
         ax = fig.add_subplot(111)
         ax.plot_date(x,y,marker='.',linestyle='-',tz=pytz.timezone(LOCAL_TIME_ZONE) ) # LOCAL_TIME_ZONE from configuration.py)
@@ -94,18 +124,18 @@ class image_directory(object):
             ind = event.ind[0]
             fname = os.path.basename( self.images[ind].file_path )
             ann_text = "Photo: %s\ndepth: %g\ndate: %s" % ( fname, self.exif_depths[ind], self.local_datetimes[ind].strftime('%Y/%m/%d %H:%M:%S') )
-            ann = ax.annotate(ann_text, xy=(self.local_datetimes[ind], self.exif_depths[ind]), xytext=(-20,-20), 
+            ann = ax.annotate(ann_text, xy=(self.local_datetimes[ind], self.exif_depths[ind]), xytext=(-20,-20),
                                 textcoords='offset points', ha='center', va='top',
                                 bbox=dict(boxstyle='round,pad=0.2', fc='yellow', alpha=0.3),
-                                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.5', 
+                                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0.5',
                                                 color='red'))
             plt.draw()
             print "Photo: %s, index: %i, depth: %g, date: %s" % ( fname, ind, self.exif_depths[ind], self.local_datetimes[ind].strftime('%Y/%m/%d %H:%M:%S') )
-        #print "Before mpl_connect"    
+        #print "Before mpl_connect"
         fig.canvas.mpl_connect('pick_event', onpick)
         plt.show()
         #print "after plt show"
-        
+
     def depth_temp_tag(self,db_path,verbose=False):
         """
         Depth tag all the photos in the directory.
@@ -125,10 +155,10 @@ class image_file(object):
             self.md = md
         else:
             raise ValueError( "The file %s does not exist." % (img_path,) )
-            
+
     def __repr__(self):
         return "Image file: %s" % (self.file_path,)
-        
+
     def __get_exiv_tag(self,tag_string):
         """
         Try to get a pyexiv2 tag. If the tag doesn't exist, return None.
@@ -137,7 +167,7 @@ class image_file(object):
             return self.md[tag_string]
         except KeyError:
             return None
-    
+
     def __get_exiv_tag_value(self,tag_string):
         """
         Try to get a pyexiv2 tag value. If the tag doesn't exist, return None.
@@ -146,7 +176,7 @@ class image_file(object):
             return self.md[tag_string].value
         except KeyError:
             return None
-            
+
     def __get_exiv_tag_human_value(self,tag_string):
         """
         Try to get a pyexiv2 tag human value. If the tag doesn't exist, return None.
@@ -155,7 +185,7 @@ class image_file(object):
             return self.md[tag_string].human_value
         except KeyError:
             return None
-            
+
     def exif_dict(self, exclude_panasonic_keys=True):
         """
         Return a dict with all exif and xmp keys and values.
@@ -169,54 +199,54 @@ class image_file(object):
                 if self.__get_exiv_tag_human_value(key):
                     exif_dict.update( { key : self.__get_exiv_tag_human_value(key)[:100] } )
         return exif_dict
-    
+
     @property
     def file_name(self):
         return os.path.basename(self.file_path)
-    
+
     @property
     def datetime(self):
         """
-        Try to get a datetime object for the image's creation from the 
+        Try to get a datetime object for the image's creation from the
         Exif.Photo.DateTimeOriginal value via pyexiv2.
         """
         if self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal').tzname():
             return self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal')
         else:
             return make_aware_of_local_tz( self.__get_exiv_tag_value('Exif.Photo.DateTimeOriginal') )
-            
+
     @property
     def utc_datetime(self):
         if self.datetime:
             return utc_from_local(self.datetime)
         else:
             return None
-    
+
     @property
     def exif_direction(self):
         if self.__get_exiv_tag_value('Exif.GPSInfo.GPSImgDirection'):
             return float( self.__get_exiv_tag_value('Exif.GPSInfo.GPSImgDirection') )
-    
+
     @property
     def exif_lat_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSLatitude')
-        
+
     @property
     def exif_latref_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSLatitudeRef')
-        
+
     @property
     def exif_lon_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSLongitude')
-        
+
     @property
     def exif_lonref_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSLongitudeRef')
-            
+
     @property
     def exif_depth_tag(self):
         return self.__get_exiv_tag('Exif.GPSInfo.GPSAltitude')
-        
+
     @property
     def exif_depth(self):
         try:
@@ -227,7 +257,7 @@ class image_file(object):
             except AttributeError:
                 ret_val = None
         return ret_val
-            
+
     @property
     def __exif_depth_temp_dict(self):
         """
@@ -235,7 +265,7 @@ class image_file(object):
         data in the exif so I went with storing a python dictionary as a string
         in Exif.Photo.UserComment. I think I'm going to stop using this and store
         this stuff in custom xmp tags instead. UserComment is accessible to many
-        photo management apps so it seems likely to get corrupted. I made it a 
+        photo management apps so it seems likely to get corrupted. I made it a
         private method but maybe I should have just deleted it.
         """
         try:
@@ -243,7 +273,7 @@ class image_file(object):
             return literal_eval(dstr)
         except KeyError:
             return None
-            
+
     @property
     def __exif_temperature(self):
         """
@@ -256,19 +286,19 @@ class image_file(object):
             return self.exif_depth_temp_dict['temp']
         else:
             return None
-            
+
     @property
     def xmp_temperature(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.temperature')
-            
+
     @property
     def xmp_temp_units(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.temp_units')
-        
+
     @property
     def xmp_substrate(self):
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.substrate')
-        
+
     @property
     def xmp_habitat(self):
         """
@@ -279,7 +309,7 @@ class image_file(object):
         in the setHabitat method of the MainWindow in bps_gui.py.
         """
         return self.__get_exiv_tag_value('Xmp.BenthicPhoto.habitat')
-        
+
     @property
     def xmp_fuzzy_hab_dict(self):
         hd_json = self.__get_exiv_tag_value('Xmp.BenthicPhoto.fuzzy_hab_dict')
@@ -287,7 +317,7 @@ class image_file(object):
             return json.loads(hd_json)
         else:
             return None
-            
+
     @property
     def xmp_fuzzy_habitats(self):
         habdict = self.xmp_fuzzy_hab_dict
@@ -295,7 +325,7 @@ class image_file(object):
             return habdict.keys()
         else:
             return []
-            
+
     @property
     def position(self):
         """
@@ -308,13 +338,13 @@ class image_file(object):
             return position(lat,lon)
         else:
             return None
-            
+
     def __set_datetime__(self,dt_obj):
         """
         Set the date original in the exif. I don't think you want to do this
-        but I did want to once. If you lose the origination time for your 
-        image you can not sync it to your gps track or your depth log so 
-        leave this alone unless you're sure you know what you're doing. 
+        but I did want to once. If you lose the origination time for your
+        image you can not sync it to your gps track or your depth log so
+        leave this alone unless you're sure you know what you're doing.
         If you screw up your data don't come crying to me. I tried to warn
         you.
         """
@@ -322,11 +352,11 @@ class image_file(object):
         self.md[key] = exiv.ExifTag(key,dt_obj)
         self.md.write()
         return self.datetime
-        
+
     def __shift_datetime__(self,time_delta_obj,verbose=True):
         """
         Shift the 'date original' in the exif by the given time delta. See the
-        warnings in the doc string of __set_datetime__ method. You should be 
+        warnings in the doc string of __set_datetime__ method. You should be
         careful with this.
         """
         current_dt = self.datetime
@@ -334,7 +364,7 @@ class image_file(object):
         if verbose:
             print "datetime of %s changed from %s to %s." % ( self.file_name, current_dt.strftime('%X, %x'), self.datetime.strftime('%X, %x') )
         return self.datetime
-            
+
     def __set_exif_position(self,pos,verbose=False):
         """
         Set the relevant exif tags to match the position object handed in.
@@ -351,7 +381,7 @@ class image_file(object):
             self.md[k] = exiv.ExifTag(k,v)
         self.md.write()
         return True
-        
+
     def __set_exif_depth_temp(self,depth,temp,verbose=False):
         from pyexiv2.utils import Rational
         if depth < 0: # This can happen because there's a bit of slop in the conversion from pressure to depth
@@ -375,7 +405,7 @@ class image_file(object):
             self.md[k] = exiv.ExifTag(k,v)
         self.md.write()
         return True
-        
+
     def __set_xmp_depth_temp(self,depth,temp):
         if not depth:
             return None
@@ -387,23 +417,23 @@ class image_file(object):
         self.md[pre+'temperature'] = str(temp)
         self.md[pre+'temp_units'] = 'celsius'
         self.md.write()
-        
+
     def set_xmp_substrate(self, subst_str):
         pre = 'Xmp.BenthicPhoto.'
         self.md[pre+'substrate'] = subst_str
         self.md.write()
-        
+
     def set_xmp_habitat(self, subst_str):
         pre = 'Xmp.BenthicPhoto.'
         self.md[pre+'habitat'] = subst_str
         self.md.write()
-        
+
     def set_xmp_fuzzy_habitats(self, habdict):
         habdict_json_str = json.dumps(habdict)
         pre = 'Xmp.BenthicPhoto.'
         self.md[pre+'fuzzy_hab_dict'] = habdict_json_str
         self.md.write()
-        
+
     def logger_depth(self,db_path):
         """
         Get the logged depth out of the db that matches the photo's timestamp.
@@ -413,7 +443,7 @@ class image_file(object):
             return depth
         else:
             return None
-        
+
     def logger_temp(self, db_path):
         """
         Get the logged temperature out of the db that matches the photo's timestamp.
@@ -423,7 +453,7 @@ class image_file(object):
             return temp
         else:
             return None
-        
+
     def depth_temp_tag(self,db_path,verbose=False):
         """
         Get the depth and temp readings out of the db that match the photo's origination
@@ -436,11 +466,11 @@ class image_file(object):
             return self.exif_depth_tag.value
         else:
             return None
-        
+
     def geotag(self,db_path,verbose=True):
         """
         Get a position that matches the time of creation for the image out
-        of the database and set the exif data accordingly. We assume that 
+        of the database and set the exif data accordingly. We assume that
         the photo timestamp is local and the gps position is utc.
         """
         pos = get_position_for_time(self.utc_datetime,db_path,verbose=verbose)
@@ -451,7 +481,7 @@ class image_file(object):
         if pos:
             self.__set_exif_position(pos,verbose)
         return self.position
-        
+
     def __compare_position__(self,db_path):
         """
         This is just for testing. Check to see if the value stored in the db
@@ -464,7 +494,7 @@ class image_file(object):
             print "Latitudes match"
         if pos.lon.nmea_string == self.position.lon.nmea_string:
             print "Longitudes match"
-        
+
     def remove_geotagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -475,7 +505,7 @@ class image_file(object):
             if self.md.__contains__(key):
                 self.md.__delitem__(key)
                 self.md.write()
-                
+
     def remove_depthtagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -486,7 +516,7 @@ class image_file(object):
             if self.md.__contains__(key):
                 self.md.__delitem__(key)
                 self.md.write()
-                
+
     def remove_temptagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -497,7 +527,7 @@ class image_file(object):
             if self.md.__contains__(key):
                 self.md.__delitem__(key)
                 self.md.write()
-                
+
     def remove_substratetagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -506,7 +536,7 @@ class image_file(object):
         if self.md.__contains__(key):
             self.md.__delitem__(key)
             self.md.write()
-                
+
     def remove_habitattag(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -515,7 +545,7 @@ class image_file(object):
         if self.md.__contains__(key):
             self.md.__delitem__(key)
             self.md.write()
-            
+
     def remove_fuzzyhabitats(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -524,14 +554,14 @@ class image_file(object):
         if self.md.__contains__(key):
             self.md.__delitem__(key)
             self.md.write()
-    
+
     def remove_habitattagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
         """
         self.remove_habitattag()
         self.remove_fuzzyhabitats()
-            
+
     def remove_all_tagging(self):
         """
         You probably won't need to do this but I did a few times during testing.
@@ -562,11 +592,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Tag a photos with position, depth, and temperature from a gps and a Sensus Ultra depth and temperature logger.')
     parser.add_argument('photo_dir', nargs='?', type=str, help='The directory that contains photos you would like tagged.')
     parser.add_argument('db_path', nargs='?', type=str, help='The database that contains the depth and location information you want to tag the photos with.')
-    
+
     args = parser.parse_args()
-    
+
     exif_tag_jpegs(args.photo_dir,db_path)
-    
+
 
 
 
@@ -595,14 +625,14 @@ def read_gps_crap(img):
         lon = md['Exif.GPSInfo.GPSLongitude'].human_value
     except KeyError:
         lon = 'not set'
-    
+
     print "GPSTag: %s, Lat: %s, Lon: %s" % ( str(gpstag), str(lat), str(lon) )
 
 def read_gps_crap_from_dir(dir):
     for fname in os.listdir(dir):
         if fname.lower().endswith('.jpg'):
             read_gps_crap(os.path.join(dir,fname))
-            
+
 def shift_time_for_photos(direc,time_delta):
     for fname in os.listdir(direc):
         if fname.lower().endswith('.jpg'):
@@ -610,7 +640,7 @@ def shift_time_for_photos(direc,time_delta):
             orig_time = imf.datetime
             imf.__set_datetime__( orig_time + time_delta )
             print "Changed %s from %s to %s." % ( fname, orig_time.strftime('%H:%M'), imf.datetime.strftime('%H:%M') )
-            
+
 def photo_times_for_dir(dir):
     for fname in os.listdir(dir):
         if fname.lower().endswith('.jpg'):
@@ -627,7 +657,7 @@ def get_photo_metadata(img_path):
     md = exiv.ImageMetadata(img_path)
     md.read()
     return md
-    
+
 def get_photo_datetime(md):
     """If I find inconsistency in exif tags, I may have to get a little more creative
     here."""
@@ -636,12 +666,3 @@ def get_photo_datetime(md):
     except KeyError:
         ptime = False
     return ptime
-
-
-    
-    
-    
-    
-    
-    
-    

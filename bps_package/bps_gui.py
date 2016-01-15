@@ -1,5 +1,35 @@
 #!/usr/bin/env python
 
+"""
+Copyright (c) 2014, Jared Kibele
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of Benthic Photo Survey nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
 import sys, os, operator, random, platform
 from slugify import slugify
 try:
@@ -42,12 +72,12 @@ if platform.system()=='Windows':
         # with the exe.
     os.environ['GDAL_DATA'] = os.path.abspath('gdal_data')
     print "GDAL_DATA set to %s" % os.getenv('GDAL_DATA')
-    
+
 class PrefHelp(QDialog, Ui_PrefHelpDialog):
     def __init__(self,parent=None):
         QDialog.__init__(self,parent)
         self.setupUi(self)
-    
+
 class StartPrefs(QDialog, Ui_PrefDialog):
     def __init__(self,parent=None):
         QDialog.__init__(self,parent)
@@ -83,7 +113,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         # setup substrate tab
         self.substList = self.__settings_extract("substList",CONF_SUBSTRATES,isList=True)
         self.substrateListWidget.addItems( self.substList )
-        
+
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
             if isList:
@@ -92,8 +122,8 @@ class StartPrefs(QDialog, Ui_PrefDialog):
                 val = self.settings.value(settings_tag,default).toString()
         except AttributeError:
             val = self.settings.value(settings_tag,default)
-        return val            
-        
+        return val
+
     def accept(self):
         newpa = HabPrefArray(widget=self.habTableWidget)
         newpa.loadFromWidget()
@@ -111,7 +141,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             super(StartPrefs, self).accept()
         else:
             pass
-        
+
     def generalSaveSettings(self):
         self.db_path = str(self.databaseLineEdit.text())
         self.working_dir = self.workingDirLineEdit.text()
@@ -124,7 +154,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         set_list = ['db_path','working_dir','inputEPSG','outputEPSG','dodgyFeatures']
         for s in set_list:
             self.settings.setValue( s, self.__getattribute__(s) )
-        
+
     def showHelpFile(self, file_path):
         """
         Create a dialog, read a markdown file, convert it to html, and display
@@ -134,14 +164,14 @@ class StartPrefs(QDialog, Ui_PrefDialog):
         with open(file_path) as f:
             dlg.textBrowser.setHtml( f.read() )
         dlg.exec_()
-    
+
     def generalHelp(self):
         """
         Display help for the general tab of the preferences dialog.
         """
         rf = os.path.join('docs','helpButtons','prefsGeneral.html')
         self.showHelpFile( rf )
-    
+
     def generalChooseDB(self):
         new_db_path = QFileDialog.getSaveFileName(self,"Choose or Create Database File",self.db_path,filter="SQLite db(*.db)",options=QFileDialog.DontConfirmOverwrite)
         if new_db_path:
@@ -149,31 +179,31 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             self.databaseLineEdit.setText( self.db_path )
         else:
             return False
-    
+
     def generalChooseWorkingDir(self):
         new_wdir = QFileDialog.getExistingDirectory(self,"Choose a Working Directory",self.working_dir)
         if new_wdir:
-            self.working_dir = new_wdir         
+            self.working_dir = new_wdir
             self.workingDirLineEdit.setText( self.working_dir )
         else:
             return False
-    
+
     def timezoneHelp(self):
         """
         Display help for the time zone tab of the preferences dialog.
         """
         rf = os.path.join('docs','helpButtons','prefsTimezone.html')
         self.showHelpFile( rf )
-    
+
     ## Habitat tab
-    
+
     def addHabRow(self):
         self.habTableWidget.setRowCount( self.habTableWidget.rowCount() + 1 )
-    
+
     def removeHabRow(self):
         currRow = self.habTableWidget.currentRow()
         self.habTableWidget.removeRow( currRow )
-    
+
     def moveHabUp(self):
         row = self.habTableWidget.currentRow()
         column = self.habTableWidget.currentColumn();
@@ -183,7 +213,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
                self.habTableWidget.setItem(row-1,i,self.habTableWidget.takeItem(row+1,i))
                self.habTableWidget.setCurrentCell(row-1,column)
             self.habTableWidget.removeRow(row+1)
-            
+
     def moveHabDown(self):
         row = self.habTableWidget.currentRow()
         column = self.habTableWidget.currentColumn();
@@ -193,7 +223,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
                self.habTableWidget.setItem(row+2,i,self.habTableWidget.takeItem(row,i))
                self.habTableWidget.setCurrentCell(row+2,column)
             self.habTableWidget.removeRow(row)
-    
+
     def changeHabColor(self):
         currRow = self.habTableWidget.currentRow()
         color_item = QTableWidgetItem()
@@ -202,35 +232,35 @@ class StartPrefs(QDialog, Ui_PrefDialog):
             color_item.setBackgroundColor( new_qcolor )
             color_item.setText( new_qcolor.name() )
             self.habTableWidget.setItem(currRow,2,color_item)
-    
+
     def habHelp(self):
         """
         Display help for the habitat tab of the preferences dialog.
         """
         rf = os.path.join('docs','helpButtons','prefsHabitat.html')
         self.showHelpFile( rf )
-        
-        
+
+
     def habItemDoubleClicked(self,qwtItem):
         if qwtItem.column()==2:
             self.changeHabColor()
-    
+
     ## Substrate tab
-    
+
     def substratesHelp(self):
         """
         Display help for the substrate tab of the preferences dialog.
         """
         rf = os.path.join('docs','helpButtons','prefsSubstrate.html')
         self.showHelpFile( rf )
-    
+
     def substAdd(self):
         text, ok = QInputDialog.getText(self,'Substrate','Enter Substrate:')
         if ok:
             self.substrateListWidget.addItem( text )
         else:
             return False
-        
+
     def substEdit(self):
         item = self.substrateListWidget.selectedItems()[0]
         if item:
@@ -242,7 +272,7 @@ class StartPrefs(QDialog, Ui_PrefDialog):
 #                return False
         else:
             pass
-        
+
     def substRemove(self):
         curr = self.substrateListWidget.currentRow()
         if curr:
@@ -253,15 +283,15 @@ class StartPrefs(QDialog, Ui_PrefDialog):
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-        self.settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)                                    
+        self.settings = QSettings(CONF_QSETTINGS_DEVELOPER,CONF_QSETTINGS_APPLICATION)
         self.setupUi(self)
         self.imageDirectoryObj = None
-        # imf will be the current image file object        
-        self.imf = None 
+        # imf will be the current image file object
+        self.imf = None
         self.currentPhotoIndex = 0
         self.applySettings()
         self.db_path = str( self.__settings_extract("db_path",CONF_DB_PATH) )
-        
+
     def __settings_extract(self,settings_tag,default,isList=False):
         try:
             if isList:
@@ -270,12 +300,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 val = self.settings.value(settings_tag,default).toString()
         except AttributeError:
             val = self.settings.value(settings_tag,default)
-        return val    
-        
+        return val
+
     def resizeEvent( self, event ):
         super(MainWindow, self).resizeEvent( event )
         self.setPhotoDisplay()
-        
+
     def setupHabSelector(self):
         habList = self.getHablistSettings()
 #        self.habLED.off()
@@ -294,19 +324,19 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             QtCore.QObject.connect(newsb, QtCore.SIGNAL(_fromUtf8("valueChanged(double)")), self.checkHabValues)
         if self.imf:
             self.loadExifData()
-            
+
     def loadHabSelector(self,hab_dict):
         for hab,num in hab_dict.items():
             sb = self.spinBoxFromHabName(hab)
             sb.setValue(num)
         self.checkHabValues()
-            
+
     def zeroHabSelector(self):
         habList = self.getHablistSettings()
         for hab in habList:
             sb = self.spinBoxFromHabName(hab)
             sb.setValue(0.0)
-            
+
     def checkHabValues(self):
         tot = self.totalFromHabSelector
         if tot<1.0:
@@ -321,7 +351,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 #            self.habLED.off()
 #            self.habLED.setColor( QColor('red') )
             self.habSaveButton.setDisabled(True)
-        
+
     @property
     def totalFromHabSelector(self):
         habList = self.getHablistSettings()
@@ -330,7 +360,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             sb = self.spinBoxFromHabName(hab)
             tot += sb.value()
         return round(tot,4)
-            
+
     def spinBoxFromHabName(self,habname):
         """
         If the spin box exists, return it. If not make it and return it.
@@ -349,7 +379,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             newsb.setSingleStep(0.1)
             newsb.setObjectName(_fromUtf8(sbname))
             return newsb
-            
+
     def setHabitat(self):
         htw = self.habitatTableWidget
         hab_dict = {}
@@ -363,7 +393,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         hdv = sorted(hab_dict.values())
         hdv.reverse()
         ties = hdv.count(hdv[0])
-        # turn the dict into a sorted list of tuples        
+        # turn the dict into a sorted list of tuples
         habs_sorted = sorted(hab_dict.iteritems(), key=operator.itemgetter(1))
         habs_sorted.reverse() # in place, so now sorted high to low
         if ties==1: # no ties, only one maxiumum. easy.
@@ -377,7 +407,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             hab_name = random.choice(tiedlist)[0]
             self.imf.set_xmp_habitat( hab_name )
         self.loadExifData()
-                
+
     def applySettings(self):
         self.setupHabSelector()
         self.substrateListWidget.clear()
@@ -391,18 +421,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.actionTime_Shift_Photos.setDisabled(True)
             self.actionTime_Shift_Depth.setDisabled(True)
-        
+
     def getHablistSettings(self):
         hpa = HabPrefArray()
         hpa.loadFromSettings()
         return hpa.toHabList()
-        
+
     def getSubstSettings(self):
         try:
             return self.settings.value("substlist",CONF_SUBSTRATES).toStringList()
         except AttributeError:
             return self.settings.value("substlist",CONF_SUBSTRATES)
-        
+
     def setPhotoDisplay(self):
         """
         If there's a currently set imageDirectoryObj, set the current image file
@@ -414,18 +444,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             photo_pixmap = QPixmap( self.imf.file_path )
             self.scaled_photo = photo_pixmap.scaled(self.photoDisplay.size(), QtCore.Qt.KeepAspectRatio)
             self.photoDisplay.setPixmap( self.scaled_photo )
-            
+
     def setPhotoData(self):
         self.loadExifData()
         self.loadPhotoDirectoryData()
-        
+
     def loadPhotoDirectoryData(self):
         self.filenameValue.setText(self.imf.file_name)
         direc = '...' + self.imageDirectoryObj.path[-30:]
         self.directoryValue.setText(direc)
         num_str = "%i of %i" % (self.currentPhotoIndex + 1, self.imageDirectoryObj.image_count )
         self.photoCountValue.setText(num_str)
-            
+
     def loadExifData(self):
         if self.imf.datetime:
             pdate = self.imf.datetime.strftime('%d/%m/%Y')
@@ -459,7 +489,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.loadHabSelector( fuzzy_hab_dict )
         else:
             self.zeroHabSelector()
-            
+
         subs = self.imf.xmp_substrate
         self.substrateValue.setText( str(subs) )
         if subs:
@@ -485,10 +515,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             # now. May beef this up later.
         else: # User hit cancel
             return False
-            
+
     def photoDirSettingsCompatibility(self):
         """
-        Take a look at the photos in this directory and see if they are 
+        Take a look at the photos in this directory and see if they are
         compatable with the current habitat settings.
         """
         photo_habs = self.imageDirectoryObj.fuzzy_habitat_dict
@@ -508,7 +538,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 except KeyError:
                     not_in_settings[hab] = 1
         return not_in_photos, not_in_settings
-        
+
     def checkPhotoSettingCompatibility(self):
         """
         See if the current photo directory's photo metadata is compatible with
@@ -527,7 +557,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             return False
         else:
             return True
-            
+
     def actionTimeShiftPhotos(self):
         """
         This method will be triggered when a user chooses the "Time Shift Photos"
@@ -554,14 +584,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 msg.setText("You lose")
                 msg._exec()
                 return False
-                
+
     def timeShiftPhotos(self,tdelta):
         """
         Shift all the photos in the current photo directory by the time delta
         tdelta.
         """
         self.imageDirectoryObj.__shift_datetimes__(tdelta)
-        
+
     def actionTimeShiftDepth(self):
         dialogtxt = "Warning: Only use this if you know what you're doing."
         seconds, ok = QInputDialog.getInt(self,'Offset in Seconds', dialogtxt)
@@ -576,7 +606,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return True
             else:
                 return False
-        
+
     def removeIncompatibleHabTags(self):
         """
         Inspect the habitat tags in each photo. If they are incompatible with
@@ -586,7 +616,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         for imf in self.imageDirectoryObj.images:
             if imf.xmp_habitat not in habList:
                 imf.remove_habitattagging()
-        
+
     def nextPhoto(self):
         if self.currentPhotoIndex < self.imageDirectoryObj.image_count - 1:
             self.currentPhotoIndex += 1
@@ -594,7 +624,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.currentPhotoIndex = 0
         self.setPhotoDisplay()
         self.setPhotoData()
-        
+
     def previousPhoto(self):
         if self.currentPhotoIndex == 0:
             self.currentPhotoIndex = self.imageDirectoryObj.image_count - 1
@@ -602,13 +632,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.currentPhotoIndex -= 1
         self.setPhotoDisplay()
         self.setPhotoData()
-        
+
     def setSubstrate(self, item_index):
         item = self.substrateListWidget.itemFromIndex( item_index )
         hab = str( item.text() )
         self.imf.set_xmp_substrate( hab )
         self.loadExifData()
-    
+
     def geoTag(self):
         if self.imf:
             r = self.imf.geotag(self.db_path)
@@ -627,7 +657,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             msg.setWindowTitle("What photo?")
             msg.exec_()
             return False
-            
+
     def geoTagAll(self):
         rg_cnt = 0
         if self.imageDirectoryObj and self.imageDirectoryObj.image_count > 0:
@@ -639,7 +669,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 title_str = 'Moderate Success'
             info_str = "Out of %i total photos, I geotagged %i. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
-            
+
             self.loadExifData()
         else:
             info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
@@ -648,7 +678,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mbox.setText( info_str )
         mbox.setWindowTitle( title_str )
         mbox.exec_()
-    
+
     def depthTempTag(self):
         if self.imf:
             r = self.imf.depth_temp_tag(self.db_path)
@@ -667,7 +697,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             msg.setWindowTitle("What photo?")
             msg.exec_()
             return False
-            
+
     def depthTempTagAll(self):
         rg_cnt = 0
         if self.imageDirectoryObj.image_count > 0:
@@ -679,7 +709,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             else:
                 title_str = 'Moderate Success'
             info_str = "Out of %i total photos, I tagged %i with depth and temperature. You\'re welcome." % (self.imageDirectoryObj.image_count,rg_cnt)
-            
+
             self.loadExifData()
         else:
             info_str = 'I couldn\'t tag any images. It looks like there aren\'t any images loaded. Try loading a directory of photos with the File menu. Good luck.'
@@ -688,7 +718,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         mbox.setText( info_str )
         mbox.setWindowTitle( title_str )
         mbox.exec_()
-    
+
     def depthPlot(self):
         if self.dodgyFeatures:
             offsec, ok = QInputDialog.getInt(self, "Depth Plot", "Time Offset (seconds):", 0)
@@ -698,7 +728,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return False
         else:
             self.imageDirectoryObj.depth_plot(self.db_path)
-    
+
     def exportShapefile(self):
         default_dir = os.path.join( str(self.working_dir), "shapefiles" )
         if not os.path.exists( default_dir ):
@@ -726,15 +756,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 #                return False
         else: # User hit cancel
             return False
-                
-    
+
+
     def loadGpsLog(self):
         default_dir = os.path.join( str(self.working_dir), "gps" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         log_filepath = str( QFileDialog.getOpenFileName(self, 'Load GPS log', directory=default_dir, filter='GPS Files (*.gpx *.log)') )
-        if log_filepath:            
-            try:            
+        if log_filepath:
+            try:
                 if log_filepath.lower().endswith('.gpx'):
                     gf = gpx_file( log_filepath )
                     result_str = gf.read_to_db(self.db_path)
@@ -754,15 +784,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 return False
         else: # This means the user hit 'cancel'
             return False
-            
-        
+
+
     def loadDepthLog(self):
         default_dir = os.path.join( str(self.working_dir), "sensus" )
         if not os.path.exists( default_dir ):
             os.mkdir( default_dir )
         log_filepath = str( QFileDialog.getOpenFileName(self, 'Load Depth / Temp log', directory=default_dir, filter='Sensus Log Files (*.csv)') )
         if log_filepath:
-            try:        
+            try:
                 result_str = read_depth_temp_log( log_filepath,self.db_path )
                 msg = "Great Success: %s" % result_str
                 self.statusBar().showMessage( msg, 8000)
@@ -776,19 +806,18 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 mbox.setWindowTitle("Epic Failure")
                 mbox.exec_()
                 return False
-        else: # This means the user hit 'cancel' 
+        else: # This means the user hit 'cancel'
             return False
-            
+
     def preferenceDialog(self):
         #write this dialog launching code
         dlg = StartPrefs(parent=self)
         if dlg.exec_():
             self.applySettings()
 
-                
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     frame = MainWindow()
     frame.show()
     app.exec_()
-    
