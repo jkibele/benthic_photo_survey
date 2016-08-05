@@ -10,6 +10,6 @@ github_username:  jkibele
 timezone: Pacific/Auckland
 
 # Build settings
-highlighter: pygments
+highlighter: rouge
 markdown: kramdown
 include: [images]
